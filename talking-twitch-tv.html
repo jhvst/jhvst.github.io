@@ -1,0 +1,154 @@
+<!doctype html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Talking Twitch.tv</title>
+        <meta name="author" content="Juuso Haavisto">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+        <meta name="twitter:creator" content="@jhaavist">
+        <style>
+            body {
+                font: 16px/24px;
+                padding: 1em;
+                line-height: 1.5;
+                margin: auto;
+                color: #444;
+                max-width: 40rem;
+                font-family: monospace;
+                display: flex;
+                flex-direction: column;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                line-height: 1.1;
+                font-weight: 700;
+                font: 24px/24px;
+            }
+
+            ul {
+                list-style-type: lower-greek;
+            }
+
+            ol {
+                list-style-type: lower-roman;
+            }
+
+            header {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+            }
+
+            footer {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            section.links {
+                max-width: 30rem;
+            }
+
+            a:hover {
+                opacity: .7;
+            }
+
+            img, iframe {
+                display: block;
+                margin: auto;
+
+                max-width: 100%;
+                max-height: 60vh;
+            }
+
+        </style>
+    </head>
+    <body>
+<p><img src="./img/twitch-chat.png" alt="Twitch TV chat" /> </p>
+<p>Recently I read <a href="http://www.mitchchn.me/2014/os-x-terminal/">Eight Terminal Utilities Every OS X Command Line User Should Know</a>. I was particularly interested in the “say” command, which is text-to-speech program. Since then, I’ve played with the idea of making it read some community generated content. I did look into some API’s of sites I thought would generate amusing content to listen on Friday nights, like 4chan, but I never really got over the planning phase. But that was until now, when I was sitting the night with couple of my friends, of whom one watched some Twitch.tv stream. I said I could put my laptop to read the comments for you, and so I did.</p>
+<p>Not long after googling up Twitch developer channel did I find that they do not provide any kind of API for reading the chat. Therefore, I decided to look up the page source code, which revealed that the content is coming from some Firebase installation. The data from Firebase was then inserted on the page with the help of Ember.js. Though for my misery, the transactions seemed to happen trough flash sockets. This whole dance of realtime tools and API’s meant that it would be no good to just HTTP GET the page, which again meant that I’d need to look into ghost-browsers like PhantomJS or the Gecko equivalent SlimerJS.</p>
+<p>I’ve worked with these tools in production, but I every time I end touching the script file I feel like I’m patching my project with chewing-gum. I absolutely hate chewing gum, so this time I felt like I wanted to roll something completely new. There’s also the fact that making any automated tool for a third-party website is something I believe should be avoided like plague. If you are not consuming any API’s, you are not going to have a good time expecting to keep up with the service’s update enrollments. From experience, I can say that you are lucky to survive even two weeks with your hacky way to scraper webpages unless you have something like direct access to the service’s source control, which we do not have. Plus, my friends were already getting disbelieving at this point, as I had not written a single line of code yet. So let’s get to it.</p>
+<h2>Let’s fix AJAX with AJAX</h2>
+<p>I hate AJAX, so my idea was to use AJAX to battle AJAX. Ultimately it would consume itself, right? Worth the try, so once again I opened my developer tools, but this time I used jQuery to parse the latest chat message with two lines of code. The output string would then be inserted into jQuery AJAX command, which would hit my local server, which would run the say command.</p>
+<p>I found that by popping up the chat window you can fetch any channel’s chat by going to URL like <a href="http://www.twitch.tv/{{.Username}}/chat">http://www.twitch.tv/{{.Username}}/chat</a></p>
+<p>This would open a window where you could use Chrome developer tools to run a simple JavaScript loop like this:</p>
+<pre><code>setInterval(function() {
+    var wi = $(&quot;.chat-messages .tse-content div .message&quot;).last()
+    var text = $(wi).text()
+    $.get(&quot;http://localhost:8080/&quot;+text);
+}, 3000)
+</code></pre>
+<p>This would hit the local server of mine</p>
+<pre><code>package main
+
+import (
+    “net/http”
+    “os/exec”
+    “fmt”
+    “strings”
+    “html”
+    “log”
+)
+
+func main() {
+    http.HandleFunc(“/”, func(w http.ResponseWriter, r *http.Request) {
+        if r.URL.Path != “/favicon.ico” {
+            cmd := exec.Command(“say”, html.EscapeString(strings.TrimLeft(r.URL.Path, “/”)))
+            err := cmd.Start()
+            if err != nil {
+                panic(err)
+            }
+        }
+        fmt.Fprintf(w, “OK”)
+    })
+
+    log.Fatal(http.ListenAndServe(&quot;:8080&quot;, nil))
+} </code></pre>
+<p>Together these scripts would start the mayhem, which however, in it’s current state is limited with 3 second interval. I also only choose channels which have enough people online, so that the same message would not be broadcasted twice.</p>
+<h1>EDIT</h1>
+<p>I was later pointed out that you every Twitch room works as an IRC room, so I later updated my code as so:</p>
+<pre><code>package main
+
+import (
+    &quot;fmt&quot;
+    &quot;os/exec&quot;
+    &quot;github.com/thoj/go-ircevent&quot;
+    &quot;github.com/9uuso/unidecode&quot;
+)
+
+var busy bool
+
+func talk(message string) {
+    if !busy {
+        busy = true
+        cmd := exec.Command(&quot;say&quot;, &quot;-v&quot;, &quot;Cellos&quot;, message)
+        cmd.Start()
+        cmd.Wait()
+        busy = false
+    }
+}
+
+func main() {
+    con := irc.IRC(&quot;9uuso&quot;, &quot;9uuso&quot;)
+    con.Password = &quot;&quot;
+    err := con.Connect(&quot;irc.twitch.tv:6667&quot;)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+
+    con.AddCallback(&quot;001&quot;, func(e *irc.Event) {
+        con.Join(&quot;#nl_kripp&quot;)
+    })
+
+    con.AddCallback(&quot;PRIVMSG&quot;, func(event *irc.Event) {
+        fmt.Println(event.User+&quot;:&quot;, unidecode.Unidecode(event.Message()))
+        go talk(unidecode.Unidecode(event.Message()))
+    })
+
+    con.Loop()
+} </code></pre>
+<p>This version of the code not only uses the Cellos voice for extra laughs, but is <em>a lot</em> easier to run and monitor. Thanks to the IRC library and its event based working method, I&rsquo;m also able to make sure no other comment is being spelled out.</p>
+    </body>
+</html>

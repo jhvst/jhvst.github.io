@@ -1,0 +1,74 @@
+<!doctype html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Introducing Vertigo</title>
+        <meta name="author" content="Juuso Haavisto">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+        <meta name="twitter:creator" content="@jhaavist">
+        <style>
+            body {
+                font: 16px/24px;
+                padding: 1em;
+                line-height: 1.5;
+                margin: auto;
+                color: #444;
+                max-width: 40rem;
+                font-family: monospace;
+                display: flex;
+                flex-direction: column;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                line-height: 1.1;
+                font-weight: 700;
+                font: 24px/24px;
+            }
+
+            ul {
+                list-style-type: lower-greek;
+            }
+
+            ol {
+                list-style-type: lower-roman;
+            }
+
+            header {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+            }
+
+            footer {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            section.links {
+                max-width: 30rem;
+            }
+
+            a:hover {
+                opacity: .7;
+            }
+        </style>
+    </head>
+    <body>
+<p>Vertigo is a blog platform I’ve been working for fun during the recent months. Part of it is that I’m learning to use Go, but for sure more lately it’s become one of those pet projects you just like to work on. I may never be able to run anything else than my own blogs on this, but that’s enough for me. I like to have control of my writings and Vertigo enables just that.</p>
+<p>Vertigo is developed as an open source software and you can find the public repository on <a href="https://github.com/jhvst/vertigo">Github</a>. The current version which I’m running is a bit modified version though, with new user registration and some other API routes disabled. I also have modified the CSS and HTML templates to more of my personal style.</p>
+<h2>The text editor</h2>
+<p>I really like the typography on Medium, so I made Vertigo bit the same. Although, so far I haven’t found any good WYSIWYG editors. I did try <a href="http://quilljs.com/">Quill</a>, but after inserting the library in place I found it to be bit too heavy for my purpose (iframes…). I’m trying to make Vertigo simple, so that just did not fit in.</p>
+<p>Instead, Vertigo ships with <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Content_Editable">contenteditable</a> element, which feels more native. And even though I have to trade Vertigo’s JavaScript virginity for it, I believe it is worth the trade. From what I’ve tested, the contenteditable works just as well on my Macbook, iPad and Android phone as it does on my PC. Every device has different operating systems and viewports, but everything works pretty much the same.</p>
+<p>The contenteditable element also lets you to copy-paste text with the formatting in place, similarly to Gmail. Whether this is a bug or feature is for the user to decide. However, I could see this as a backdoor to implement simple “HTML editor” by having example elements, which are already formatted in place. You could then copy the formatted text into your blog post or a template. This would be a huge difference for the people who don’t understand that much of coding. Anyone who just has the skills to code HTML could make ready made templates for others.</p>
+<p>You can also inject plain HTML code into partly formatted page, so nothing is holding you back from adding widgets like Twitter buttons or YouTube videos on to the page, even after initial publication.</p>
+<h2>Design</h2>
+<p>I’m a huge fan of minimalistic design, which also shows up on Vertigo. By default, there are no extra elements distracting you on writing mode. Even the submit button is hidden invisibly behind the title input field. So to synchronize your progress with the server (the progress is constantly saved to localStorage) you have to hit Enter on the title input field. I initially found this subtle feature by accident, but as it seems to work on all platforms (mobile devices have the equivalent of Enter as well) I decided to leave it as so. Coupled with localStorage it gives a solid alternative to event-based AJAX saving, which I wanted avoid of adding at all costs.</p>
+<h2>Integrated analytics</h2>
+<p>I keep coming back to things which reward me constantly. I’ve noticed the same pattern in some games, which I find myself playing hundreds of hours. Therefore, I wanted to add something which would give the same kind of feeling of progression to Vertigo. So now there’s very simple counter added on user control panel after each post, which shows how many times the page has been loaded. In the future it would be nice if I’d be able to draw charts using the gathered data, kind the same way as what Ghost demoed on their <a href="https://www.kickstarter.com/projects/johnonolan/ghost-just-a-blogging-platform">Kickstarter</a> page back in 2013. I hope the feature even in its current state will bring me same kind of cheering as what the stargazers I’ve received for Vertigo on Github have.</p>
+<h2>Never heard of static page generator?</h2>
+<p>Yes, I have, but after reading John Resig’s <a href="http://ejohn.org/blog/write-code-every-day/"><em>Write Code Every Day</em></a> I thought to give Resig’s thoughts a try. I also had this dilemma where I wanted to deliver good websites to clients, but because the clients wanted to have solid CMS features, I was forced to basically use Wordpress. Since I’ve never coded in PHP and somehow the complexity of even changing theme properties got me so overwhelmed I decided to give my own playful shot at it.</p>
+<p>I doubt I’ll actually recommend Vertigo over Wordpress for any clients, but then again, at least it’s a platform on which I can provide my full array of skills. Be it exclusively for me, I don’t really care. As long as it teaches me new and repetition stays in order (thought at that point I already know I failed myself) I’ll keep on coding.</p>
+</body>
+</html>

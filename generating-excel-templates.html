@@ -1,0 +1,89 @@
+<!doctype html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Generating Excel templates with Google Sheets</title>
+        <meta name="author" content="Juuso Haavisto">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+        <meta name="twitter:creator" content="@jhaavist">
+        <style>
+            body {
+                font: 16px/24px;
+                padding: 1em;
+                line-height: 1.5;
+                margin: auto;
+                color: #444;
+                max-width: 40rem;
+                font-family: monospace;
+                display: flex;
+                flex-direction: column;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                line-height: 1.1;
+                font-weight: 700;
+                font: 24px/24px;
+            }
+
+            ul {
+                list-style-type: lower-greek;
+            }
+
+            ol {
+                list-style-type: lower-roman;
+            }
+
+            header {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+            }
+
+            footer {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            section.links {
+                max-width: 30rem;
+            }
+
+            a:hover {
+                opacity: .7;
+            }
+
+            img, iframe {
+                display: block;
+                margin: auto;
+
+                max-width: 100%;
+                max-height: 60vh;
+            }
+        </style>
+    </head>
+    <body>
+<p>I recently hit a deal with local entrepreneur who among many things does bookkeeping of road maintenances for forests (forests are an object of investment in Finland). Like many other local businesses I’ve visited, he also does everything in Excel.</p>
+<p>His problem was that when he received a list of shareholders of an area, he needed to migrate them into his own Excel template. Therefore, knowing that I handle the data of the business next door, he asked me of a way to automate this process. Even though I (at the time) did not know much about Excel, I knew that the data could be exported to CSV and possibly imported with the data functions. So I took the gig.</p>
+<p>The client’s three most important things he wanted the software do for him were:</p>
+<ul>
+    <li>grouping data of shareholders who own the same area</li>
+    <li>add whitespace between groups</li>
+    <li>add extra columns for his own bookkeeping</li>
+</ul>
+<p>Quick googling revealed that CSV could not really import any functions (as in, you had to double-click them to work). There was also a quirk that they had to be localized, as in <code>SUM()</code> did not work with the Finnish version of Excel, but the localized correspondent function <code>SUMMA()</code> did.</p>
+<p>I informed the client about this issue and he said its okay, as the functions are not really a priority. Therefore, I was left deciding what language would I like to use. I decided to start with my favorite one, Go. Go would also have the advantage that I could ship the program in a single executable, which I’d imagine would be easy for non tech-savvy user.</p>
+<p>On my way to take up <code>encoding/csv</code> docs I was left wondering whether I could import the functions in some better way. I ended up searching for Go packages from godoc.org which could handle the XLSX file format. I ended up with importing <code>github.com/tealeg/xlsx</code>, which from the README looked like a fine library. I run up some examples, and I was able to create new Excel files. Great! However, the files did not open up in Numbers, but I thought it was platform independent problem. Therefore, I kept on creating the template until I ran into my first function. I tried looking the documentation in godoc.org for the appropriate keystrokes, but could not find anything. Darn, this meant that I this was no better than CSV.</p>
+<p>At this stage I was still determined to get the functions working right (remember, they were not a priority) and decided to take a look at the usually better library supplemented language, node.js, which I’m also comfortable with. From NPM I found <code>node-xlsx</code>, and decided to use that.</p>
+<p>Dozen minutes and a cup of tea in, I noticed that this library does not include a way to import functions either. The maintainer had also commented in one of the PR’s that the project was no longer maintained in favor of node’s <code>xlsx</code> package. Oh gooey.</p>
+<p><em>Into the xlsx package</em> and its quite long README, I finally found the bits for functions notations! Though whereas <code>node-xlsx</code> used three dimensional arrays to represent data in the spreadsheet, the <code>xlsx</code> package used a different notation, like this: “<code>{c:C, r:R}</code>, where <code>C</code> and <code>R</code> are 0-indexed column and row numbers … For example, the cell address <code>B5</code> is represented by the object <code>{c:1, r:4}</code>”. The cell object itself has 10 different single letter keys. For example, <code>cell.v</code> would be the raw value of the cell and <code>cell.t</code> would be the cell type, which by the way, has 8 different possible types. At this point, I figured out that I’d be needing a very, <em>very</em> ugly loop for constructing the base of the client’s template.</p>
+<p>I tried to do it anyway, but I gave up soon as I remembered that the typical JavaScript library does not have documentation, nor any standards regarding to code style. Back to point <code>{c:0, r:0}</code>.</p>
+<p>At this point I looked up the Go’s <code>encoding/csv</code> package once more, but it just did not feel right. Maybe my ambition to deliver this client spreadsheets with proper functions got into my way of thinking. The final blow was when I realized that Go’s type safety would have eventually got into my way (I recall having problems with integers being strings when importing to Numbers).</p>
+<p>At this point, I had used circa three days, as I had escaped the problems into the latest installment of Dragon Age. All I had really delivered so far was an example spreadsheet made with <code>node-xlsx</code>, which had nine cells, which one summed the values. But you only got so far after clicking the said cell first.</p>
+<p>I can’t recall how I found about it in the first place, but on one day I found myself tinkering with the Google Sheets scripting functionality. <em>I had found it</em>.</p>
+<p>I already had my header row in place, and the script was already able to group shareholder data. Whenever I faced a problem, I took up the documentation, which had listed all the methods one could think of. Want to change the data in the B5 row? <code>sheet.getRange(&quot;B5&quot;).setValue(&quot;amazing&quot;)</code>. Insert a column after ID one? <code>sheet.insertColumnAfter(2)</code> (counting starts from 1 instead of 0). At this point, I could have died and I’d died happy. The joy of manipulating Excel spreadsheets had become real, letting me insert those lovely functions with <code>sheet.getRange(&quot;L2&quot;).setFormula(&quot;=SUM(J4:J)&quot;)</code>. Wanted that bolded? <em>Here you go, add this</em> <code>.setFontWeight(&quot;bold&quot;)</code>. I did not care that generating these sheets took 30 seconds - in contrary - it was rather satisfying to see the script insert empty rows and clearing unnecessary data from the tables in realtime. <em>Bold, set, row and copy</em>. I was done.</p>
+<video controls>
+    <source src="./videos/spreadsheet.webm" type="video/webm"> Your browser does not support the `video` element. </video>
+    </body>
+</html>

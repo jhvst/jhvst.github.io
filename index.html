@@ -1,0 +1,666 @@
+<!doctype html>
+<html>
+<!--
+   This page implements John H. Conway's "Game of Life" using WebGL.
+   There is a 1024-by-1024 grid of "cells", represented by pixels in
+   a canvas.  Each cell can be "alive" or "dead".  Dead cells are black;
+   living cells are white.  The rules of life tell how to compute a
+   new "generation", or configuration of all the cells, from the
+   current generation:  To determine whether a cell is alive in the
+   next generation, count the number of neighbors (in the eight cells
+   surrounding this cell) that are alive.  If the cell is alive, then
+   it will stay alive in the next generation if the number of alive
+   neighbors is 2 or 3; otherwise it dies.  If the cell is dead, then
+   it will come to life in the next generation if the number of alive
+   neighbors is exactly 3; otherwise it stays dead.
+-->
+<head>
+    <meta charset="utf-8">
+    <title>Juuso Haavisto</title>
+    <meta name="description" content="Escape from Finnish farmland, Silicon Valley style">
+    <meta name="author" content="Juuso Haavisto">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡🟦</text></svg>">
+    <link rel="alternate" type="application/rss+xml" title="Juuso Haavisto" href="rss.xml"/>
+    <style>
+    body {
+        background-color: black;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    #content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    main {
+        width: 50vw;
+        max-width: 512px;
+        height: 50vw;
+        max-height: 512px;
+        position: absolute;
+        border: 1px dashed white;
+    }
+
+    header, footer, form {
+        position: absolute;
+        color: white;
+        text-transform: uppercase;
+    }
+
+    header {
+        align-self: flex-start;
+        font-size: xx-small;
+    }
+
+    footer {
+        margin-top: 3em;
+        display: flex;
+        opacity: .7;
+        align-self: start;
+    }
+
+    footer a:not(:last-child) {
+        padding-right: .5em;
+    }
+
+    footer a {
+        font-weight: bold;
+        color: inherit;
+        text-decoration: none;
+        align-self: end;
+    }
+
+    canvas#webglcanvas {
+        width: 100%;
+        height: 100%;
+    }
+
+    aside {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    nav {
+        text-transform: uppercase;
+        display: flex;
+        overflow-x: scroll;
+    }
+
+    article small, article time {
+        color: #ccc;
+        font-size: xx-small;
+        display: block;
+    }
+
+    article p {
+        font-size: small;
+    }
+
+    article a {
+        color: white;
+        font-weight: bold;
+    }
+
+    article {
+        margin: 1.75em;
+    }
+
+    fieldset {
+        border: 0;
+    }
+
+    fieldset video {
+        opacity: .7;
+        width: 100%;
+        max-width: 512px;
+    }
+
+    form {
+        display: flex;
+        width: 100vw;
+        align-self: flex-end;
+    }
+
+    aside form, #rand {
+        display: none;
+    }
+
+    </style>
+</head>
+<body>
+
+<div id="content">
+    <header><h1>Juuso Haavisto</h1></header>
+    <aside>
+        <main></main>
+        <canvas id="webglcanvas" width="1024px" height="1024px"></canvas>
+        <form onsubmit="soundsystem(event); return false">
+            <fieldset>
+                <details>
+                    <summary>Track list [<input onchange="createSources(event)" type="file" multiple />] <input type="submit" /></summary>
+                    <select multiple></select>
+                </details>
+                <canvas id="soundsystem" width="640" style="display: none;"></canvas>
+                <video autoplay></video>
+                <audio controls></audio>
+            </fieldset>
+        </form>
+        <footer>
+            <a href="cv.html">cv</a>
+            <a href="rss.xml">rss</a>
+            <a href="https://github.com/jhvst">github</a>
+            <a href="https://twitter.com/osnnr">twitter</a>
+            <a href="https://scholar.google.fi/citations?user=fUyuq1AAAAAJ&hl=en">gscholar</a>
+        </footer>
+    </aside>
+</div>
+<hr/>
+
+<nav></nav>
+
+<canvas id="rand" width="512px" height="512px"></canvas>
+
+<!-----------------------------------------------------------------------------------
+   The vertex shader for both programs come from the script with id=vshader.
+   It simply sends the input coordinates to the fragment shader, after converting
+   from the range 0 to 1 to the clip coordinate range -1 to 1.
+
+   The fragment shader for drawing the initial board come from the script
+   with id="fshader-create".  The output color can be white, or it can be
+   computed using Perlin noise, or it can be taken from a texture, depending
+   on the value of the uniform int named fill.  In any case, the output color
+   will be either black or white.  (Perlin noise is to produce random-looking
+   patterns.)
+
+   The fragment shader for computing the next generation comes from the
+   script with id="fshader-nextgen.  It computes the next generation value
+   for one cell, taking data for the current generatin from a texture.
+   It uses 9 texture lookups to find the state of the cell and of its eight
+   neighbors.  Since the texture uses the REPEAT wrap mode, cells along an
+   edge of the board will use values from the opposite edge.
+-->
+
+<script type="x-shader/x-vertex" id="vshader">
+    attribute vec2 a_coords;  // coordinates on square, ranging from 0 to 1
+    varying vec2 v_coords;
+    void main() {
+        gl_Position = vec4( 2.0*a_coords - 1.0, 0, 1 );
+        v_coords = a_coords;
+    }
+</script>
+
+<script type="x-shader/x-fragment" id="fshader-create">
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+       precision highp float;
+    #else
+       precision mediump float;
+    #endif
+    varying vec2 v_coords;
+    uniform vec2 noise_seed;
+    uniform float noise_scale;
+    uniform int fill;
+    uniform sampler2D texture;
+
+    float snoise(vec2 v);  // Perlin noise function, to be defined below.
+
+    void main() {
+         if (fill == 0) {  //  draw using Perlin noise, 50/50 black and white
+            float color = snoise(noise_scale*(noise_seed+v_coords));
+            if (color > 0.0)
+                color = 0.0;
+            else
+                color = 1.0;
+            gl_FragColor = vec4( color, color, color, 1.0);
+         }
+         else if (fill == 1) {  // draw with white
+             gl_FragColor = vec4(1);
+         }
+    }
+
+    //
+    // THE FOLLOWING CODE WAS OBTAINED FROM https://github.com/ashima/webgl-noise
+    // This is the code for 2D Perlin noise, using simplex method.
+    //
+
+    //------------------------------- 2D Noise ------------------------------------------
+    vec3 mod289(vec3 x) {
+      return x - floor(x * (1.0 / 289.0)) * 289.0;
+    }
+    vec2 mod289(vec2 x) {
+      return x - floor(x * (1.0 / 289.0)) * 289.0;
+    }
+    vec3 permute(vec3 x) {
+      return mod289(((x*34.0)+1.0)*x);
+    }
+    float snoise(vec2 v) {
+        const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+                            0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+                           -0.577350269189626,  // -1.0 + 2.0 * C.x
+                            0.024390243902439); // 1.0 / 41.0
+        // First corner
+        vec2 i  = floor(v + dot(v, C.yy) );
+        vec2 x0 = v -   i + dot(i, C.xx);
+
+        // Other corners
+        vec2 i1;
+        //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
+        //i1.y = 1.0 - i1.x;
+        i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+        // x0 = x0 - 0.0 + 0.0 * C.xx ;
+        // x1 = x0 - i1 + 1.0 * C.xx ;
+        // x2 = x0 - 1.0 + 2.0 * C.xx ;
+        vec4 x12 = x0.xyxy + C.xxzz;
+        x12.xy -= i1;
+
+        // Permutations
+        i = mod289(i); // Avoid truncation effects in permutation
+        vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+              + i.x + vec3(0.0, i1.x, 1.0 ));
+
+        vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+        m = m*m ;
+        m = m*m ;
+
+        // Gradients: 41 points uniformly over a line, mapped onto a diamond.
+        // The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
+
+        vec3 x = 2.0 * fract(p * C.www) - 1.0;
+        vec3 h = abs(x) - 0.5;
+        vec3 ox = floor(x + 0.5);
+        vec3 a0 = x - ox;
+
+        // Normalise gradients implicitly by scaling m
+        // Approximation of: m *= inversesqrt( a0*a0 + h*h );
+        m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+
+        // Compute final noise value at P
+        vec3 g;
+        g.x  = a0.x  * x0.x  + h.x  * x0.y;
+        g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+        return 130.0 * dot(m, g);
+    }
+</script>
+
+<script type="x-shader/x-fragment" id="fshader-nextgen">
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+       precision highp float;
+    #else
+       precision mediump float;
+    #endif
+    varying vec2 v_coords;     // texture coordinates for this cell
+    const float scale = 1.0/1024.0;  // 1.0 / canvas_size; (offset between
+                                     //          cells, in texture coords)
+    uniform sampler2D source;  // the texture holding the previous generation
+    void main() {
+        int alive;  // is this cell alive ?
+        if (texture2D(source,v_coords).r > 0.0)
+           alive = 1;
+        else
+           alive = 0;
+
+        // Count the living neighbors.  To check for living, just test
+        // the red component of the color, which will be 1.0 for a
+        // living cell and 0.0. for a dead cell.
+
+        int neighbors = 0; // will be the number of neighbors that are alive
+
+        if (texture2D(source,v_coords+vec2(scale,scale)).r > 0.0)
+           neighbors += 1;
+        if (texture2D(source,v_coords+vec2(scale,0)).r > 0.0)
+           neighbors += 1;
+        if (texture2D(source,v_coords+vec2(scale,-scale)).r > 0.0)
+           neighbors += 1;
+
+        if (texture2D(source,v_coords+vec2(0,scale)).r > 0.0)
+           neighbors += 1;
+        if (texture2D(source,v_coords+vec2(0,-scale)).r > 0.0)
+           neighbors += 1;
+
+        if (texture2D(source,v_coords+vec2(-scale,scale)).r > 0.0)
+           neighbors += 1;
+        if (texture2D(source,v_coords+vec2(-scale,0)).r > 0.0)
+           neighbors += 1;
+        if (texture2D(source,v_coords+vec2(-scale,-scale)).r > 0.0)
+           neighbors += 1;
+
+        // Output the new color for this cell.
+
+        float color = 0.0; // color for dead cell
+        if (alive == 1) {
+            if (neighbors == 2 || neighbors == 3)
+               color = 1.0; // color for living cell
+        }
+        else if ( neighbors == 3 )
+            color = 1.0; // color for living cell
+
+        gl_FragColor = vec4(color, color, color, 1);
+    }
+</script>
+
+<script>
+
+const createSources = e => document.querySelector('details select').append(...[...e.target.files].flatMap(file => {
+    let source = document.createElement('source');
+    source.src = URL.createObjectURL(file);
+    source.type = file.type;
+    let item = document.createElement('option');
+    item.value = file.name;
+    item.innerText = file.name;
+    return [item, source]
+}));
+
+// async makes form submission return without preventdefault
+const soundsystem = async e => {
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const analyser = audioCtx.createAnalyser();
+    // bind audio, i.e., analyser -> speaker
+    // without this line audio is muted
+    analyser.connect(audioCtx.destination);
+
+    const tracks = document.querySelectorAll('source');
+    const audio = document.querySelector('audio');
+    audio.append(...tracks);
+
+    // bind visualization, i.e., audio -> analyzer
+    audioCtx.createMediaElementSource(audio).connect(analyser);
+
+    // 2d canvas, essentially a framebuffer for video
+    const canvas = document.querySelector('canvas#soundsystem');
+
+    let array = [];
+    const draw_framebuffer = () => {
+        drawVisual = requestAnimationFrame(draw_framebuffer);
+
+        const sample = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(sample);
+
+        if (array.length < 512) {
+            array.push(sample)
+        }
+        if (array.length == 512) {
+
+            const ctx = document.querySelector('canvas#rand').getContext('2d');
+
+            const WIDTH = 512;
+            const HEIGHT = 512;
+
+            const arrayBuffer = new ArrayBuffer(WIDTH * HEIGHT * 4);
+            const pixels = new Uint8ClampedArray(arrayBuffer);
+            for (let y = 0; y < HEIGHT; y++) {
+                for (let x = 0; x < WIDTH; x++) {
+                    const i = (y*WIDTH + x) * 4;
+                    if (array[x][y] % 2 == 0) {
+                        pixels[i  ] = 0;   // red
+                        pixels[i+1] = 0;   // green
+                        pixels[i+2] = 0;   // blue
+                        pixels[i+3] = 255; // alpha
+                    } else {
+                        pixels[i  ] = 255;   // red
+                        pixels[i+1] = 255;   // green
+                        pixels[i+2] = 255;   // blue
+                        pixels[i+3] = 255; // alpha
+                    }
+                }
+            }
+
+            const imageData = new ImageData(pixels, WIDTH, HEIGHT);
+            ctx.putImageData(imageData, 0, 0);
+
+            copyImg(gl, document.querySelector('canvas#rand'))
+
+            gol.main(0);
+
+            array.push("done")
+        }
+
+        canvas.getContext("2d").fillStyle = `rgb(0, 0, 0)`;
+        canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
+
+        const barWidth = canvas.width / analyser.frequencyBinCount * 2.5;
+        sample.forEach((val, index) => {
+            canvas.getContext("2d").fillStyle = 'rgb(236, 240, 241)';
+            canvas.getContext("2d").fillRect(index, canvas.height-val/2, barWidth, val/2);
+        })
+    };
+
+    audio.onplay = draw_framebuffer();framebuffer_to_video(canvas, audioCtx);
+    audio.play();
+}
+
+const framebuffer_to_video = (canvas, audioCtx) => {
+    // MediaElement -> MediaStream conversion
+    const stream = canvas.captureStream();
+    // multiplex audio and canvas
+    stream.addTrack(...audioCtx.createMediaStreamDestination().stream.getAudioTracks())
+    const video = document.querySelector('video');
+    video.srcObject = stream;
+}
+
+/**
+ *  Compute the next generation of the game of life by copying the current board into
+ *  a texture, and then rendering a square that covers the board while using a shader
+ *  program in which the fragment shader computes the state of each pixel in the next
+ *  generation.
+ */
+function next(gl, square, texture, nextgenProg) {
+   gl.activeTexture(gl.TEXTURE1);
+   gl.bindTexture(gl.TEXTURE_2D,texture);
+   gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGB, 0, 0, 1024, 1024, 0);  // copy board into texture.
+   gl.useProgram(nextgenProg.prog);
+   gl.uniform1i(nextgenProg.source_loc, 1);
+   gl.enableVertexAttribArray(nextgenProg.a_cords_loc);
+   square.render();
+   gl.disableVertexAttribArray(nextgenProg.a_cords_loc);
+}
+
+function createInitialConfiguration(gl) {
+    const vertex = document.querySelector("#vshader").textContent;
+    const fragment = document.querySelector("#fshader-create").textContent;
+    const shader = createProgram( gl, vertex, fragment );
+
+    gl.useProgram(shader);
+    gl.clearColor(0,0,0,1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(gl.getUniformLocation(shader, "noise_seed"), Math.random(), Math.random());
+    gl.uniform1f(gl.getUniformLocation(shader, "noise_scale"), 200.0);
+    gl.uniform1i(gl.getUniformLocation(shader, "fill"), 0); // tell shader to use Perlin noise
+
+    // draw a triangle fan using specified coordinates
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.25,0.25, 0.75,0.25, 0.75,0.75, 0.25,0.75]), gl.STREAM_DRAW);
+
+    const a_coords_loc = gl.getAttribLocation(shader, "a_coords");
+    gl.enableVertexAttribArray(a_coords_loc);
+    gl.vertexAttribPointer(a_coords_loc, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays( gl.TRIANGLE_FAN, 0, 4 );
+    gl.disableVertexAttribArray(a_coords_loc);
+}
+
+function copyImg(gl, img) {
+
+    const canvasTexture = gl.createTexture();
+
+    const vertShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertShader, `
+        attribute vec2 c;
+        varying vec2 vTextureCoord;
+        void main(void){
+            gl_Position=vec4(c, 0.0, 1.0);
+            vTextureCoord = c + 0.5;
+        }
+    `);
+    gl.compileShader(vertShader);
+
+    const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragShader, `
+        precision highp float;
+        varying vec2 vTextureCoord;
+        uniform sampler2D uSampler;
+        void main(void){
+            gl_FragColor = texture2D(uSampler, vTextureCoord);
+        }
+    `);
+    gl.compileShader(fragShader);
+    if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
+        var compilationLog = gl.getShaderInfoLog(fragShader);
+        console.log('F-Shader compiler log: ' + compilationLog);
+    }
+
+    prog = gl.createProgram();
+    gl.attachShader(prog, vertShader);
+    gl.attachShader(prog, fragShader);
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    gl.viewport(0, 0, 1024, 1024);
+
+    const vertexBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5]), gl.STATIC_DRAW);
+
+    const coord = gl.getAttribLocation(prog, "c");
+    gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(coord);
+
+    textureLocation = gl.getUniformLocation(prog, "uSampler");
+    gl.uniform1i(textureLocation, 0);
+
+    gl.bindTexture(gl.TEXTURE_2D, canvasTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
+
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+    gl.bindTexture(gl.TEXTURE_2D, canvasTexture);
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, canvasTexture);
+    gl.uniform1i(textureLocation, 0);
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+function initGL(gl) {
+
+    const square = {  // This object draws a square, using its own buffer, when square.render() is called
+        buffer: gl.createBuffer(),
+        render(a_coords_loc) {  // square.render(a_coords_loc) will draw the square.
+            // a_coords_loc should be the location of an a_coords attribute variable of type vec2
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            gl.vertexAttribPointer(a_coords_loc, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(a_coords_loc);
+            gl.drawArrays( gl.TRIANGLE_FAN, 0, 4 );
+            gl.disableVertexAttribArray(a_coords_loc);
+        }
+    };
+    gl.bindBuffer(gl.ARRAY_BUFFER, square.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ 0,0, 1,0, 1,1, 0,1 ]), gl.STATIC_DRAW);
+
+    /**
+     *  Creates and configures a texture object for the texture that will hold the
+     *  current board while the next generation is being computed.  Then creates
+     *  the shader program that will do the computation.
+     */
+    gl.activeTexture(gl.TEXTURE1);
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+    const nextgenProg = {};
+    const vshader = document.querySelector("#vshader").textContent;
+    const fshader = document.querySelector("#fshader-nextgen").textContent;
+    nextgenProg.prog = createProgram( gl, vshader, fshader);
+    nextgenProg.a_coords_loc =  gl.getAttribLocation(nextgenProg.prog, "a_coords");
+    nextgenProg.source_loc = gl.getUniformLocation(nextgenProg.prog, "source");
+
+    return { square, texture, nextgenProg };
+}
+
+function createProgram(gl, vertex, fragment) {
+    const vsh = gl.createShader( gl.VERTEX_SHADER );
+    gl.shaderSource(vsh, vertex);
+    gl.compileShader(vsh);
+
+    const fsh = gl.createShader( gl.FRAGMENT_SHADER );
+    gl.shaderSource(fsh, fragment);
+    gl.compileShader(fsh);
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vsh);
+    gl.attachShader(prog, fsh);
+    gl.linkProgram(prog);
+    return prog;
+}
+
+    // Avoid antialiasing, since we need to avoid any blending of values.
+    // Keep the drawing buffer, so that the data it contains won't be lost before we
+    // copy it to the texture.
+    const gl = document.querySelector("canvas#webglcanvas").getContext("webgl", { antialias: false, depth: false, preserveDrawingBuffer: true });
+    if (gl === null) {
+        //return;
+    }
+
+    const gol = {
+        main(timestamp) {
+            next(gol.gl, gol.square, gol.texture, gol.nextgenProg);
+            requestAnimationFrame(gol.main);
+        },
+
+        init(gl) {
+            const {square, texture, nextgenProg} = initGL(gl);
+            gol.gl = gl;
+            gol.square = square;
+            gol.texture = texture;
+            gol.nextgenProg = nextgenProg;
+        }
+    };
+
+    gol.init(gl);
+    createInitialConfiguration(gol.gl);
+    gol.main(0);
+
+(async(target) => {
+    const rss = await fetch("rss.xml");
+    if (!rss.ok) { target.textContent = "header HTTP-Error: " + rss.status; return; };
+    const doc = new DOMParser().parseFromString(await rss.text(), "text/xml");
+    const links = [...doc.getElementsByTagName("item")].map(item => {
+        const article = document.createElement("article");
+
+        const p = document.createElement("p");
+
+        const time = document.createElement("time");
+        time.textContent = item.querySelector("pubDate").textContent.substr(0, 12);
+
+        const a = document.createElement("a");
+        a.href = item.querySelector("link").textContent;
+        a.textContent = item.querySelector("title").textContent;
+
+        const subtitle = document.createElement("small");
+        subtitle.textContent = item.querySelector("description").textContent;
+
+        p.appendChild(time);
+        p.appendChild(a);
+        article.appendChild(p);
+        article.appendChild(subtitle);
+
+        return article
+    });
+    target.append(...links)
+})(document.querySelector("nav"));
+
+</script>
+</body>
+</html>

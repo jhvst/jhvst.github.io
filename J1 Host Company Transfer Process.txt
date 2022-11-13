@@ -1,0 +1,96 @@
+# J1 Host Company Transfer Process
+
+
+During StartupLife anything is possible. Sometimes you see a happy kitten looking at you from a MUNI train, sometimes you run into Zuckerberg while jogging around Palo Alto, and sometimes you face problems so bad  with your host company that you are ready to quit.
+
+That all happened to me!
+
+Although, in this blog post we are going to concentrate on the visa transfer process.
+
+The publicly available information on the topic is scarce and only a few StartupLife alumni have any experience about the process. There is also false information online stating that the J1's would not be transferable.
+
+When I was transferring my visa, I recall searching online about peoples past experiences. There were a lot of mixed information. So once I got mine done, I decided it would make sense to document the process to help future alumni. 
+
+## Migration process
+
+The transfer process is roughly the following:
+
+ 1. Get the current company's agreement on transferring over
+ 2. Contact your visa sponsor with the heavy reason for change
+ 3. Have your new host company fill a new training plan
+ 4. Wait for CIEE to approve your new training plan
+
+These steps do involve some additional things, which I'll cover in steps.
+
+Before that though, it is worth mentioning that while the process follows the steps mentioned above, I would highly recommend to have an exit plan first. I personally already had job agreement signed before I told my host company or CIEE that I am about to quit.
+
+Trust me, the hardest thing with changing the company is not the actual process, but the work and effort required to find a new host company. Unless you have that planned you will have 30 days to find one or be deported from the country and have your visa obliterated.
+
+## Agreement of transferring over
+
+/img/j1transfer/transfer.png ""The transfer of a participant from one program (sponsor) to another may be allowed at the discretion of the responsible officers and must be within the same category" [(j1visa.state.gov)](https://j1visa.state.gov/participants/current/adjustments-and-extensions/)"
+
+Simply put, as long as you keep on doing the same field of work (eg. software engineering) and the change is fine for CIEE, your current employer and to-be employer, then you can change your host company.
+
+Once you have a new host company secured down, the best way to start the transfer process is to first talk to your current host company and have them agree that the best option for both of you is that you change your host company. Explain that you are about to leave the company. Getting this talk out of the way will make the rest of the process swift.
+
+The agreement on transferring over can be verbal. I handled this by simply booking a conference room with my program manager and telling him I would like to quit. Once that was said, I continued to tell how I would like to continue my internship in the States by transferring my visa under a different company. My program manager was cooperative and agreed that I will call CIEE right after the meeting to start the transfer process. We also agreed on last day employment during the meeting, which was set to be 1.5 weeks from the date of resignation. Agreeing on the date was a good idea as it was asked by CIEE on the phone.
+
+The last day of employment will be the day CIEE calls your employer to make sure they are okay with the visa transfer. Therefore, one could hasten the transfer process by agreeing the last day of employment to be the same day of resignation, but I have been told that it is good customs to give your employer two weeks of time to prepare paperwork.
+
+It goes without saying, but it is worth keeping your temper under control whatever your feelings are, since you will need your host company's approval to transfer the visa over. Whilst handling the situation calmly might be hard or make you seem psychotic, it is far better than risking a no as an answer.
+
+## Heavy reason for change
+
+Call CIEE once you have received the blessing of your current host company to transfer the visa over. CIEE will prompt you for a heavy reason for change, which should be something easily arguable and concrete. CIEE will unlikely let you change your company because of better snack offerings on Thanksgiving.
+
+As for me, I told CIEE that the host company has been unable to follow the initial training plan, which is enough of a reason on its own. In addition, I told I was not feeling respected and therefore was not learning as much as I could have.
+
+If you sound convincing enough, the CIEE representative on the phone will follow up momentarily with an email and to-be-filled, called *Personal Statement document*.
+
+## Personal Statement document
+
+/img/j1transfer/req1.png "Congratulations if you receive this email. That is the first blink of green light from CIEE."
+
+/img/j1transfer/Personal-Statement-for-Change-of-Host-Organization.png "Personal Statement document ([click here to download as .doc](/attachments/Personal-Statement-for-Change-of-Host-Organization.doc))"
+
+I received the email from CIEE after 15 minutes of making the phone call with them.
+
+I was told on phone to write everything I just told them on the *Personal Statement document*.[^As for the filled document, I am happy to share that with any StartupLife alumni. Feel free to contact me on Facebook about it.] I did not file a letter of explanation from my host company nor was there a separate attachment for one.
+
+After you reply to the said email with the document(s) attached (or fax them 🤔) your transfer process is officially started. You are then left to wait for CIEE to call your employer by the last day of your employment.
+
+## Filling new training plan
+
+/img/j1transfer/approval.png "Letter of approval. It is worth noting that this email was received on Jun 23th, which would have left me with a month to find a new host company and fill the DS-7002."
+
+Once CIEE has called your host company around the last day of your employment, you will receive a request by email to fulfil a new training plan (separate from the one above). Log in to the portal and invite your new host company manager there. Once filled you may both sign, after which the DS-7002 will go to CIEE (and CIEE only, no lawyers or Kilroy) for approval.
+
+My timeline of the whole process was following:
+
+* **Jun 15**: I called CIEE to tell them that I'm changing my host company. After 15 minutes the call had ended, I received the personal statement document which I filled and sent back during the same day.
+* **Jun 23**: I got an email from CIEE verifying that the transfer has been approved by my host company.
+* **Jun 27**: My new host company signed a new training plan.
+* **Jul 05**: CIEE approves the new training plan. I start working under the new host company.
+
+As far as I am concerned, my application was stuck between Jun 23 and 27 because CIEE had  to send someone to visit the host company first.
+
+
+## Thoughts
+
+
+Trust me, that is less complicated than it looks. When changing the host company, the hardest part is finding a new host company and telling your current employer that you are about to quit.
+
+The change of host company is free of charge and does not involve mailing process with your DS-2019.
+
+You can still travel outside of the country with your DS-2019 even though it has the information of your old employer.
+
+As noted in the letter of approval, CIEE will pay a visit to your new employers office unless they have already approved them before. This step might prolong the transfer process by a few days.
+
+I initiated the transfer process with CIEE **after** I had found a new employer and told my current one I'm about to quit. I recommend doing the same for the sake of simplicity.
+
+To my misery, both StartupLife and Kilroy had little to no idea about the transfer process.
+
+Later on I met some of the CIEE staff, the same people who review these applications, in person and I was told that too often people who run into these problems seek advisory from their native program managers. As in with everything, they told that in case you run into problems while in the States, the CIEE should be your first line of contact. Kilroy and StartupLife have little to no possibilities to help you even if they would like to.
+
+There was also the helping and supportive StartupLife alumni around, who pulled me from the trench when I needed that.

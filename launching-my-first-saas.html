@@ -1,0 +1,74 @@
+<!doctype html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Launching my first SaaS</title>
+        <meta name="author" content="Juuso Haavisto">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+        <meta name="twitter:creator" content="@jhaavist">
+        <style>
+            body {
+                font: 16px/24px;
+                padding: 1em;
+                line-height: 1.5;
+                margin: auto;
+                color: #444;
+                max-width: 40rem;
+                font-family: monospace;
+                display: flex;
+                flex-direction: column;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                line-height: 1.1;
+                font-weight: 700;
+                font: 24px/24px;
+            }
+
+            ul {
+                list-style-type: lower-greek;
+            }
+
+            ol {
+                list-style-type: lower-roman;
+            }
+
+            header {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+            }
+
+            footer {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            section.links {
+                max-width: 30rem;
+            }
+
+            a:hover {
+                opacity: .7;
+            }
+        </style>
+    </head>
+    <body>
+<p>Tuesday the 22nd of July 2014 marks the day I launched my first <a href="http://en.wikipedia.org/wiki/Software_as_a_service">SaaS</a> modeled product. The software was made for a local newspaper company and its main purpose is to function as a small CRM with focus in selling ads. Below are some of my initial thoughts after roughly one week of running the app.</p>
+<h2>Started by making mistakes with money</h2>
+<p>This is probably a hard landing, but it’s actually the first thing and the first mistake that I’ve identified so far. When making the initial quote for the client I should have just handed out my hourly wage instead of trying to come up with a lump sum. There was this awkward situation after the pilot version was taken online, where the client decided to start bargaining the price down. Even though the client did accept my initial lump sum offer, they seemed to be not happy about the few hours spent on the project. Moreover, I did take it bit offensively as the client had just moments before said how the software covers pretty much anything they can think of, and that they are very satisfied with the job so far.</p>
+<p>My original plan was to charge as much of the initial work as I’d think I would charge for a full year SaaS subscription, plus few hundred extra on top of that. It now seems like I’m going to lose that extra few hundred, but for the sake of giving me the opportunity to do the software for them, I just may let it go trough my fingers. So yes, even though the software is online and in use, the price has not been settled. I personally don’t see this as a big problem, but my peers and family can’t really see the reasoning behind it. They seem to lack the idea of mutual trust, which I’ve noticed to be a really important thing to cope for an entrepreneur. I must say that I wouldn’t have closed as much deals as I would have if I’d just wanted the money to change hands at first. Anyway, so far I’ve been better of lying that I’ve had something paid for me than going through the awful argumentation with my relatives how my work is supposed to be paid and when. Like, my whole life I’ve been handing money over the Internet to companies that I’ve never seen and probably will never will see. Still, somehow those Chinese batteries and electronics from Germany or apparel from US still have managed to find my home door sooner or later. But that’s enough of that matter.</p>
+<h2>Preview page</h2>
+<p>The real key feature is a preview page where you can see what sized ads are sold on which page. To be honest, at first I was a bit worried whether I could pull something like that out. In the end, you are supposed to render models of advertisements with data pulled from database onto an webpage. After that, you are supposed to be able to move the models freely and save the positions of each. The models also had to have the ad buyer’s name and the size displayed on them.</p>
+<p>At first I played around the idea whether I should use the same approach as what the client had used prior my software, which meant painting columns and rows in Excel. Basically, I’d use the HTML table element, hook up some JS and make a small version of Excel sheet functionality on top of that. Soon I understood that it’s most likely not worth it to try converting HTML tables to something which they definitely aren’t supposed to do. So, I looked up alternatives and found the <code>canvas</code> element, which seemed to serve my purpose. With the help of <a href="http://fabricjs.com/">fabricjs</a> I was able to use the nice <a href="http://fabricjs.com/intersection/">intersection example</a> almost completely copy-pasted into my web app. Suddenly I had everything I, and more importantly, what the client wanted the application to have. Now it was only a matter of writing few helper functions to render non-escaped JS variables to the HTML layout, which proved to not be that of an issue. I also had to add few more fields to my data structures, just to make sure that the saved positions will be persistent. Nonetheless to say, those were just minor tweaks to what I would have needed to do in order to roll out my own version of fabricjs.</p>
+<h2>Code deployment</h2>
+<p>Even though the initial idea was to make the software only for a single client, I still had scalability in mind. What I’ve learned from my earlier tinkering is that deployment should be as easy as possible. When you make a lot of small changes in a short time it must be easy to push changes onto a server, or else you won’t be mentally sane for long. Workflow in which you have to <code>ssh</code>, <code>git pull</code> and finally rebuild the app is just something you don’t want to do for a single line change or so.</p>
+<p>So, forever flawed by the easy workflow of Heroku, I decided to look onto the highly hyped Docker and the “mini-Heroku” Dokku. Since DigitalOcean had ready-made images of Dokku available, I decided to spin up a small instance of theirs to see how it all would work out. Not so much to my surprise, everything was easy to set-up from the actual app deployment to secure, isolated and upgradable database container. Making a change what would have earlier took me 15 minutes now took only a few clicks on SourceTree.</p>
+<h2>Choosing a server provider</h2>
+<p>That leads us to another big choice, which was selecting the server provider. I had three options in my mind, which were DigitalOcean, Linode and a Finnish server provider UpCloud. However, once I laid down the price sheets for my client the UpCloud was weeded out, as it was too expensive compared to the US providers. From there, I was initially meant to pick Linode because of their nice emails regarding to disk usage and pretty much everything else technical. However, I had hard time to setup Dokku on Linode. And because at the time I had the meeting in just few hours I decided to switch on to DigitalOcean, on which I had already setup the app running successfully earlier.</p>
+<p>Looking back a week later, although DigitalOcean does have slower IO rates, the app has been running smoothly. However, should I ever expand to multiple clients, I’d probably take my time to set them up on Linode just for the sake of more in-depth monitoring.</p>
+<p>But that’s all I have now, I’ll be updating this article once I find something worth noting of.</p>
+    </body>
+</html>

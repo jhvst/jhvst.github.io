@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>On Ethereum node operation</title>
+  <style>
+    body {
+        padding: 1em;
+        margin: auto;
+        max-width: 40rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        display: flex;
+        flex-direction: column;
+    }
+
+    time {
+        font-family: monospace;
+    }
+
+    header {
+        display: flex;
+        align-items: center;
+    }
+
+    header h3 {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    header img {
+        max-width: 10%;
+        margin-right: 1em;
+    }
+
+    a:hover {
+        opacity: .7;
+    }
+
+    img {
+        max-width: 100%;
+    }
+    </style>
+</head>
+<body>
+<h1>On Ethereum node operation</h1>
+
+<p>Sat 28. Aug 2021</p>
+
+<p>This week there was an <a href="https://www.theblockcrypto.com/amp/post/115822/bug-impacting-over-50-of-ethereum-clients-leads-to-fork">Ethereum node split</a> due to outdated clients. This resulted in the following comment on ETHSecurity Community channel:</p>
+
+<figure>
+<img src="img/node-discussion-fs8.png" alt="" />
+</figure>
+
+<p>Personally, I think this is true. I also think there is currently little effort put into instructions or approaches on how to run nodes. This becomes even more essential with Ethereum 2. As such, I think it makes sense as a community to share our approaches for a more resilient network. What follows in the next sections is my attempt.</p>
+
+<h2>Containers</h2>
+
+<p>To update software, one way to receive new updates is by relying on Docker container repositories. Instead of downloading new releases and patching our client software, we separate the concerns of persistent storage and the actual process. In my case, I run the <code>erigon</code> client, which receives periodical updates on DockerHub at <a href="https://hub.docker.com/r/thorax/erigon"><code>thorax/erigon</code></a>.</p>
+
+<p>I update these images roughly once a week by pulling the <code>latest</code> tag: <code>/bin/podman pull docker.io/thorax/erigon:stable</code>. I do this via <code>systemd</code> units:</p>
+
+<pre><code>[Unit]
+Description=Ethereum 1 mainnet client
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=always
+RestartSec=5s
+User=core
+Type=simple
+ExecStartPre=-/bin/podman kill erigon erigon-rpcdaemon lighthouse lighthouse-vc
+ExecStartPre=-/bin/podman rm erigon erigon-rpcdaemon lighthouse lighthouse-vc
+ExecStartPre=/bin/podman pull docker.io/thorax/erigon:stable
+ExecStart=/bin/podman run \
+  --name erigon \
+  -v /var/mnt/ssdraid/eth1/erigon-mainnet:/data:z \
+  docker.io/thorax/erigon:stable erigon \
+  --metrics --metrics.port=6060 \
+  --pprof --pprof.port=6061 \
+  --private.api.addr=localhost:4090 \
+  --datadir /data \
+  --chain mainnet
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>Here you can also see the separation of persistent data: the <code>-v /var/mnt/ssdraid/eth1/erigon-mainnet:/data:z</code> mounts the a block device which has the data the process needs. In theory, I would only ever need to point this directory to the client process, and the client process could receive upgrades independent of the data it mounts.</p>
+
+<p>I can manually upgrade my client by running <code>systemctl restart erigon</code>, which will kill all its dependencies, remove the containers, and then pull the newest version. The update will propagate over the <code>rpcdaemon</code> and its <code>lighthouse</code> dependants by <code>systemd</code> <code>Requires</code> and <code>After</code> instructions in the <code>erigon.service</code> file. For example, consider the <code>rpcdaemon</code> process:</p>
+
+<pre><code>[Unit]
+Description=Ethereum 1 client rpcdaemon
+Requires=erigon.service
+After=erigon.service
+
+[Service]
+Restart=always
+RestartSec=5s
+User=core
+Type=simple
+ExecStart=/bin/podman run \
+  --net=container:erigon \
+  --pid=container:erigon \
+  --ipc=container:erigon \
+  -v /var/mnt/ssdraid/eth1/erigon-goerli:/data:z \
+  --name erigon-rpcdaemon \
+  docker.io/thorax/erigon:stable rpcdaemon \
+  --datadir /data \
+  --private.api.addr=localhost:4090 \
+  --http.api=eth,erigon,web3,net,debug,trace,txpool,shh \
+  --http.addr=0.0.0.0
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>Here, the <code>[Unit]</code> part of the systemd specification has the following lines:</p>
+
+<pre><code>[Unit]
+Description=Ethereum 1 client rpcdaemon
+Requires=erigon.service
+After=erigon.service
+</code></pre>
+
+<p>This will mean that the <code>erigon-rpcdaemon.service</code> will only launch <em>after</em> the <code>erigon.service</code> is running. This propagates to <code>lighthouse.service</code>:</p>
+
+<pre><code>[Unit]
+Description=Ethereum 2 mainnet client
+Requires=erigon-rpcdaemon.service
+After=erigon-rpcdaemon.service
+
+...
+</code></pre>
+
+<p>And from there on to the validator:</p>
+
+<pre><code>[Unit]
+Description=Ethereum 2 mainnet client validator
+Requires=lighthouse.service
+After=lighthouse.service
+
+...
+</code></pre>
+
+<p>This way, a simple <code>systemctl restart erigon</code> command will cause the whole stack to upgrade.</p>
+
+<h2>Integrating container updates to system upgrades</h2>
+
+<p>While running the restart operation could be a cron job, the reality is that the nodes also run other software. This includes but is not limited to <code>podman</code>, i.e., the Docker host and the kernel of the system. These updates are arguably as important to the client upgrades to avoid <a href="https://en.wikipedia.org/wiki/Shellshock_(software_bug)">shellshocks</a> and vulnerabilities alike to be introduced over time.</p>
+
+<p>To avoid dependency conflicts between different processes and thus risk the maintenance process cascading into chaos, I have taken the approach popularised by the CoreOS Linux distribution. Here, the general idea is that <em>everything</em> except for the kernel and the container runtime interface is a container. And while CoreOS as a company does not exist anymore, the distribution is kept alive by Fedora as <a href="https://getfedora.org/coreos?stream=stable">Fedora CoreOS</a>. </p>
+
+<p>But how does this help? Well, CoreOS also auto-upgrades the kernel by periodically polling the release windows. Naturally, <a href="https://docs.fedoraproject.org/en-US/fedora-coreos/auto-updates/">you may also configure the way these updates are rolled out</a>. This way, by enabling the <code>erigon.service</code> with <code>systemctl enable erigon.service</code> the operating system will trigger the process to start on each boot. And in CoreOS, each unattended boot operation corresponds to a system upgrade, which by specifying <code>podman rm</code> and <code>podman pull</code> operations corresponds to also upgrading the clients automatically. What is thus achieved is that around each week, when Fedora releases a new CoreOS version, the nodes will download the patches, restart, and then upgrade the Ethereum client processes. This allows unattended-upgrades across all nodes that I maintain, thus effectively avoiding chain splits.</p>
+
+<h2>Monitoring</h2>
+
+<p>In theory, this works all okay, but sometimes backward compatibility with the mounted persistent storage is broken in practice. And sometimes, the command line arguments are tweaked, which may also cause downtime. The way to resolve this is by introducing monitoring to the cluster, for which there already exists process-specific approaches via Prometheus and Grafana.</p>
+
+<p>But, Prometheus and Grafana only work as long as the node itself can recover from configuration errors, which it often cannot because there is no programmatic way to apply patches to filesystem and process arguments. To resolve this, we should first test that the upgrade does not cause downtime, and only if so, then upgrade. While I have not configured these to work automatically, the tools already exist in the form of Linux <em>checkpoints</em>.</p>
+
+<p>Luckily, the checkpoint operations also apply to containers via <a href="https://criu.org/Docker">CRIU</a>. In essence, CRIU allows the containers to be stopped and pushed to a remote computer while the host itself tries to upgrade the system. Interestingly, this also applies to kernel upgrades via <a href="https://criu.org/Seamless_kernel_upgrade">seamless kernel upgrades</a>. This way, it could be possible to devise an approach that works roughly as follows:</p>
+
+<ol>
+<li>When there is an upgrade to the kernel, simulate the upgrade by moving the containers to another host via checkpoints.</li>
+<li>Check that the kernel upgrade can be executed with <code>kexec</code>, and if so, boot into it and pull the latest container images. Otherwise, notify the ops team (that's me!) that the upgrade breaks something.</li>
+<li>If the kernel upgrade is OK, pull the latest container images and see if we run into an error. If so, notify the ops team that the kernel upgrade is OK, but the containers have a problem.</li>
+<li>If there is a problem container, postpone the upgrade and pull the checkpoint images from the remote host to continue operation while a manual upgrade is resolved.</li>
+<li>Otherwise, all is good and we run the latest software, and the remote checkpoints can be destroyed.</li>
+</ol>
+
+<h2>Conclusion</h2>
+
+<ul>
+<li>Containers can add resilience to node operation, but this requires rather esoteric Linux distributions. And even then, upgrades can sometimes cause failure by changing process arguments or making new assumptions of the underlying filesystem structure, which requires human intervention.</li>
+<li>Moving forward, it would be important for the community of distributed software systems to share information on how to tackle these problems to realize more reliable systems overall. This can be done by sharing our approaches of setting up nodes, from which we can collectively learn from.</li>
+</ul>
+</body>
+</html>

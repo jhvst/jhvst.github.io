@@ -1,0 +1,289 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>A review of viability of microservices</title>
+
+	<meta name="description" content="The essay concludes that incorporating microservices, especially in small companies (e.g. startups) is likely a bad decision."/>
+	<meta name="author" content="Juuso Haavisto">
+
+	<meta itemprop="name" content="Juuso Haavisto">
+	<meta itemprop="description" content="The essay concludes that incorporating microservices, especially in small companies (e.g. startups) is likely a bad decision.">
+	<meta itemprop="image" content="http://www.juusohaavisto.com/img/juuso.jpg">
+
+
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:site" content="@jhaavist">
+	<meta name="twitter:title" content="Juuso Haavisto">
+	<meta name="twitter:description" content="The essay concludes that incorporating microservices, especially in small companies (e.g. startups) is likely a bad decision.">
+	<meta name="twitter:creator" content="@jhaavist">
+	<meta name="twitter:image:src" content="https://www.juusohaavisto.com/img/juuso.jpg">
+	<meta name="twitter:domain" content="www.juusohaavisto.com">
+
+	<meta property="og:article:published_time" content="2018-03-08"/>
+	<meta property="og:title" content="Juuso Haavisto"/>
+	<meta property="og:type" content="website"/>
+	<meta property="og:url" content="https://www.juusohaavisto.com"/>
+	<meta property="og:image" content="https://www.juusohaavisto.com/img/juuso.jpg"/>
+	<meta property="og:description" content="The essay concludes that incorporating microservices, especially in small companies (e.g. startups) is likely a bad decision."/>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+	<link href="https://fonts.googleapis.com/css?family=Unica+One" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Vollkorn" rel="stylesheet">
+
+	<link rel="stylesheet" href="css/normalize.min.css">
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<article>
+
+<h1 id="a-review-of-viability-of-microservices">A review of viability of microservices</h1>
+
+<h2 id="abstract">Abstract</h2>
+
+<p>The purpose of this essay is to (1) research how software applications should be managed as microservices, (2) what kind of problems does the microservice architecture solve (and introduce), and (3) at what scale does it become a lucrative option in industrial software engineering setting.</p>
+
+<p>Main observations include that incorporating microservices require special attention in parts of software development that may be overseen in a usual industrial software engineering environment. An unaware programmer is likely to run into pitfalls with micro-services, which may slow down the phase of usual industrial software development.</p>
+
+<p>The essay concludes that incorporating microservices, especially in small companies (e.g. startups) is likely a bad decision, as it requires broader knowledge and configuration from software engineers compared to the traditional monolithic approach.</p>
+
+<p>Keywords: microservices, containers, SOA (service-orientated architecture), DevOps (development operations), Docker, K8s (Kubernetes)</p><div class="TOC">
+
+
+<ul>
+<li><a href="#a-review-of-viability-of-microservices">A review of viability of microservices</a>
+
+<ul>
+<li><a href="#abstract">Abstract</a></li>
+<li><a href="#introduction">1.0 Introduction</a></li>
+<li><a href="#research-method">2.0 Research method</a></li>
+<li><a href="#previous-research">3.0 Previous research</a>
+
+<ul>
+<li><a href="#microservices">3.1 Microservices</a></li>
+<li><a href="#containers-and-their-performance">3.2 Containers and their performance</a></li>
+<li><a href="#devops">3.3 DevOps</a></li>
+<li><a href="#cluster-orchestration-kubernetes">3.4 Cluster orchestration, Kubernetes</a></li>
+<li><a href="#data-persistency">3.5 Data persistency</a></li>
+<li><a href="#polyglot">3.5.1 Polyglot</a></li>
+<li><a href="#database-transaction-log-mining">3.5.2 Database transaction log mining</a></li>
+<li><a href="#sagas">3.5.3 Sagas</a></li>
+<li><a href="#event-sourcing">3.5.4 Event Sourcing</a></li>
+</ul></li>
+<li><a href="#contribution">4.0 Contribution</a></li>
+<li><a href="#conclusions">5.0 Conclusions</a></li>
+<li><a href="#references">References</a></li>
+</ul></li>
+</ul>
+</div>
+
+<h2 id="introduction">1.0 Introduction</h2>
+
+<p>Service architectures are required for large systems. After all, there is a physical limit to the amount of load one server can handle — even a mainframe, parallel processing supercomputer or quantum computer. There is also a conceptual limit to the number of functions one release team can specify, test, and maintain.</p>
+
+<p>This essay researches microservices approach and attempts to give the reader an opinion whether microservices are something they should consider architecting their business services with. Topics included in this essay are (1) exhaustive term definitions, (2) benefits of microservices, (3) common pitfalls and ways to avoid them, (4) and finally a closer look into solutions on to handle persistent data in. The essay hopes to contribute to the field by informing organizations with aspects to consider before investing engineering effort to the currently well-promoted architecture style found in the leading corporations of the field, such as Google and Amazon. </p>
+
+<p>The findings of this essay may also work as a waypoint for organizations currently struggling with microservices in practice. The essay suggests areas of further research, which may work as a starting point for future academic work.</p>
+
+<h2 id="research-method">2.0 Research method</h2>
+
+<p>The research method is a literature review. The sources used in this review were found through various different scientific databases, such as ACM, IEEE Xplore, and Google Scholar. The search terms consisted of various different English keywords, such as microservices, docker, and kubernetes, and their synonyms and variations. Some of the used search terms included: “microservices (viability OR pitfalls)”, “micro-service* OR microservice*”, “containers docker”. Finding of differentiating literature proved out to be challenging, as most research was conducted by huge companies, such as IBM and Google, whose problems and goals are much different to those of smaller companies or single researchers. Thus, most sources are qualitative research outcomes conducted by industrial companies in the software engineering space.</p>
+
+<p>Most of the information was found to be exhaustive enough that it was possible to compile them to better define some of the terms used in the field and to evaluate and describe different solutions found in each company’s problems. Yet, as the scope of the issues got more precise, the scientific research became as recent as of this year and this month (for example, SRE practices of Google) and for some topics, such as the application of different database methods with microservices, had to rely on information from blog posts. Thus, while I would consider these sources fine for a plain literature review like this, I would not try to extend this review, at least in its current scope, to a formal thesis.</p>
+
+<h2 id="previous-research">3.0 Previous research</h2>
+
+<p>In this chapter we will go through relevant terms using prior literature to define what they are and use each, with the exception of 3.1, to draw findings how they knit together with the microservices approach.</p>
+
+<h3 id="microservices">3.1 Microservices</h3>
+
+<p>Microservices could be defined as a distributed, cloud-native architectural style approach (Balalaie, Heydarnoori, &amp; Jamshidi, 2015), a refinement, and simplification of Service-Oriented Architecture (SOA; Amaral et al., 2015). It aims to eliminate long-term commitment and bottlenecks both at the business and the architectural level, by realizing software systems as a set of small yet complete, cohesive, loosely coupled services resilient to failure (Gadea, Trifan, Ionescu, Cordea, &amp; Ionescu, 2016; Balalaie, Heydarnoori, &amp; Jamshidi, 2015). A single service is dedicated to a single business capability, each independently and automatically deployable, testable and elastically scalable platform-agnostically (Smith 2017; Balalaie, Heydarnoori, &amp; Jamshidi, 2016; Dragoni et al., 2017; Gadea, Trifan, Ionescu, Cordea, &amp; Ionescu, 2016). Services may utilize various programming languages, middleware stacks, data stores (Balalaie, Heydarnoori, &amp; Jamshidi, 2015), and data tiers (Amaral et al., 2015), each running in its own process isolation while communicating through lightweight mechanisms like RESTFull APIs (Balalaie, Heydarnoori, &amp; Jamshidi, 2015; Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016; Dragoni et al., 2017).</p>
+
+<p>Not all services in a microservices architecture are necessarily micro. A service will become as big as it needs to be to provide a coherent, efficient and reliable function (Singleton, 2016). A monolith software application transitioned into microservices is likely formed of dozens or hundreds of services (Amaral et al., 2015).</p>
+
+<p>Since all the components of a microservice architecture are microservices, its distinguishing behavior derives from the composition and coordination of its components via messages (Dragoni et al., 2017). Thus, the only constraint imposed on a network of interoperating microservices is the technology used to make them communicate (media, protocols, data encodings). Apart from that, microservices impose no additional lock-in (Dragoni et al., 2017).</p>
+
+<p>Microservices also emphasize development operations (DevOps), such as continuous deployment, continuous delivery, and other agile practices to accelerate software development (Balalaie, Heydarnoori, &amp; Jamshidi, 2016; Balalaie, Heydarnoori, &amp; Jamshidi, 2016). This way, a microservices-centric development team can test and release changes, regardless of the organization's or teams size, to individual components more than once per day (Singleton, 2016). A company like Amazon with thousands of services can make more than a thousand changes per day, fixing problems and adding new features. This type of continuous delivery becomes a powerful tool for developers that update cloud-based Software-as-a-Service (SaaS) and other online systems (Singleton, 2016). This also means that continuous delivery is a powerful tool for business agility and competitive advantage (Singleton, 2016). Large software teams often have problems with merging code, in addition to testing. Microservices solve this problem by skipping the merges, as each team can run an integration test on its code, and release it directly as a packaged service (Singleton, 2016).</p>
+
+<p>The principles of microservice architectures also assist project managers: a continuous process is more adaptable and easier to manage than e.g. Scrum-style agile development with its two-week cadence (Dragoni et al., 2017; Singleton, 2016). Microservice approach structures the engineering organization as a collection of small (6-10 members), autonomous teams (Richardson, 2017). It allows teams of designers and developers to take complete ownership of deployments, developments, and testings from the database to the user interface, thus enabling permissionless innovation (Killalea, 2016). It contrasts with approaches where so-called gatekeepers have to be consulted before an integration can be considered. An organization that has embraced microservices and permissionless innovation enable a high rate of experimentation and a low rate of cross-team meetings (Killalea, 2016).</p>
+
+<p>However, studies show that these benefits are not automatically guaranteed. Instead, they can only be achieved by careful functional decomposition of the application into services (Richardson, 2017; Smith, 2017;). One argument is that you should not start with a microservices architecture (Fowler, 2014). According to Fowler, you should begin with a monolith, keep it modular, and split it into microservices should the monolith become a problem.</p>
+
+<p>In addition, studies show that microservices require developers to be familiar with distributed system development for the architecture to be fully functional and for its benefits to be realized (Balalaie, Heydarnoori, &amp; Jamshidi, 2015; Namiot &amp; Sneps-Sneppe, 2014; Smith, 2017). Extra machinery is found to be required, which can impose costs: to address the complexities of microservices, supporting components such as service registry, load balancer, configuration server, service discovery, circuit breaker and edge server are required (Balalaie, Heydarnoori, &amp; Jamshidi, 2016; Fowler, 2014; Singleton, 2016). Companies using microservices architecture have found that systems such as those which monitor service performance and behavior, as well as special techniques to handle errors, are required (Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016; Fowler, 2014; Singleton, 2016). For example, when a microservice is not responding, there is no simple way for other services to understand or even see the error. Thus, extra code and monitoring are needed to avoid the system to cascade into a catastrophe (Singleton, 2016). Finally, discussions about when to include functions inside one service, and when to break them into separate services are needed. Some say this is more of an art than a science, although some studies have shown methodologies such as Situational Method Engineering to help streamline the process (Balalaie, Heydarnoori, &amp; Jamshidi, 2015; Singleton, 2016).</p>
+
+<p>Often extra code is required to communicate between services. Instead of making simple function calls, you'll define API calls or messages, and implement API calls on each end. In addition, because microservices can be event-processing scripts, containers, or entire virtual machines, you'll also want a systematic way to package and deploy them (Singleton, 2016). Hence, there should be a facility in place for setting up such a environments with a minimum amount of effort (Balalaie, Heydarnoori, &amp; Jamshidi, 2015). In some companies, such as Google, this is handled by specialized Site Reliability Engineers (Beyer, Jones, Petoff, &amp; Murphy, 2016; Dogan, 2017). Consequently, having standards is a must in order to avoid chaos and making the system unmaintainable (Balalaie, Heydarnoori, &amp; Jamshidi, 2015). Cluster orchestration such as Docker Compose or Kubernetes is likely needed. Finally, costs such as the computational overhead of running an application in different processes and having to pay network communication costs rather than simply making function calls within a process are something to take into account (Amaral et al., 2015).</p>
+
+<p>According to one opinion, if you have fewer than about 60 people working on your system, you don't need a microservices architecture (Singleton, 2016). For medium-sized systems, they can deliver cost reduction, quality improvement, agility, and decreased time to market. For large cloud systems, they fundamentally change the rules of the game (Singleton, 2016).</p>
+
+<h3 id="containers-and-their-performance">3.2 Containers and their performance</h3>
+
+<p>Containers can be considered, due to their nature of isolation and dependency minimization, as basic building blocks of microservices. Furthermore, the container is the sole runnable entity supported by the Google infrastructure, which heavily relies on microservices (Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016). Managing containers means managing applications rather than machines (Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016). Containers isolate applications from operating systems making them possible to provide the same deployment environment in both development and production, which, in turn, improves deployment reliability and speeds up development by reducing inconsistencies and friction (Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016).</p>
+
+<p>Containers make it easy to limit the number of operating system versions deployed (Balalaie, Heydarnoori, &amp; Jamshidi, 2015; Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016; Dragoni et al., 2017). Maintaining and upgrading applications' underlying operating systems requires only a small staff.</p>
+
+<p>Containers are lightweight and fast - a single x86 server can have hundreds of containers running on it (Amaral et al., 2015). Despite that, one common topic in recent research has been whether containers produce a lot of overhead and whether there are performance issues when running containers in different kind of hosting environments. This is a relevant aspect when considering microservices as an architecture as well. For example, it is not hard to end up in a situation where you are renting a virtual server from a provider such as Amazon (a bare-metal server running KVM on some operating system), on which you run your host operating system (e.g. Ubuntu), on which you run the actual containers (e.g. Alpine Linux). As such, your application would be operating on an operating system three levels deep.</p>
+
+<p>One research concludes that there is no significant performance impact for CPU-intensive executions when running on containers compared to bare-metal, except for some trade-offs in terms of network performance (Amaral et al., 2015).</p>
+
+<p>Another research concludes running containers inside virtual machines imposes performance overheads (Felter, Ferreira, Rajamony, &amp; Rubio, 2015).</p>
+
+<p>Another research concludes that containers show a network performance decrease of about 10% to 20% compared to bare-metal (Kratzke, 2017).</p>
+
+<p>We can thus confirm that microservices approach does impose a reduction in network performance.</p>
+
+<h3 id="devops">3.3 DevOps</h3>
+
+<p>Distributed applications, such as microservices architecture, need to be designed so that they can tolerate the failure of services. Teams should reflect on how service failures affect the user experience (Fowler, 2014). For example, Netflix creates failures of services and datacenters during the working day to test their microservice applications' resilience and monitoring (Tseitlin, 2013).</p>
+
+<p>Thus, microservice teams would expect to see sophisticated monitoring and logging setups for each individual service. Dashboards should show statuses and a variety of operational and business relevant metrics, such as current throughput and latency (Fowler, 2014).</p>
+
+<p>These can all be considered to be traits of DevOps, which can be defined as a set of practices aimed to decrease the time between applying a change to a system and the change being transferred to the production environment (Balalaie, Heydarnoori, &amp; Jamshidi, 2016). According to DevOps keeping the software quality in terms of both code and the delivery mechanism as one of the key elements in the development process (Balalaie, Heydarnoori, &amp; Jamshidi, 2016).</p>
+
+<p>In contrast, DevOps recommends vertical dividing of project members into small cross-functional teams which fit microservices well (Balalaie, Heydarnoori, &amp; Jamshidi, 2016). Each team is responsible for a service and consists of people with different skills, like development and operations skills. They cooperate from the beginning of the project to create value for the end-users of that particular service through frequent releases of new features (Singleton, 2016). This removes overheads which exist in horizontal team formation. Furthermore, as each team is focused on a particular service, the maintainability and comprehensibility of each service's code are higher, and new members can be added to a lower learning curve (Balalaie, Heydarnoori, &amp; Jamshidi, 2016).</p>
+
+<p>DevOps defines and is often mentioned alongside some terms, such as continuous delivery (CD). Continuous delivery aims to enable on-demand deployment of a software to any environment through automated mechanisms (Amaral et al., 2015). Continuous delivery is an essential counterpart for microservices as the number of deployable units increases (Balalaie, Heydarnoori, &amp; Jamshidi, 2016).</p>
+
+<p>Another term is continuous monitoring (CM). Since services can fail at any time, it is important to be able to detect the failures quickly and restore service (Fowler, 2014). Thus, continuous monitoring aims to provide developers with performance-related feedbacks and to facilitate detecting operational anomalies (Balalaie, Heydarnoori, &amp; Jamshidi, 2016). This is essential in microservices architecture, as you may have hundreds or thousands of containers operating at the same, thus a programmatic approach to detecting anomalies is required. Thus, you should have a system that should, in real-time, monitoring both architectural elements (such as how many requests per second is the database getting) and business relevant metrics (such as how many orders per minute are received; Fowler, 2014). Monitoring can that way provide an early warning system of something going wrong that triggers development teams to follow up and investigate. This is particularly important because choreography and event collaboration leads to emergent behavior (Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016; Fowler, 2014).</p>
+
+<p>We can thus conclude that organizations looking to incorporate microservices should also incorporate DevOps practices into their software release workflow.</p>
+
+<h3 id="cluster-orchestration-kubernetes">3.4 Cluster orchestration, Kubernetes</h3>
+
+<p>As mentioned above, one of the promises of microservices is resilience. When one microsystem goes down, the system should still be operational and the failed service be restored. In a monolithic app, if one part goes out, the entire app can come down. With microservices, you are likely operating such a vast amount of independent services that you will need to handle resilience automatically. This is where Kubernetes steps in. Kubernetes monitors statuses of containers and is able to create, update, delete and restore them without downtime.</p>
+
+<p>An application which is resilient can also be said to have high availability. High availability is achieved when the system availability reaches the 5 nines (i.e. the system is available 99.999% of the time; Kanso, Huang, &amp; Gherbi, 2016). This leaves an outage margin of 315 seconds per year. High availability is one thing achieved with tools such as Kubernetes.</p>
+
+<p>Kubernetes is battle-hardened software. It concludes Google's decade's worth of experience in building container-management systems. It is an open-source software with the goal to make it easy to both manually and automatically deploy and manage complex distributed systems (Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016). It appears to have won a long-running technology war in the corporate market over competing products like Mesos (McLaughlin &amp; Efrati, 2017). According to McLaughlin &amp; Efrati, Kubernetes is emerging as an industry standard.</p>
+
+<p>From recent research, we can see that among the users of Kubernetes are also non-technical researchers (Markstedt, 2017), which use the software to manage experiments spanning large numbers of machines, to which it provides easy resource management and automatic scheduling of heavy workloads, such as DNA sequencing.</p>
+
+<p>Studies note that if the number of users is low, it would be excessive to install and configure a Kubernetes cluster (Markstedt, 2017). According to Markstedt, Kubernetes demands a lot from the user when it comes to the administration of the cluster.</p>
+
+<p>But Kubernetes brings managing of containers to a scale: building management APIs around containers rather than machines shifts the focus from a server in the datacenter to an individual application. This has many benefits: (1) it relieves application developers and operations teams from worrying about specific details of machines and operating systems, (2) it provides the infrastructure team flexibility to roll out new hardware and upgrade operating systems with minimal impact on running applications and their developers, (3) it ties telemetry collected by the management system (for example, metrics such as CPU and memory usage) to applications rather than machines (Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016).</p>
+
+<p>In short, Kubernetes brings best practices for containerized and distributed software shipping, which improves the reliability of the resulting service as a whole. We can thus conclude that organizations looking to adopt microservices also want to incorporate some form of container orchestration tool, such as Kubernetes. </p>
+
+<h3 id="data-persistency">3.5 Data persistency</h3>
+
+<p>Distributed systems require inter-service communication mechanisms (Burns, Grant, Oppenheimer, Brewer, &amp; Wilkes, 2016). You need to implement message delivery systems that guarantee that every single message is delivered (Smith, 2017). Thing brings up the topic of how data is accessed and retrieved when using multiple services.</p>
+
+<p>In microservices, synchronous calls are considered harmful - any time you have a number of synchronous calls between services you will encounter the multiplicative effect of downtime (Fowler, 2014). Simply, this is when the downtime of your system becomes the product of the downtimes of the individual components. You face a choice, making your calls asynchronous or managing the downtime (Fowler, 2014).</p>
+
+<p>For many applications, the solution is to use an event‑driven architecture (Richardson, 2015). One challenge with implementing an event‑driven architecture is how to atomically update state and how to publish events (Richardson, 2015). There are a few ways to accomplish this, according to recent research, which are briefly demonstrated below:</p>
+
+<h3 id="polyglot">3.5.1 Polyglot</h3>
+
+<p>Microservices decentralize data storage decisions. While monolithic applications prefer a single logical database for persistent data, according to Fowler (2014) microservices prefer letting each service manage its own database, either different instances of the same database technology or entirely different database systems - an approach called polyglot persistence. This way, polyglot persistence ensures ensure loose coupling as services don't necessarily have to call each other (Richardson, 2017).</p>
+
+<p>The problem is that without some kind of barrier to enforcing encapsulation, developers will be tempted to bypass a service's API and access it's data directly (Richardson, 2017). It also introduces a big overhead for an individual container, because you have to run both the application and database server on the same system.</p>
+
+<h3 id="database-transaction-log-mining">3.5.2 Database transaction log mining</h3>
+
+<p>Another way to achieve atomicity is for the events to be published by a thread or process that mines the database's transaction or commit log (Richardson, 2017). The application updates the database, which results in changes being recorded in the database's transaction log. The transaction log miner thread or process reads the transaction log and publishes events to a master database.</p>
+
+<p>Transaction log mining can simplify the application by separating event publishing from the application's business logic (Richardson, 2017). However, it can be difficult to reverse engineer the high‑level business events from the low‑level updates recorded in the transaction log (Richardson, 2017). Thus, you will need to record enough context for each log entry, so it can reveal the originator of the problem.</p>
+
+<h3 id="sagas">3.5.3 Sagas</h3>
+
+<p>Another approach is to implement each business transaction that spans multiple services as a saga (Richardson, 2017). A saga can be defined as a sequence of local transactions (Garcia-Molina &amp; Salem, 1987). Each local transaction updates the database and publishes a message or event to trigger the next local transaction in the saga. If a local transaction fails because it violates a business rule then the saga executes a series of compensating transactions that undo the changes that were made by the preceding local transactions. Each local transaction publishes an event or message that triggers the next step (Garcia-Molina &amp; Salem, 1987).</p>
+
+<p>However, the major drawback is that the programming model is complex (Richardson, 2017). A developer must design compensating transactions that undo changes made earlier in a saga, possibly propagating over several services.</p>
+
+<p>Additionally, services will interact synchronously, which means a client calls a service and waits for the response. One of the popular frameworks, that provides this functionality, is gRPC (Sill, 2016). To use it, you need to write definitions for message types and services in Protocol Buffer's interface definition language and compile them. This imposes complexity and requires more code to be written.</p>
+
+<h3 id="event-sourcing">3.5.4 Event Sourcing</h3>
+
+<p>Event sourcing is usually used in conjunction with sagas but could be established on their own.</p>
+
+<p>Event sourcing achieves atomicity by using an event‑centric approach to persisting business entities. Rather than store the current state of an entity, the application stores a sequence of state‑changing events. The application reconstructs an entity's current state by replaying the events. Whenever the state of a business entity changes, a new event is appended to the list of events. Since saving an event is a single operation, it is atomic (Richardson, 2017).</p>
+
+<p>Event sourcing is a style of application design where state changes are logged as a time-ordered sequence of records. Recent articles suggest using Kafka as a backend for an application built in this style (Smith, 2017).</p>
+
+<p>With event sourcing commands come into as a request to perform an operation. If that command is a valid request a time-based event is created. In effect, commands are wish or request for something to happen while events are a statement of fact about something that has happened in the past. Events are never deleted so you have a complete history (Smith, 2017).</p>
+
+<p>However, as with sagas, event managing may cause extra code. According to one thesis, the event manager took over 4 times more code than everything else in the program, thus glue code needed for inter-application communication may be very burdensome (Casas Sáez, 2017).</p>
+
+<h2 id="contribution">4.0 Contribution</h2>
+
+<p>It is worth noting, that Google uses containers not to escape Infrastructure as a Service (IaaS) providers, but to escape managing multiple physical machines. I think it is safe to assume the same applies to other big tech companies. I also think most modern internet businesses rarely get to the point that administrating dedicated servers (or even instances within AWS) become an annoyance. And if it does, what is the actual value that the AWS is providing, if not managing these instances? </p>
+
+<p>Google solved problems with dealing with actual hardware with Kubernetes. One of Google's priorities was to decrease the number of operating system versions they have deployed, which tells about the scale of their deployments. Smaller efforts reported struggles with setting it up.</p>
+
+<p>It is an open question how many need Kubernetes for high availability to five nines. How many companies are there which are able to build services in which the network and infrastructure become the bottleneck (which Kubernetes manages), instead of logical human errors within application code or the configuration? It's more likely that a human error will take the server out, making the high availability promise a pointless one.</p>
+
+<p>Most of the academic information currently available is produced by companies, such as Google (but not limited to), which tend to have commercial applications around the microservices architecture, such as Google Container Engine. This might cause a biased opinion which favors the microservices architecture over the alternatives. The studies referenced in this essay show that it is clear that microservices do not come without a drawback. Smaller companies may need to spend the time to understand distributed systems, which may not contribute a lot to the end product. </p>
+
+<p>This essay mostly relied on qualitative research from companies and single researches. Continuing such research, as in which microservices are deployed in practice and reported as so, is something I believe to be the best way forward in an effort to extend the knowledge in the field. Microservices in smaller companies, in specific, is an area of on-going debate. I predict a change in consensus towards wider approval once instrumentation tools such as Kubernetes mature and the differences between microservices and monoliths, in both management and software engineering, are better understood. Kubernetes may, in time, create the foundation for best practices in instrumenting of microservices and distributed systems, thus resulting in better experiences for developers, both in industrial and research fields.</p>
+
+<h2 id="conclusions">5.0 Conclusions</h2>
+
+<p>Instrumentation of microservices is hard. Studies show that developers involved are required to understand complicated distributed system development and various different technologies and architectural approaches, which take time to learn and implement. Microservices were created to solve problems in huge organizations, such as Google. As such, small organizations unlikely benefit technologically from microservices. The upsides for smaller companies are likely the managerial ones, such as permissionless innovation. Verifying the premise would require further studies, which may act as a starting point for future research.</p>
+
+<h2 id="references">References</h2>
+
+<p>Amaral, M., Polo, J., Carrera, D., Mohomed, I., Unuvar, M., &amp; Steinder, M. (2015). Performance evaluation of microservices architectures using containers. Paper presented at the Network Computing and Applications (NCA), 2015 IEEE 14th International Symposium On, 27-34.</p>
+
+<p>Balalaie, A., Heydarnoori, A., &amp; Jamshidi, P. (2015). Migrating to cloud-native architectures using microservices: An experience report. Paper presented at the European Conference on Service-Oriented and Cloud Computing, 201-215.</p>
+
+<p>Balalaie, A., Heydarnoori, A., &amp; Jamshidi, P. (2016). Microservices architecture enables DevOps: Migration to a cloud-native architecture. IEEE Software, 33(3), 42-52.</p>
+
+<p>Beyer, B., Jones, C., Petoff, J., &amp; Murphy, N. R. (2016). Site reliability engineering: How google runs production systems &quot; O'Reilly Media, Inc.&quot;.</p>
+
+<p>Burns, B., Grant, B., Oppenheimer, D., Brewer, E., &amp; Wilkes, J. (2016). Borg, omega, and kubernetes. Communications of the ACM, 59(5), 50-57.</p>
+
+<p>Casas Sáez, G. (2017). Big data analytics on container-orchestrated systems</p>
+
+<p>Dogan, J. (2017, -07-31T04:48:56.534Z). The SRE model. Retrieved from https://medium.com/@rakyll/the-sre-model-6e19376ef986</p>
+
+<p>Dragoni, N., Giallorenzo, S., Lafuente, A. L., Mazzara, M., Montesi, F., Mustafin, R., &amp; Safina, L. (2017). Microservices: Yesterday, today, and tomorrow. Present and ulterior software engineering (pp. 195-216) Springer.</p>
+
+<p>Erl, T. (2005). Service-oriented architecture: Concepts, technology, and design Pearson Education India.</p>
+
+<p>Felter, W., Ferreira, A., Rajamony, R., &amp; Rubio, J. (2015). An updated performance comparison of virtual machines and linux containers. Paper presented at the Performance Analysis of Systems and Software (ISPASS), 2015 IEEE International Symposium On, 171-172.</p>
+
+<p>Fowler, M. (2014). Microservices. Retrieved from https://martinfowler.com/articles/microservices.html</p>
+
+<p>Gadea, C., Trifan, M., Ionescu, D., Cordea, M., &amp; Ionescu, B. (2016). A microservices architecture for collaborative document editing enhanced with face recognition. Paper presented at the Applied Computational Intelligence and Informatics (SACI), 2016 IEEE 11th International Symposium On, 441-446.</p>
+
+<p>Garcia-Molina, H., &amp; Salem, K. (1987). Sagas ACM.</p>
+
+<p>Kanso, A., Huang, H., &amp; Gherbi, A. (2016). Can linux containers clustering solutions offer high availability?</p>
+
+<p>Killalea, T. (2016). The hidden dividends of microservices. Communications of the ACM, 59(8), 42-45.</p>
+
+<p>Kratzke, N. (2017). About microservices, containers and their underestimated impact on network performance. arXiv Preprint arXiv:1710.04049,</p>
+
+<p>Markstedt, O. (2017). Kubernetes as an approach for solving bioinformatic problems.</p>
+
+<p>Namiot, D., &amp; Sneps-Sneppe, M. (2014). On micro-services architecture. International Journal of Open Information Technologies, 2(9), 24-27.</p>
+
+<p>Richardson, C.Microservices pattern: Decompose by business capability. Retrieved from http://microservices.io/patterns/decomposition/decompose-by-business-capability.html</p>
+
+<p>Richardson, C. (2015). Event-driven data management for microservices. Retrieved from https://www.nginx.com/blog/event-driven-data-management-microservices/</p>
+
+<p>Richardson, C. (2017). Microservice patterns.</p>
+
+<p>Sill, A. (2016). The design and architecture of microservices. IEEE Cloud Computing, 3(5), 76-80.</p>
+
+<p>Singleton, A. (2016). The economics of microservices. IEEE Cloud Computing, 3(5), 16-20.</p>
+
+<p>Smith, T. (2017). Are you building microservices or microliths? - DZone integration. Retrieved from https://dzone.com/articles/are-you-building-microservices-or-microliths</p>
+
+<p>Tseitlin, A. (2013). The antifragile organization. Communications of the ACM, 56(8), 40-44.</p>
+
+<p>Turnbull, J. (2014). The docker book: Containerization is the new virtualization James Turnbull.</p>
+
+<p><i>for</i><br />
+	University of Oulu<br/>
+	Faculty of Information Technology and Electrical Engineering<br/>
+	18th of December, 2017</br>
+	Published online: 8th of March, 2018</br></p>
+
+<a href="/">back to index page</a>
+
+</article>
+
+</body>
+</html>

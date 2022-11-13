@@ -1,0 +1,82 @@
+<!doctype html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Blocking HTML links with pure CSS</title>
+        <meta name="author" content="Juuso Haavisto">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+        <meta name="twitter:creator" content="@jhaavist">
+        <style>
+            body {
+                font: 16px/24px;
+                padding: 1em;
+                line-height: 1.5;
+                margin: auto;
+                color: #444;
+                max-width: 40rem;
+                font-family: monospace;
+                display: flex;
+                flex-direction: column;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                line-height: 1.1;
+                font-weight: 700;
+                font: 24px/24px;
+            }
+
+            ul {
+                list-style-type: lower-greek;
+            }
+
+            ol {
+                list-style-type: lower-roman;
+            }
+
+            header {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+            }
+
+            footer {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            section.links {
+                max-width: 30rem;
+            }
+
+            a:hover {
+                opacity: .7;
+            }
+        </style>
+    </head>
+    <body>
+<p>Edit: Blocking does not work anymore in the recent versions of Chrome, at least.</p>
+<p>Some time ago I was making CSS3 transitions for my blog, but I accidentally blocked myself from being able to navigate trough the affected <code>&lt;a&gt;</code> elements. I found the unexpected behavior odd, but interesting, because if I&rsquo;d wanted the behavior I&rsquo;d just used JavaScript.</p>
+<p>Technically, the idea is to stretch HTML element so that it will cover the <code>&lt;a&gt;</code> element <em>before</em> the user can click and release the left mouse button. From browser&rsquo;s viewpoint you aren&rsquo;t therefore clicking on a link anymore, but rather on the overlaying element, which blocks the action. I also found that you can actually specify how fast the user has to click on the element for the link to work. This behavior could be reached by modifying the CSS <code>transition</code>’s second parameter, <code>transition-duration</code>, which I although removed from the code I pushed to <a href="https://github.com/jhvst/hrefstop">Github</a>. Here&rsquo;s the one I did push:</p>
+<pre><code>*:active::after {
+    position: fixed;
+    background-color: transparent;
+    height: 100%;
+    width: 100%;
+    transition: all linear;
+} </code></pre>
+<p>Including the code in your stylesheet will break <em>every</em> link on your website, no matter how fast they click on things. If you&rsquo;d want to limit that, and only let users which click on things faster than in 60ms navigate your site, you would alter the code as so:</p>
+<pre><code>*:active::after {
+    position: fixed;
+    background-color: transparent;
+    height: 100%;
+    width: 100%;
+    transition: all 60ms linear;
+} </code></pre>
+<p>I can&rsquo;t really come up with any real use for this, but I&rsquo;ll surely troll my co-workers on some idle Friday with this. I&rsquo;ll update this posts later to let you know how long it took them to debug it, if I manage to convince its not my code which broke.</p>
+<p>You can also include the CSS in your stylesheet with</p> <pre><code>@import url('https://raw.githubusercontent.com/jhvst/hrefstop/master/hrefstop.css'); </code></pre>
+<p>Though please do make a local copy of the file as fast as you can, since hard-linking to Github isn&rsquo;t all too kind.</p>
+<p>Lastly, try to use any link on this page. I bet it does not work.</p>
+    </body>
+</html>
