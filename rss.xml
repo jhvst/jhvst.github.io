@@ -6,6 +6,18 @@
   <link>https://juuso.dev</link>
   <description>Escape from Finnish farmland, Silicon Valley style</description>
   <item>
+    <title>Scheduling Array Operations // Dyalog '22</title>
+    <link>https://www.youtube.com/watch?v=Jt6mdYGn9M4</link>
+    <description>Scheduling array operations has been a topical theme in the research of tensor computation. With the help of type theory, array operations are parallelised for graphics processing units and distributed computing. Juuso shares his findings in static scheduling, and how it can be used to optimise execution over different hardware and compute infrastructure settings.</description>
+    <pubDate>11 Nov 2022 12:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>Metaversumi: Virtuaalitodellisuus, NFT:t ja 5G-verkko | Lohkoketju 6</title>
+    <link>https://www.youtube.com/watch?v=ZVd91Ye4JS8</link>
+    <description>Mikä metaversumi tai metaverse on? Miten AR ("Augmented Reality") eli lisätty todellisuus ja VR ("Virtual Reality") eli virtuaalitodellisuus eroavat toisistaan? Miten metaversumi liittyy lohkoketjuihin ja mikä rooli NFT-teknologialla ja digitaalisella omistajuudella on metaversumissa?</description>
+    <pubDate>03 Dec 2021 18:00:00 GMT</pubDate>
+  </item>
+  <item>
     <title>Ethereum, EVM ja Solidity | Lohkoketju 5</title>
     <link>https://www.youtube.com/watch?v=Otpwn420hoc</link>
     <description>Miten Ethereumin virtuaalikone eli Ethereum virtual machine toimii? Minkälainen ohjelmointikieli Ethereumin Solidity on ja mihin kaikkeen sitä voi käyttää? Mitä eroa on funktionaalisilla ja imperatiivisilla ohjelmointikielillä?</description>
