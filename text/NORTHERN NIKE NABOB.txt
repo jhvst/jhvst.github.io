@@ -1,0 +1,269 @@
+# NORTHERN NIKE NABOB
+
+This is a story about reselling sneakers.
+
+/img/nike/airmag.png "eBay's sold listings on Air Mag "Back to the Future""
+
+Early into my programming hobby I used to scavenge through online forums in search of people with ideas of software I could create for them. Time to time I still do that, but most of the time these idea people are rather complicated clients. Nowadays I also have more credibility, which makes getting better clients easier. Yet, for many self-taught programmers early into their career, this paving of the road through bad clients seems like the only option forward. So in other words, at the time I traded off client quality for getting experience. And working on something which might turn useful for somebody is a great way to do that! And who knows, maybe I could also make some money on the same run.
+
+/img/nike/shelf.png "A collection of sneakers (reddit.com)"
+
+Back in 2013, I found an online forum thread on which many people wanted to hire someone to create a bot for ordering shoes from Nike. Despite the randomness, I replied. Few days went by and a promising email reached my inbox. The person (let’s call him Michael) was from Chicago. Michael wrote good English and was able to explain the whole concept of sneaker reselling to me. He wrote me exactly what the bot had to do and when.
+
+Before Michael I received emails from other people as well.  These people did not write good English. I also may have received more emails after Michael, but I never bothered to check my disposable email address again. So idea people, do take notes, if you want to convince a programmer to build your next big thing, make a good first impression.
+
+Convinced by Michael's good written English I decided to partner with him. Little did I know that Michael and I would end up cooperating for two years. During that time, we would spend $10 000 on Nike’s sneakers. I would also find myself with a German shipping address and an UK debit card, but more of that later. The reality was that I was bidding big on sneakers and luckily for me and Michael, the sneakers got my full attention. Programmers, do take notes, as without going big on one thing, you will never create anything big. As a friend of mine keeps on saying, he knows plenty of people who are successful at running a business, but none who are successful running two or more. "The key to success is the guts to dedicate yourself to one thing." The same seems to apply to side-projects as well.
+
+/img/nike/redoctober.png "Air Yeezy 2 "Red October" was one of the most prestigious releases during our operation."
+
+So for the best of both of us, sneakers was all I had in mind. Now, it is also worth mentioning that the chances of making $100 000 in a single day motivated me. To elaborate, there were three days during our cooperation on which over $100 000 could have been made in profit, on a single day. A pair of shoes would have been bought for $250 from Nike.com and resold a day later for $5 000 on eBay. This is also astounding because it could be made with only a single client (Michael, in this case). Explaining why that is possible needs an explanation. Here's one I wrote on reddit:
+
+> Before Nike fixed their servers the shoes were sold out in less than 250ms. During the Kobe Prelude’s the shoes were already sold out before Nike had even made an announcement. If this sounds odd, let me elaborate. The shoes have a high demand and a low supply. Exclusive shoes like these Jordans were one of the many one-day-only sales, which Nike announces on their Twitter accounts. So, the shoes are sold only for one day and usually nowhere else than Nike.com. Some Nikestores in the US sell some of the releases, but the most prestigious ones are sold only at Nike’s own website. For example, Nike Yeezys which were released out of the blue earlier this year were sold on Nike.com for $250 and the resale price over at eBay was as high as $5 000. Many people see the business here and therefore just buy the shoes for the sake of making money. Thus many people buy designated software to buy the sneakers before anyone else. The competition is fierce, to say the least. Nike benefits from the situation, as the high demand and low supply enforces their brand. And because of the reselling, Nike can basically release any shoe and it will sell out. Partly because of this, Nike has been hesitant to see the effort to make the process of copping shoes harder. Recently people have started complaining that all the shoes go to bots only and Nike has therefore added new steps for checkout process. Stuff like captchas have been added, but usually Nike’s servers are under such hammering that the captcha challenges fail to load. Sometimes the shoes don’t even appear on the whole site, sometimes you are unable to click on captcha fields on mobile, and sometimes, like with the What The Kobe release, the whole Nike sites shuts down. You could say that it is a bubble, but whilst Nike’s logos appear on about every sport event (watched basketball recently? football? snowboarding? …tennis?) there seems to be no end to it. Nike enjoys the status of a patriotic US brand and if some, the US citizens are ready to pay up for it -- kids believe the shoes their idols wear are the way – the only way – to become a star. If you don’t catch my point, you could listen to [Macklemore’s “Wing$”](https://youtu.be/gAg3uMlNyHA).
+
+> I’ve been reselling for two years now, but heck, I’m not even a US citizen. I just ship shoes through Europe to the US mainland, right where the demand is.
+
+Now you know the basics. Now we go technical.
+
+/img/nike/rsvp.png "Nike's Twitter RSVP process"
+
+Michael and I had two ways of acquiring shoes. The first way, the RSVP process, (described on the image above) was fun to solve. In case you did not read the rules above, the goal is to find the word, which is
+
+* completely circled
+* starts with an hashtag (#)
+* is an English word
+
+Once we find the word, we send it as a direct message on Twitter to the Nike Twitter account which posted the image. If we get a reply, we get to buy the shoes the following weekend. What a privilege!
+
+But wait why, why do we need automation? Well, if it took you longer than one second to find, read and send the hashtag to Nike, then you would have already lost to competition. We need a bot because we need to not only beat humans, but other bots as well. That's what Michael told me. There is no public information how fast the competitors are (and never will be), but Michael has heard rumours that they can do it in one second. So that’s what we are aiming to beat.
+
+For the program to work, I had to glue some existing software together and have it stay intact for the time required to send direct messages. In theory one could write it all by theirselves, but only researches in universities do that.
+
+Anyhow, the first external program had to do image processing. There are better tools for this job, but when you can not use sophisticated tool like a drill, you use a screwdriver. Our screwdriver is called ImageMagick. ImageMagick is simple and works on computers which do not have clickable things. It is like Microsoft Paint which you control from the command line, as in, drawing without using a mouse.
+
+ImageMagick has its reasons for having magic in its name. For your entertainment, I am going to show you why. This is the example image which I need to convert:
+
+/img/nike/test.png "Air Jordan 1 Mid "Baron". Our starting point. This is a typical image Nike would tweet and from which you would need to find the circled word."
+
+In this case the word we are looking for is `#BASEBALL`. We now need a to tell our keyboard-Paint to find that word. One programmatic approach to solving this is like when eating Skittles -- one way to find every green Skittle is to eat all other Skittles. Let me elaborate.
+
+From the image we can see that Nike has put obfuscation in place to make image processing harder. The obvious one is the false circulations, either whole or partial. Then we have the actual shoe which covers part of the words and the shading below the shoe.
+
+/img/nike/zoom.png "The L letter breaking into the crossed word UE#FI"
+
+For the image processing I iterated two different methods. We will go through them in the order that I came up with them. The first method, the Skittles method, relies on the right word being the only one which doesn’t get clipped. In a zoomed image above we notice that every false circle is broken by a character from the previous word, like UE#FI by the L. This is our exploit, which lets us remove every other word from the image except the circled word.
+
+How would that work? Well, since the characters touch the borders of the circles, we could search for tight gaps. The tight caps could be marked in another colour. Then, we could enlarge those coloured parts. Finally, we could replace the marks with transparency and fill the image. That's a lot of coulds, but would it work? Let’s find out.
+
+I have sometimes broken captcha protections with different tools than ImageMagick. Something universal which I learned was that an easy way to get rid of most visual clutter is to first make a monochromatic version of the image. Image;agick can do this with the `-threshold` argument. It takes in a percentage with which I experimented until I got results that I was happy with. I ended up with 64%. Now we have this:
+
+/img/nike/step1.png "convert test\.png -threshold 64% output\.png"
+
+Now we would need to somehow tell ImageMagick to find the tight gaps we spoke earlier. Luckily, it has us covered with a thing called image morphology. And as it turns out, this is the magic, the wow factor, behind the whole program. Image morphology was also a new thing for me, so what I ended up doing was just trying out different ways to use it. Because of my trial-and-error approach, this step took the most time on the whole program. The tricky part was to find a generic approach which worked on most of the images. I used about dozen images in testing and once I got the accuracy to around 80%, I was happy to move forward. Nevertheless, this was a huge time sink. I ended up reading the whole ImageMagick documentation through more than once in hopes to find a better approach. After some time, reading paid off and I got my accuracy to around 80%.
+
+Choosing the image morphology operator, even though one of the first choices to make with the whole program, is the most crucial one. It is like the foundation to build on, as changing the operator would bunk all our work build upon it. Want to challenge yourself? Feel free to open the [documentation](http://www.imagemagick.org/Usage/morphology/) and guess which morphology operator I chose.
+
+I settled with [Hit-And-Miss](https://www.imagemagick.org/Usage/morphology/#hmt). If we look up the description of Hit-And-Miss on the ImageMagick documentation page, we can find the following:
+
+> The ‘Hit-And-Miss’ morphology method, also commonly known as “HMT” in computer science literature, is a high level morphology method that is specifically designed to find and locate specific patterns in images. It does this by looking for a specific configuration of ‘foreground’ and ‘background’ pixels around the ‘origin’.
+
+Sounds like the brains we need for our program!
+
+Now that we have chosen our morphology method, we need to choose which [kernel](https://www.imagemagick.org/Usage/morphology/#pattern_kernels) we want to use. For this case, I decided to choose Ridges. Ridges locate ridges and thin lines of pixels, which matches my earlier description of “tight gaps” well. Now that we have our parameters chosen, we get the following command:
+
+/img/nike/step2.png "convert test\.png -threshold 64% -morphology HMT Ridges output\.png"
+
+Looks nice. We can see the silhouette of the shoe there, which means that our plan has not sunk yet. But hey, there seems to be a slight problem. We lost all the text! Figuring out how to get the text back required me to plunge on the ImageMagick usage documentation again. Eventually, I found colour channels. For reason that I cannot recall, I decided to remove colours (of a monochromatic image, yes, a signal of desperation), by passing in `-channel R` parameter. Surprisingly, for a reason beyond my comprehension ImageMagick spat out this image:
+
+/img/nike/step3.png "convert test\.png -threshold 64% -morphology HMT Ridges -channel R output\.png"
+
+Hey, there’s the text again! In a zoomed image below you can also notice that the white ridges from Hit-And-Miss morphology are still there. 
+
+/img/nike/rchannelzoom.png "Now there's a white border on the left side of the UE#FI circle!"
+
+Now we would need to dilate the ridges with another colour, which we would then replace with cyan and finally fill the image with black. That would get rid of the wrong words! Luckily, morphology has Dilate method, which sounds like something which dilates things. We should also use some big kernel, to increase our changes to break the circle’s border. However, choosing the biggest kernel is not a good choice, since that may break the circle around the correct word! This again requires some imperative testing, from which I found the Square to be the best. Our command now looks like this:
+
+/img/nike/step4.png "convert test\.png -threshold 64% -morphology HMT Ridges -channel R -morphology HMT Ridges -morphology Dilate Square output\.png"
+
+Getting there! Please laugh now if you thought my initial plans to be insane. Now we just need to replace colours generated with cyan. I’ll show you two ways of doing this is. First one is bit tedious: `-bordercolor red -border '1x1' -fill cyan -draw 'color 0,0 replace'`. This means that we frame the image with 1 pixel red colour and replace the colour found at coordinate 0,0 with cyan. Since the image is framed with red, the colour in coordinate 0,0 will always be red. There is a reason we want the 1 pixel border. I will get to that in an instant, but here is our progression picture first:
+
+/img/nike/step5.png "convert test\.png -threshold 64% -morphology HMT Ridges -channel R -morphology HMT Ridges -morphology Dilate Square -bordercolor red -border '1x1' -fill cyan -draw 'color 0,0 replace' output\.png"
+
+Now we can remove the white colour by using `-opaque white`.
+
+/img/nike/step6.png "convert test\.png -threshold 64% -morphology HMT Ridges -channel R -morphology HMT Ridges -morphology Dilate Square -bordercolor red -border '1x1' -fill cyan -draw 'color 0,0 replace' -opaque white output\.png"
+
+The image is now ready to be filled with colour and since we created the border earlier, we can fill the image from coordinate 0,0 (which is always cyan). Without the added border, the original image may or may not have text at 0,0. Since it is essential that the coordinate is free of text, we need the border to assure that is true. Now we can flood fill the image safely:
+
+/img/nike/step7.png "convert test\.png -threshold 64% -morphology HMT Ridges -channel R -morphology HMT Ridges -morphology Dilate Square -bordercolor red -border '1x1' -fill cyan -draw 'color 0,0 replace' -opaque white -fill black -draw 'color 0,0 floodfill' output\.png"
+
+/img/nike/mindblown.gif "Mindblown"
+
+There’s a small error in there, but that was the case with most of the images. We’ll take care of it later. But talk about how efficient we have been! Just a moment ago we had no idea what this whole morphology thing was, but now we know what it may achieved with it! Wait what, it is October? I started working on this *three* months ago? Oh my... 
+
+Next up we need to extract the text form the image. I chose TesseractOCR, which is probably the best OCR thing there is. For those who do not know, OCR means optical character recognition, which means eyes on a computer. Also, the computer does not even have to have a monitor to be able to recognise text! Meaning, the computer does not actually see anything, it just reads image data and uses it to guess what it could say. Sounds hacky? Sounds cool? It is both!
+
+Setting up Tesseract is dull. We define allowed character set `tessedit_char_whitelist QWERTYUIOPASDFGHJKLZXCVBNM#` and save it as `nike`. Done. Now Tesseract, once run, will create a text file with an educated guess of what the image might say. Ultimately, I ended up building Tesseract (and Leptonica) from the source to get the – at the time – brand new stdout flag to work. Stdout, or standard output, means that instead of creating a text file with the guess, the guess will be printed on screen. Avoiding the necessity to create files skips few steps from the program flow, thus making our program faster. Awesome! Now we can run our final image through Tesseract: `tesseract output.png stdout nike`
+
+```
+ #BASEBAL
+
+OMICORANG   I
+
+I    #
+```
+
+
+As you can see, the `#BASEBALL` did not come trough completely. There is also some clutter on the output, but one character words are easy to ignore. Either way, we would need a way to cancel out wrong words and auto-correct them. Kind of like when you Google the wrong thing and Google automatically corrects your search query. And you know, the early versions of the bot did just that. Yes. Although that was just a temporary solution, as any unnecessary Internet connection adds lag, which we want to avoid. We have to be fast and phoning Google might take up to 1/5 of a second. Also, doing an actual Google search is bad in about every way possible, so the third program, aspell, was brought in. aspell is also simple program to use. Give it a dictionary and it can tell whether you spelled the word correct or not. If not, it suggests corrections. Not as good corrections as Google, but good enough for us.
+
+Finally, pass the hashtags to 12 Twitter accounts and hope for the best. And because we love to live on the edge, choose the word randomly if aspell gives us more than one choice.
+
+We used this method for a few months. Michael got to pick up some sneakers with his friends, but we missed some prestigious releases. Some because of the shadow beneath the shoe, some because Nike tweeted with unicode characters (think about including a poop emoji which only shows up for programmers) which messed up tweet catcher. However, most error prone component was the optical character recognition. Eventually, the bot was unable to receive RSVP tickets even though the hashtag was correct. Michael and I thought that Nike flagged the bots, so we created new Twitter accounts. Nothing changed, so we agreed that competitors were coming up with faster ones. And that folks, is how I made a crucial career choice which sent me to Silicon Valley two years later. At that time I did not think it as one though. What I did was dumping node.js and picking up Go. The reason was that node.js was slow. So, when a [TechEmpower blog post](http://www.techempower.com/blog/2013/05/02/frameworks-round-4/) about the fastest programming languages crossed my sight on Hacker News, I decided to learn Go. I knew that C++ and Java were taught in universities, so I expected these languages to be hard to learn. Turns out Go was easy to learn, even when coming from node.js background.
+
+Since the bot needed a complete rewrite, I also revisited my ImageMagick script. I knew it could be better. Turns out, it could. Remember the rules? The word has to be completely circled to the correct word. Since less is more, what about if we monochrome the image and jump to the flood filling directly? Would that be any good?
+
+/img/nike/method2step1.png "convert test\.png -threshold 64% -bordercolor white -border 1x1 -fill black -draw 'color 0,0 floodfill' output\.png"
+
+I felt like an idiot. Just flood fill the image again using white. Now we get to this:
+
+/img/nike/method2step2.png "convert test\.png -threshold 64% -bordercolor white -border 1x1 -fill black -draw 'color 0,0 floodfill' -fill white -draw 'color 0,0 floodfill' output\.png"
+
+And we are almost done! We also add `-trim` and add 1x1 border to optimise TesseractOCR reading capabilities later on. Also, is my screen dirty or are there small black dots there? Well I tested it for you, and no, your screen is not dirty. But mine is now. Therefore, lets close this thing up `-morphology Close Rectangle:2x2 -morphology Erode Rectangle:2x2`. I won’t get into too much detail of these methods, but they are effective at removing the black clutter from an image. Finally we have:
+
+/img/nike/method2step3.png "convert test\.png -threshold 64% -bordercolor white -border 1x1 -fill black -draw 'color 0,0 floodfill' -fill white -draw 'color 0,0 floodfill' -morphology Close Rectangle:2x2 -morphology Erode Rectangle:2x2 -trim -border 1x1 output\.png"
+
+Ah, my screen has not looked this clear for two weeks! Running this image through TesseractOCR prints:
+
+```
+UE#FI ROWN#RA
+#LASEROR
+
+#BASEBALL
+OMICORANG
+
+UL
+N ONPURPL
+
+```
+
+There the #BASEBALL we wanted! With this method more words are outputted, but that is fine. We will rely on aspell and hope for the best, like we have so far. All in all, I was able to crunch the next things into 300 milliseconds (2-4x improvement over node.js):
+
+1. download image from Twitter and save it on disk
+2. run the image trough ImageMagick
+3. run the processed image trough Tesseract
+4. send out the direct message
+
+The new bot was fast and Michael told me that he was gaining reputation as reliable sneaker plug in Chicago aftermarket. I was able to create competitive software and Michael was able to find buyers in Chicago's aftermarket.
+
+Suddenly, bots were not able to secure any RSVP’s, even though the OCR was right. Michael created new Twitter accounts, but nothing changed. I never understood what was wrong. It could be that one of our competitors were stepping up the game. Before I could get it figured out Nike halt RSVP’s altogether. But Nike could not say no to limited releases, so they migrated the process to their own website where they had more control. And we sure followed. This brings us to the second bot, which Michael called add-to-cart bot.
+
+## ADD TO CART
+
+This is less interesting program, since the functionality came from Nike’s JSON API. The JSON API is a fair starting point, so lets get onto it.
+
+Nike has their online store at nike.com. The website is JavaScript heavy and most of the functionality rely on AJAX calls. However, the AJAX blade cuts both ways. By enabling your web browser’s network inspector you can sniff on requests. Funky.
+
+/img/nike/id_adidas.png "Adidas sneakers on "Paul Alexander Leroy – Haman and Mordecai" (1884)"
+
+In the start the API was transparent, but nowadays the same requests do not show up in inspector and do not work even if you’d know the URLs. Nike has done effort to hide them to screw up bots like Michael's and mine. Though I do believe someone with enough persistency could find and reverse-engineer the API again, but I don’t think that’s worth the time anymore. But at the time, things were simpler. To order shoes without clicking any buttons, you’d first fetch the unique SKU of a shoe from `http://store.nike.com/html-services/templateData/pdpData?action=getPage&productId={{.PID}}&cache=true&country=US&lang_locale=en_US` and then use the data from there to add item to cart by sending a request to `https://secure-store.nike.com/us/services/jcartService?action=addItem&lang_locale=en_US&country=US&productId={{.PID}}&skuId={{.SKU}}&qty={{.MaxAllowedQuantity}`. Cookies enabled you’d get the shoes to show up in your shopping cart, which you could then checkout. Childs play, as they say in that Facebook movie.
+
+Michael and I used Nike passwords to share accounts, but if you would have wanted, you could have done this with cookies as well. But Michael was not tech-savvy, so sharing passwords was best option for both of us. It also carried one practical reason. Since Michael lives in the States where the sneaker-game is hard, we decided to concentrate on Europe instead. With some releases that were instantly sold out on States you could easily cop in Europe. The demand is lower in Europe, but the prices are higher because of VAT. But since the demand in US is so high, buying shoes from Europe still leaves profit margin even after VAT and shipping. Also, Michael is unable to checkout shoppings in Europe, since his PayPal shows that he does not live in Europe. This is where the password sharing comes in. We found out that I was able to checkout shoes with my debit card, so every now and then, Michael would stay awake past midnight on Friday night and I would wake up on Saturday morning to checkout shoes. We would go through our Nike accounts to see which one got the shoes, which I then tried to checkout before the shopping cart reseted. On one occasion in the middle of my matriculation examination, Michael was able to secure $5 000 shoes on his shopping cart, but I was out of reach. The shoes would have sold for $250 retail, but the resale price next day would been $5 000. This would have left quite a lot of margin, about $4 750 to be exact, to be shared with both of us. But because I was out of reach and felt bad about it, I decided to get Michael European debit card which he could have used in situation which required it. I loaded some money on the card, shared the card number and CVC with him and hoped that he won’t spend it on something stupid. He never did. 
+
+Also, because sending a shoebox from Finland to US costs 40€ and Finland has one of the highest VAT percentages in Europe, we decided to turn into Germany. I told Michael to register German mail address, which would forward shipments from Nike’s EU warehouse to US. Michael was fine to get a mail address in Germany and Nike’s online store was fine with me paying for the shoes. From me, this required strong trust in Michael. He could have scammed me at any point and I couldn’t have done much to get my money back. However, I was glad to notice that Michael was intelligent enough to not cut me off at any point, as that would have obliterated his access to the bot. I did eventually grant Michael the source code for the program using Docker images, but before that he was completely dependent on me.
+
+Overall, the add-to-cart bot worked well considering the time I spent on it. But again, the bot worked fine for a while, but then we started having problems. The problem turned out to be competition. This required me to shave of milliseconds of latency, which lead to a bot which was able to buy shoes in 60 milliseconds. So, if you ever wondered how to buy sneakers in a blink of an eye, you are reading the right thing. 
+
+The add to cart links are published on Nike’s official Twitter accounts, @NikeStoreEurope and @NikeStore. They release more or less prestigious shoes through this medium few times a week, some of which you can still make good money of. What is interesting is that Nike uses their own URL shortener with links. They might be something like `http://swoo.sh/K2XK7U` or `http://gonike.me/6019dweF`. These links only redirect you, so there’s nothing to see on the request body. Because the body is irrelevant, we can issue an HTTP HEAD request instead of a GET request. The performance different is negligible, but why not. Also, if you send a curl request to either URL and repeat it, you may notice that the second response time is always faster. It is your operating system saving the IP of the URL to its DNS cache. So, lets add DNS cacher for our program. 
+
+That’s all there is. Expected more? Sadly, the bot did not introduce a lot of technical problems (aside of Nike switching their API every week or so). Now we are only left with:
+
+1. many competitors, because of the triviality of the program
+2. time to optimise other aspects of the program
+
+Since issue #1 leads to #2 and we cannot really `SIGTERM` our competitors, we might as well continue with the latter. So lets get the biggest download/upload bandwidth I know. AWS provides instances with 10GB line, so lets rent those. Since we know when the releases happen, we don’t need to run the servers for more than an hour anyway. A price of Red Bull for a 10GB line (and hundred cores and 200GB of RAM)! What a time to be alive!
+
+Later though we notice that even when using 10GB line we cannot get all releases poached. The shoes seem to be sold out in 250ms. We need to dig deeper.
+
+```
+$ ping nike.com  
+  
+64 bytes from 146.197.184.5: icmp_seq=0 ttl=238 time=137.708 ms  
+64 bytes from 146.197.184.5: icmp_seq=1 ttl=238 time=136.914 ms  
+64 bytes from 146.197.184.5: icmp_seq=2 ttl=238 time=136.137 ms  
+64 bytes from 146.197.184.5: icmp_seq=3 ttl=238 time=136.706 ms  
+64 bytes from 146.197.184.5: icmp_seq=4 ttl=238 time=137.414 ms  
+64 bytes from 146.197.184.5: icmp_seq=5 ttl=238 time=136.743 ms.
+```
+
+Hmm, 140ms ping? We can do better, so lets give different cloud providers a spin. We try:
+
+* DigitalOcean
+* Linode
+* AWS
+* Google
+* Microsoft
+
+We test the servers by renting an instance in every location of the said providers. In the end, we should know which on of them is physically closest to Nike’s servers. We notice that Microsoft’s latency is not measured in milliseconds, but on a smaller scale. Well that’s new. Are the servers in the same hosting space? Likely yes.
+
+We measure 60ms for *the whole workload*, but we seem to miss shoe every now and then. One weekend, we miss the whole release. The shoes sold out. In fucking 60ms. Quick, down the rabbit hole!
+
+## Secret URLs
+
+Michael finds out that some people are selling secret URL’s of releases for $20, which let you checkout shoes about an hour earlier than they are shared on Twitter. But we do business in EU, so we need to figure out how these secret URL’s are retrieved. Michael buys one US link, which he gets 30 minutes before Nike announces the shoes on Twitter. Michael is able to checkout the shoes before Nike has released the link to the public. The shoes sold out way before release.
+
+What we also found out that the buying process did not differ from the usual purchase process by any way. The fact that the buying process is the same reveals that somehow, people have found the URLs before announcement. Now, if you remember the URL structure of the earlier links, you know you only need the PID to order shoes, which lets us to get the SKU. You guessed right. The secret URLs are fetched by bruteforcing Nike’s JSON API. This means that one blindly sends requests to Nike.com and hope they hit gold. Seemingly, the shoes are registered to the API before they are announced. So, lets try it out ourselves.
+
+* 10300000 - Nothing.
+* 10300001 - Nothing.
+* 10300002 - Oo! Socks. But those are not sneakers.
+* 10300003 - Shoes! I repeat, we have SHOES. But the model is not we are looking for. Lets continue.
+* 10300004 - Nothing.
+* 10300005 - Nothing.
+* ...
+* 10423505 - Nothing… I haven’t hit anything for seven hours. Do they have 401k for this?
+
+Not that productive, but luckily I am a programmer and that is a website, so I can automate everything. Writing a bot which visits web pages and checks the page contents is trivial to code, so soon enough we have a Nike product scanner. As long as we happen to find the PID, we can buy shoes even before they are publicly announced. Luckily, we notice that the shoe PID’s have a pattern, such as that Air Jordan Retro’s live around PID 10330000 whilst LeBrons around 10300000. You can look this up by searching older releases trough Nike’s own website and looking at the URL.
+
+Some time went and Nike starts to do better job at hiding the PID’s, so we stopped mining the PIDs. Also, this sort of bruteforce scanner is wrong. And oh, Nike obfuscated their API for tenth time this month, but this time you cannot get it to respond with data anymore...
+
+/img/nike/rodents_revenge.png "Sneakers. A cat-and-mouse game."
+
+Lets face it. Now that Nike is in charge of the release process, they can add captchas and other breaking changes without much effort. They can hide website changes until product release, so you cannot pre-emptively develop programs against changes either. You have only one chance in a week to test the bot and that’s the moment it should work without problems. Not easy. However, there’s one last thing I can try, which is automation through frontend. I know, I know, this is pretty deep into the swamp, but we are so deep that we might continue until we are stuck.
+
+/img/nike/lava.png "In Minecraft, when you dig deep enough you will eventually find lava. Lava is hot and kills you and your adventure of finding diamonds."
+
+## FRONTEND AUTOMATION
+
+Ah, the uprise of using embedded Chrome browsers as application containers. First case study that comes to my mind is Atom, which kind of works. Slack’s desktop application is fine too. So lets follow the trend and make our own browser, but only with one purpose – to buy sneakers from Nike! It would login to an account and start following Nike’s tweets. When Nike would announce a release, it would open a new browser window and automatically checkout the shoes. Luckily I know node.js so this is quite easy to get up and running.
+
+This method allowed Michael and me to run multiple browsers on our desktop computers. Running web browsers were less error prone to changes. We could take over the bots as problems occurred, but the bots were significantly slower than software running on servers. There was also the problem of competition. You see, the easier it becomes to create a bot for something, the more likely people will have them. There were bunch of Chrome extensions sold online which done the exact the same thing as our browser, although those ones only supported one account per computer. But the extensions had dedicated maintainers, who wished to continue to play the game.
+
+After this experiment we ran out of ideas. Times had changed. Getting shoes had become scarce and not only in the US, but in Europe as well. The death of the project was silently agreed upon, as we did not exchange emails for an year.
+
+## BOTTOM LINE
+
+Besides of programming there has been several things which this project taught me.
+
+/img/nike/something_else_burning.png "Something else than lava burning 🌚"
+
+1. Marketing, see image above
+2. That building applications on top of ones which do not provide you stable API is nonsense. You don’t want to play cat-and-mice games.
+3. A lot about sneakers and sneaker culture.
+
+Ultimately, I ended purchasing a pair of Air Jordan 1’s myself. The sneakers are more of a testimony than anything else. They are subtle indicator to other sneakerheads that I have been in the game once.
+
+As for epiphany, I liked how something you do not have high expectations of can build up to something great. Sure, finance-wise I could have spent my time better, but it was an experience how I grew into the problem domain as time went by. In the beginning, I did not care about sneakers, but nowadays I know enough to weird people out.
+
+So next time you choose a job, don’t be too afraid if you don’t know anything about the product. You will eventually find yourself familiar with it. It is one of the riches in software and keeps your career feeling fresh. Praise the possibilities!
+
+## Further material
+
+* [Josh Luber: Why sneakers are a great investment | TED Talk | TED.com](https://www.ted.com/talks/josh_luber_why_sneakers_are_a_great_investment?language=en)
+* [Sneaker Bots: How Do They Work? | Highsnobiety](http://www.highsnobiety.com/2016/04/27/sneaker-bots-how-do-they-work/)
+* [GOAT raises $5 million to help sneakerheads buy and sell covetable kicks | TechCrunch](https://techcrunch.com/2016/08/29/goat-raises-5-million-to-help-sneakerheads-buy-and-sell-covetable-kicks/)
+* [This 16-year-old makes a fortune selling sneakers to celebrities - Business Insider](http://www.businessinsider.com/16-year-old-benjamin-kickz-sneaker-don-makes-fortune-selling-sneakers-celebrities-snapchat-dj-khaled-2016-9)
+
+## Metadata
+
+Written by [Juuso Haavisto](https://www.juusohaavisto.com)
+
+Posted on Tuesday, December 1, 2015 6:59PM (Europe/Helsinki time)

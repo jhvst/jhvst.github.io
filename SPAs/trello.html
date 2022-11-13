@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>teema</title>
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡︎</text></svg>">
+    <style>
+
+    body {
+        display: grid;
+        gap: 2em;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    header {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    main {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    main fieldset {
+        border: 0;
+    }
+
+    textarea {
+        height: 50vh;
+        width: 90%;
+    }
+
+    form#geo input[type="number"] {
+        width: 3rem;
+    }
+
+    </style>
+</head>
+<body>
+
+    <header>
+
+        <form onsubmit="geolocate(event); return false" id="geo">
+            <fieldset>
+                <legend>Geolocation</legend>
+                <small>Latitude <input name="latitude" type="number" step="0.01" readonly required /></small>
+                <small>Longitude <input name="longitude" type="number" step="0.01" readonly required /></small>
+                <input type="submit" value="↺" />
+            </fieldset>
+        </form>
+
+        <form action="https://duckduckgo.com">
+            <fieldset>
+                <legend>duckduckgo 🦆 🔎</legend>
+                <input autofocus name="q" type="search" />
+                </br>
+                <small>For address bar, press Ctrl+L</small>
+            </fieldset>
+        </form>
+
+    </header>
+
+    <main>
+
+        <fieldset>
+            <legend>Sunday</legend>
+            <small>Sunrise: <span id="sunrise">??:??</span></small>
+            <small>Sunset: <span id="sunset">??:??</span></small>
+            <textarea></textarea>
+        </fieldset>
+
+        <fieldset>
+            <legend>Monday</legend>
+            <textarea></textarea>
+        </fieldset>
+
+        <fieldset>
+            <legend>Tuesday</legend>
+            <textarea></textarea>
+        </fieldset>
+
+        <fieldset>
+            <legend>Wednesday</legend>
+            <textarea></textarea>
+        </fieldset>
+
+        <fieldset>
+            <legend>Thursday</legend>
+            <textarea></textarea>
+        </fieldset>
+
+        <fieldset>
+            <legend>Friday</legend>
+            <textarea></textarea>
+        </fieldset>
+
+        <fieldset>
+            <legend>Saturday</legend>
+            <textarea></textarea>
+        </fieldset>
+
+    </main>
+
+</body>
+
+<script>
+
+    const geolocate = async e => {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            e.target.querySelector("input[name='latitude']").value = parseFloat(pos.coords.latitude).toFixed(2);
+            e.target.querySelector("input[name='longitude']").value = parseFloat(pos.coords.longitude).toFixed(2);
+            const [sunrise, sunset] = suntimes(pos.coords.latitude, pos.coords.longitude, undefined);
+            document.querySelector("#sunrise").innerHTML = parseFloat(sunrise).toFixed(2);
+            document.querySelector("#sunset").innerHTML = parseFloat(sunset).toFixed(2);
+            localStorage.setItem("latitude", e.target.querySelector("input[name='latitude']").value);
+            localStorage.setItem("longitude", e.target.querySelector("input[name='longitude']").value);
+        });
+    }
+
+    for (let idx = 0; idx < localStorage.length; idx++) {
+        const key = localStorage.key(idx);
+        const query = `input[name='${key}']`;
+        document.querySelector(query).value = localStorage.getItem(key);
+    }
+
+    const suntimes = (lat, lng, tz) => {
+        var d = new Date();
+        var radians = Math.PI / 180.0;
+        var degrees = 180.0 / Math.PI;
+
+        var a = Math.floor((14 - (d.getMonth() + 1.0)) / 12)
+        var y = d.getFullYear() + 4800 - a;
+        var m = (d.getMonth() + 1) + 12 * a - 3;
+        var j_day = d.getDate() + Math.floor((153 * m + 2)/5) + 365 * y + Math.floor(y/4) - Math.floor(y/100) + Math.floor(y/400) - 32045;
+        var n_star = j_day - 2451545.0009 - lng / 360.0;
+        var n = Math.floor(n_star + 0.5);
+        var solar_noon = 2451545.0009 - lng / 360.0 + n;
+        var M = 356.0470 + 0.9856002585 * n;
+        var C = 1.9148 * Math.sin( M * radians ) + 0.02 * Math.sin( 2 * M * radians ) + 0.0003 * Math.sin( 3 * M * radians );
+        var L = ( M + 102.9372 + C + 180 ) % 360;
+        var j_transit = solar_noon + 0.0053 * Math.sin( M * radians) - 0.0069 * Math.sin( 2 * L * radians );
+        var D = Math.asin( Math.sin( L * radians ) * Math.sin( 23.45 * radians ) ) * degrees;
+        var cos_omega = ( Math.sin(-0.83 * radians) - Math.sin( lat * radians ) * Math.sin( D * radians ) ) / ( Math.cos( lat * radians ) * Math.cos( D * radians ) );
+
+        // sun never rises
+        if( cos_omega > 1)
+            return [null, -1];
+
+        // sun never sets
+        if( cos_omega < -1 )
+            return [-1, null];
+
+        // get Julian dates of sunrise/sunset
+        var omega = Math.acos( cos_omega ) * degrees;
+        var j_set = j_transit + omega / 360.0;
+        var j_rise = j_transit - omega / 360.0;
+
+        /*
+        * get sunrise and sunset times in UTC
+        * Check section "Finding Julian date given Julian day number and time of
+        *  day" on wikipedia for where the extra "+ 12" comes from.
+        */
+        var utc_time_set = 24 * (j_set - j_day) + 12;
+        var utc_time_rise = 24 * (j_rise - j_day) + 12;
+        var tz_offset = tz === undefined ? -1 * d.getTimezoneOffset() / 60 : tz;
+        var local_rise = (utc_time_rise + tz_offset) % 24;
+        var local_set = (utc_time_set + tz_offset) % 24;
+        return [local_rise, local_set];
+    }
+
+</script>
+
+</html>

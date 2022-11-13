@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Juuso Haavisto</title>
+    <meta name="description" content="I make the world a better place.">
+    <meta name="author" content="Juuso Haavisto">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡︎</text></svg>">
+    <link rel="alternate" type="application/rss+xml" title="Juuso Haavisto" href="rss.xml"/>
+    <style>
+    html {
+        background-color: blue;
+    }
+
+    body {
+        margin: auto;
+        margin-top: 1em;
+        max-width: 40rem;
+        font-family: monospace;
+        display: flex;
+        flex-direction: column;
+        text-transform: uppercase;
+        border: 3px dotted blue;
+        background-color: gainsboro;
+        box-shadow: 3px 3px 3px grey;
+    }
+
+    body > *:not(script, main) {
+        display: flex;
+    }
+
+    main {
+        padding: 1em;
+    }
+
+    main ol {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    main li {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    header {
+        padding: 1em 1em 0 1em;
+        flex-direction: column;
+    }
+
+    header h3 {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    a:hover {
+        opacity: .7;
+    }
+
+    #rows {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        flex-grow: 1;
+    }
+
+    #rows > * {
+        border: 1px solid black;
+    }
+
+    #x {
+        text-align: center;
+        width: 15px;
+        color: transparent;
+        text-shadow: 0 0 0 blue;
+    }
+
+    #hole {
+        position: relative;
+        left: 90%;
+        background-color: blue;
+        width: 30px;
+        height: 30px;
+        bottom: 2em;
+        border-radius: 2em;
+        border: 3px dotted gainsboro;
+    }
+
+    fieldset video {
+        width: 100%;
+    }
+    </style>
+</head>
+<body>
+    <aside>
+        <div id="x">⚡︎</div>
+        <div id="rows">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </aside>
+
+    <header>
+        <h3>Juuso Haavisto</h3>
+        <small>
+            <span title="University of Oxford">DPhil Student</span>,
+            <span title="Ponkila Oy">Entrepreneur</span>
+        </small>
+        <small>
+            <a href="https://github.com/jhvst">github</a>
+            <a href="https://twitter.com/osnnr">twitter</a>
+            <a href="https://scholar.google.fi/citations?user=fUyuq1AAAAAJ&hl=en">gscholar</a>
+            <a href="cv.html">cv</a>
+            <a href="mailto:juuso.haavisto@cs.ox.ac.uk">juuso.haavisto@cs.ox.ac.uk</a>
+        </small>
+    </header>
+
+    <main>
+        <ol>
+            <li lang="fi">
+                <time datetime="2020-12-03 17:00:00.00Z">Dec-03</time>
+                <a href="https://www.youtube.com/watch?v=Otpwn420hoc">Ethereum, EVM ja Solidity | Lohkoketju 5</a>
+            </li>
+            <li>
+                <time datetime="2021-08-28 12:00:00.00Z">Aug-21</time>
+                <a href="On%20Ethereum%20node%20operation.html">On Ethereum node operation</a>
+            </li>
+            <li>
+                <time datetime="2020-06-29 12:00:00.00Z">Jun-20</time>
+                <a href="https://hal.inria.fr/hal-03155647/">Leveraging APL and SPIR-V languages to write network functions to be deployed on Vulkan compatible GPUs [pdf]</a>
+            </li>
+            <li>
+                <time datetime="2020-01-24 12:00:00.00Z">Jan-20</time>
+                <a href="https://www.semanticscholar.org/paper/fef3dcaa1608447fdf5cf65cbbad3dbf8d90c957">Interoperable GPU Kernels as Latency Improver for MEC [pdf]</a>
+            </li>
+            <li>
+                <time datetime="2019-06-17 12:00:00.00Z">Jun-19</time>
+                <a href="https://www.semanticscholar.org/paper/5fa1407954fe0e499b2d9ce14003c1ddc4e9af16">Open-source RANs in Practice: an Over-The-Air Deployment for 5G MEC [pdf]</a>
+            </li>
+            <li>
+                <time datetime="2019-06-12 11:00:00.00Z">Jun-19</time>
+                <a href="https://www.kauppalehti.fi/uutiset/huawein-kieltaneet-maat-ampuvat-omaan-jalkaansa/f04b6515-a43d-4c15-9839-e2b36bf9de80">"Huawein kieltäneet maat ampuvat omaan jalkaansa"</a>
+            </li>
+            <li>
+                <time datetime="2019-03-11 12:00:00.00Z">Mar-19</time>
+                <a href="https://startuplifers.org/blog/2019/03/11/freshman-left-to-silicon-valley/">Freshman Left to Silicon Valley</a>
+            </li>
+            <li>
+                <time datetime="2019-01-27 12:00:00.00Z">Jan-19</time>
+                <a href="vacuum cleaners and me.html">vacuum cleaners and me</a>
+            </li>
+            <li>
+                <time datetime="2018-09-01 01:15:00.00Z">Sep-18</time>
+                <a href="founder-privacy.html">Founder Privacy</a>
+            </li>
+            <li>
+                <time datetime="2018-12-18 12:00:00.00Z">Dec-17</time>
+                <a href="microservices.html">A Review of Viability of Microservices</a>
+            </li>
+            <li>
+                <time datetime="2017-10-16 09:58:00.00Z">Oct-17</time>
+                <a href="j1.html">J1 Host Company Transfer Process</a>
+            </li>
+            <li lang="fi">
+                <time datetime="2017-04-03 12:00:00.00Z">Apr-17</time>
+                <a href="genz.html">Z-Sukupolvi ja Tietojohtaminen</a>
+            </li>
+            <li lang="fi">
+                <time datetime="2017-03-17 12:00:00.00Z">Mar-17</time>
+                <a href="https://blogit.kaleva.fi/opiskelijan-aani/suomesta-suurempi-striimaamalla">Suomesta Suurempi Striimaamalla</a>
+            </li>
+            <li>
+                <time datetime="2016-08-05 19:05:36.00Z">Aug-16</time>
+                <a href="https://ti5.juusohaavisto.com">The International 5 in Numbers</a>, <a href="https://highlightplay.com/"><b>Highlight Play</b></a>
+            </li>
+            <li>
+                <time datetime="2016-05-15 21:15:47.00Z">May-16</time>
+                <a href="batching-database-calls-in-go.html">Batching Database Calls in Go</a>
+            </li>
+            <li>
+                <time datetime="2016-02-18 06:37:31.00Z">Feb-16</time>
+                <a href="changing-your-country-on-google-store.html">Changing Your Country on Google Store</a>
+            </li>
+            <li>
+                <time datetime="2015-12-01 16:59:39.00Z">Dec-15</time>
+                <a href="northern-nike-nabob.html"><b>Northern Nike Nabob</b></a>
+            </li>
+            <li>
+                <time datetime="2015-03-23 18:47:30.00Z">Mar-15</time>
+                <a href="blocking-html-links-with-pure-css.html">Blocking HTML Links With Pure CSS</a>
+            </li>
+            <li>
+                <time datetime="2015-02-07 22:54:12.00Z">Feb-15</time>
+                <a href="promotions-and-relocations.html">Promotions and Relocations</a>
+            </li>
+            <li>
+                <time datetime="2014-11-30 02:01:41.00Z">Nov-14</time>
+                <a href="generating-excel-templates.html">Generating Excel Templates</a>
+            </li>
+            <li>
+                <time datetime="2014-11-19 22:51:40.00Z">Nov-14</time>
+                <a href="saving-money-with-russian-games.html">Saving Money with Russian Games</a>
+            </li>
+            <li>
+                <time datetime="2014-08-10 19:39:10.00Z">Aug-14</time>
+                <a href="launching-my-first-saas.html">Launching My First SaaS</a>
+            </li>
+            <li>
+                <time datetime="2014-08-06 17:28:16.00Z">Aug-14</time>
+                <a href="self.html"><b>About Me</b></a>
+            </li>
+            <li>
+                <time datetime="2014-07-28 11:44:19.00Z">Jul-14</time>
+                <a href="talking-twitch-tv.html">Talking Twitch.tv</a>
+            </li>
+            <li>
+                <time datetime="2014-06-21 20:00:43.00Z">Jun-14</time>
+                <a href="introducing-vertigo.html">Introducing Vertigo</a>
+            </li>
+        </ol>
+    </main>
+
+    <form onsubmit="soundsystem(event); return false">
+        <fieldset>
+            <legend>Sauna Soundsystem</legend>
+            <details>
+                <summary>Track list [<input onchange="createSources(event)" type="file" multiple />] <input type="submit" /></summary>
+                <select multiple></select>
+            </details>
+            <canvas width="640" style="display: none;"></canvas>
+            <video autoplay></video>
+            <audio controls></audio>
+        </fieldset>
+    </form>
+
+</body>
+<script>
+
+    const createSources = e => {
+        const items = [...e.target.files].flatMap(file => {
+            let source = document.createElement('source');
+            source.src = URL.createObjectURL(file);
+            source.type = file.type;
+            let item = document.createElement('option');
+            item.value = file.name;
+            item.innerText = file.name;
+            return [item, source]
+        });
+        document.querySelector('details select').append(...items)
+    }
+
+    // async makes form submission return without preventdefault
+    const soundsystem = async e => {
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioCtx.createAnalyser();
+        // bind audio, i.e., analyser -> speaker
+        // without this line audio is muted
+        analyser.connect(audioCtx.destination);
+
+        const tracks = document.querySelectorAll('source');
+        const audio = document.querySelector('audio');
+        audio.append(...tracks);
+
+        // bind visualization, i.e., audio -> analyzer
+        audioCtx.createMediaElementSource(audio).connect(analyser);
+
+        // 2d canvas, essentially a framebuffer for video
+        const canvas = document.querySelector('canvas');
+
+        const draw_framebuffer = () => {
+            drawVisual = requestAnimationFrame(draw_framebuffer);
+
+            const sample = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(sample);
+
+            canvas.getContext("2d").fillStyle = `rgb(0, 0, 0)`;
+            canvas.getContext("2d").fillRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = canvas.width / analyser.frequencyBinCount * 2.5;
+            sample.forEach((val, index) => {
+                canvas.getContext("2d").fillStyle = 'rgb(' + (val+100) + ', 50, 50)';
+                canvas.getContext("2d").fillRect(index, canvas.height-val/2, barWidth, val/2);
+            })
+        };
+
+        audio.onplay = draw_framebuffer();framebuffer_to_video(canvas, audioCtx);
+        audio.play();
+    }
+
+    const framebuffer_to_video = (canvas, audioCtx) => {
+        // MediaElement -> MediaStream conversion
+        const stream = canvas.captureStream();
+        // multiplex audio and canvas
+        stream.addTrack(...audioCtx.createMediaStreamDestination().stream.getAudioTracks())
+        const video = document.querySelector('video');
+        video.srcObject = stream;
+    }
+
+    (async(output) => {
+        const header = await fetch("rss.xml");
+        if (!header.ok) { output.textContent = "header HTTP-Error: " + header.status; return; };
+        const doc = new DOMParser().parseFromString(await header.text(), "text/xml");
+        console.log(doc)
+        const items = [...doc.getElementsByTagName("item")].map(item => {
+            console.log(item);
+            const title = item.children[0];
+            const link = item.getElementByTagName("link")
+            const date = item.getElementByTagName("date")
+        });
+        console.log(items)
+    })(document.body);
+
+</script>
+</html>
