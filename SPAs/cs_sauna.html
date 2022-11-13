@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>cs_sauna</title>
+    <meta charset="utf-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧖</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            display: grid;
+            justify-items: center;
+            grid-template-columns: repeat(3, 1fr)
+        }
+
+        video {
+            width: 100%;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <p>cs_sauna is twitch but with better bitrate</p>
+        <p id="status"></p>
+        <form id="add">
+            <fieldset>
+                <legend>Follow players</legend>
+                <input name="streamer" type="text" required/>
+                <button disabled type="submit">Add</button>
+            </fieldset>
+        </form>
+        <form onsubmit="syncStreams(event); return false">
+            <fieldset>
+                <legend>Group control</legend>
+                <input name="time" type="number" required />
+                <button disabled type="submit">Sync all media</button>
+            </fieldset>
+        </form>
+    </nav>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/0.14.17/hls.min.js" integrity="sha512-t0GMHzxvVdMw1p8oSntdvFKikEx9Pwus6G2PP3U7/GQ3+Id+D9sYgnck0etYk0CBK5gdk8BJBnQYx7PIT1PJ0Q==" crossorigin="anonymous"></script>
+<script>
+
+    const syncStreams = e => document.querySelectorAll("video").forEach(v => v.currentTime = new FormData(e.target).get("time"))
+    const changeVolume = e => e.target.parentNode.parentNode.querySelector("video[data-track='" + e.target.dataset.track + "']").volume = e.target.value
+    const siblingSeek = e => e.target.parentNode.querySelectorAll("video.hidden").forEach(s => s.currentTime = e.target.currentTime)
+    const siblingPlay = e => e.target.parentNode.querySelectorAll("video.hidden").forEach(s => s.play())
+    const siblingPause = e => e.target.parentNode.querySelectorAll("video.hidden").forEach(s => s.pause())
+
+    const createContainer = (name, tracks) => {
+        const f = document.createElement("form");
+        const fs = document.createElement("fieldset");
+        const l = document.createElement("legend");
+        l.innerText = name;
+
+        f.appendChild(fs)
+        fs.appendChild(l)
+
+        tracks.map((track, index) => {
+            const attach = document.createElement("input");
+            attach.type = "checkbox"
+            attach.name = "attachMedia"
+            attach.disabled = true
+            attach.dataset.attachMedia = track.name ? track.name : "video_" + index;
+            fs.appendChild(attach)
+        })
+
+        tracks.map((track, index) => {
+            const attach = document.createElement("input");
+            attach.type = "checkbox"
+            attach.name = "canPlay"
+            attach.disabled = true
+            attach.dataset.canPlay = track.name ? track.name : "video_" + index;
+            fs.appendChild(attach)
+        })
+
+        if (document.getElementById("add").onsubmit == addNativeStream) {
+            const safari = document.createElement("button");
+            safari.innerText = "Delegate tracks"
+            safari.onclick = () => document.querySelectorAll("video").forEach((val, t) => {
+                val.audioTracks[t].enabled = true
+                val.play()
+            })
+            fs.appendChild(safari)
+        }
+
+        document.body.appendChild(f)
+
+        return fs
+    }
+
+    const createVideo = (container, video, isAudio) => {
+        if (!isAudio) {
+            video.onseeking = siblingSeek
+            video.onplay = siblingPlay
+            video.onpause = siblingPause
+            video.controls = true
+        } else {
+            video.classList.add("hidden")
+            createControls(container, video)
+        }
+        container.appendChild(video)
+    }
+
+    const createControls = async (container, val) => {
+        const volume_label = document.createElement("label");
+        volume_label.innerText = val.dataset.track
+        const volume = document.createElement("input");
+        volume.onchange = changeVolume
+        volume.type = "range"
+        volume.min = "0"
+        volume.max = "1"
+        volume.step = "0.01"
+        volume.dataset.track = val.dataset.track
+        volume_label.appendChild(volume)
+        container.appendChild(volume_label)
+    }
+
+    const addNativeStream = e => {
+        e.preventDefault();
+
+        const streamer = new FormData(e.target).get("streamer")
+        const video = document.createElement("video")
+        video.dataset.track = "system sound"
+
+        video.src = streamer + '.m3u8';
+        video.addEventListener('loadedmetadata', video.play);
+
+        document.body.appendChild(video)
+    }
+
+    const addStream = e => {
+        e.preventDefault();
+
+        const streamer = new FormData(e.target).get("streamer")
+
+        const hls = new Hls();
+        hls.loadSource(streamer + '.m3u8');
+        hls.on(Hls.Events.MANIFEST_LOADED, (event, data) => {
+            const tracks = [].concat(data.levels.filter(level => level.videoCodec), data.audioTracks)
+            document.getElementById("status").innerText += "\nℹ️ [" + streamer + "]: found " + tracks.length + " tracks"
+            const container = createContainer(streamer, tracks)
+            const videos = tracks.map((track, index) => {
+                const video = document.createElement("video")
+                const stream = new Hls();
+                stream.on(Hls.Events.MANIFEST_LOADED, (e, d) => {
+                    video.dataset.track = track.name ? track.name : "video_" + index;
+                    const isAudio = index > 0 ? true : false
+                    createVideo(container, video, isAudio)
+                    document.getElementById("status").innerText += "\n✅ [" + streamer + "]: " + video.dataset.track + " " + e
+                    container.querySelector("input[data-attach-media='" + video.dataset.track + "']").checked = true
+                    if (Array.from(container.querySelectorAll("input[name='attachMedia']")).filter(box => box.checked).length == tracks.length) {
+                        document.getElementById("status").innerText += "\nℹ️ [" + streamer + "]: " + tracks.length + "/" + tracks.length + " tracks attachable"
+                    }
+                    stream.attachMedia(video)
+                })
+                stream.on(Hls.Events.MEDIA_ATTACHED, (e, d) => {
+                    container.querySelector("input[data-can-play='" + video.dataset.track + "']").checked = true
+                    document.getElementById("status").innerText += "\n✅ [" + streamer + "]: " + video.dataset.track + " " + e
+                })
+                stream.on(Hls.Events.ERROR, (_, err) => {
+                    document.getElementById("status").innerText += "\n❌ " + err.details + " (" + err.type + "): " + err.reason
+                })
+                stream.loadSource(track.url);
+                return video
+            })
+        });
+    }
+
+    (function(trg) {
+        const shim = Hls.isSupported()
+        const native = document.createElement("video").canPlayType('application/vnd.apple.mpegurl')
+        trg.innerText = shim || native ? native ? "✅ Native HLS support." : "✅ Shim-based HLS support." : "❌ No HLS support. Try Safari or Microsoft Edge."
+        document.querySelectorAll("button").forEach(btn => btn.disabled = shim || native ? false : true)
+        if (!(shim || native)) { return }
+        document.getElementById("add").onsubmit = native ? addNativeStream : addStream
+    })(document.getElementById("status"));
+</script>
