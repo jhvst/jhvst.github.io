@@ -12,6 +12,12 @@
     <pubDate>11 Nov 2022 12:00:00 GMT</pubDate>
   </item>
   <item>
+    <title>Unleashing GPUs for Network Function Virtualization: an open architecture based on Vulkan and Kubernetes</title>
+    <link>https://www.semanticscholar.org/paper/Unleashing-GPUs-for-Network-Function-an-open-based-Haavisto-Cholez/af548628c453e47cd1ac32ce7b6bd97970503265</link>
+    <description>General-purpose computing on graphics processing units (GPGPU) is a promising way to speed up computationally intensive network functions, such as performing real-time traffic classification based on machine learning. Recent studies have focused on integrated graphics units and various performance optimizations to address bottlenecks such as latency. However, these approaches tend to produce architecture-specific binaries and lack the orchestration of functions. A complementary effort would be a GPGPU architecture based on standard and open components, which allows the creation of interoperable and orchestrable network functions.This study describes and evaluates such open architecture based on the cross-platform Vulkan API, in which we execute hand-written SPIR-V code as a network function. We also demonstrate a multi-node orchestration approach for our proposed architecture using Kubernetes. We validate our architecture by executing SPIR-V code performing traffic classification with random forest inference. We test this application both on discrete and integrated graphics cards and on x86 and ARM. We find that in all cases the GPUs are faster than the baseline Cython code.</description>
+    <pubDate>25 Apr 2022 12:00:00 GMT</pubDate>
+  </item>
+  <item>
     <title>Metaversumi: Virtuaalitodellisuus, NFT:t ja 5G-verkko | Lohkoketju 6</title>
     <link>https://www.youtube.com/watch?v=ZVd91Ye4JS8</link>
     <description>Mikä metaversumi tai metaverse on? Miten AR ("Augmented Reality") eli lisätty todellisuus ja VR ("Virtual Reality") eli virtuaalitodellisuus eroavat toisistaan? Miten metaversumi liittyy lohkoketjuihin ja mikä rooli NFT-teknologialla ja digitaalisella omistajuudella on metaversumissa?</description>
