@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 <!--
    This page implements John H. Conway's "Game of Life" using WebGL.
    There is a 1024-by-1024 grid of "cells", represented by pixels in
@@ -21,9 +21,6 @@
     <meta name="description" content="Juuso Haavisto is a DPhil student at University of Oxford. His research papers and theses consists of multi-access edge computing and total functional programming languages.">
     <meta name="author" content="Juuso Haavisto">
 
-    <meta itemprop="name" content="Juuso Haavisto">
-    <meta itemprop="description" content="Juuso Haavisto is a DPhil student at University of Oxford. His research papers and theses consists of multi-access edge computing and total functional programming languages.">
-
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@osnnr">
     <meta name="twitter:title" content="Juuso Haavisto">
@@ -36,8 +33,8 @@
     <meta property="og:url" content="https://juuso.dev">
     <meta property="og:description" content="Juuso Haavisto is a DPhil student at University of Oxford. His research papers and theses consists of multi-access edge computing and total functional programming languages.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡🟦</text></svg>">
-    <link rel="alternate" type="application/rss+xml" title="Juuso Haavisto" href="rss.xml" />
+    <link rel="icon" href="favicon.svg">
+    <link rel="alternate" type="application/rss+xml" title="Juuso Haavisto" href="rss.xml">
     <style>
         body {
             background-color: black;
@@ -50,7 +47,7 @@
             align-items: center;
         }
 
-        main {
+        aside {
             width: 50vw;
             max-width: 512px;
             height: 50vw;
@@ -95,7 +92,7 @@
             height: 100%;
         }
 
-        aside {
+        main {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -144,7 +141,7 @@
             align-self: flex-end;
         }
 
-        aside form,
+        main form,
         #rand {
             display: none;
         }
@@ -157,13 +154,13 @@
         <header>
             <h1>Juuso Haavisto</h1>
         </header>
-        <aside>
-            <main></main>
-            <canvas id="webglcanvas" width="1024px" height="1024px"></canvas>
+        <main>
+            <aside></aside>
+            <canvas id="webglcanvas" width="1024" height="1024"></canvas>
             <form onsubmit="soundsystem(event); return false">
                 <fieldset>
                     <details>
-                        <summary>Track list [<input onchange="createSources(event)" type="file" multiple />] <input type="submit" /></summary>
+                        <summary>Track list [<input onchange="createSources(event)" type="file" multiple>] <input type="submit"></summary>
                         <select multiple></select>
                     </details>
                     <canvas id="soundsystem" width="640" style="display: none;"></canvas>
@@ -178,15 +175,15 @@
                 <a href="https://twitter.com/osnnr">twitter</a>
                 <a href="https://scholar.google.fi/citations?user=fUyuq1AAAAAJ&hl=en">gscholar</a>
             </footer>
-        </aside>
+        </main>
     </div>
-    <hr />
+    <hr>
 
     <nav></nav>
 
-    <canvas id="rand" width="512px" height="512px"></canvas>
+    <canvas id="rand" width="512" height="512"></canvas>
 
-    <!-----------------------------------------------------------------------------------
+    <!--
       The vertex shader for both programs come from the script with id=vshader.
       It simply sends the input coordinates to the fragment shader, after converting
       from the range 0 to 1 to the clip coordinate range -1 to 1.
