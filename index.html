@@ -98,12 +98,6 @@
             align-items: center;
         }
 
-        nav {
-            text-transform: uppercase;
-            display: flex;
-            overflow-x: scroll;
-        }
-
         article small,
         article time {
             color: #ccc;
@@ -170,16 +164,13 @@
             </form>
             <footer>
                 <a href="cv.html">cv</a>
-                <a href="rss.xml">rss</a>
+                <a href="rss.xml">blog</a>
                 <a href="https://github.com/jhvst">github</a>
                 <a href="https://twitter.com/osnnr">twitter</a>
                 <a href="https://scholar.google.fi/citations?user=fUyuq1AAAAAJ&hl=en">gscholar</a>
             </footer>
         </main>
     </div>
-    <hr>
-
-    <nav></nav>
 
     <canvas id="rand" width="512" height="512"></canvas>
 
@@ -665,38 +656,6 @@
         gol.init(gl);
         createInitialConfiguration(gol.gl);
         gol.main(0);
-
-        (async (target) => {
-            const rss = await fetch("rss.xml");
-            if (!rss.ok) {
-                target.textContent = "header HTTP-Error: " + rss.status;
-                return;
-            };
-            const doc = new DOMParser().parseFromString(await rss.text(), "text/xml");
-            const links = [...doc.getElementsByTagName("item")].map(item => {
-                const article = document.createElement("article");
-
-                const p = document.createElement("p");
-
-                const time = document.createElement("time");
-                time.textContent = item.querySelector("pubDate").textContent.substr(0, 12);
-
-                const a = document.createElement("a");
-                a.href = item.querySelector("link").textContent;
-                a.textContent = item.querySelector("title").textContent;
-
-                const subtitle = document.createElement("small");
-                subtitle.textContent = item.querySelector("description").textContent;
-
-                p.appendChild(time);
-                p.appendChild(a);
-                article.appendChild(p);
-                article.appendChild(subtitle);
-
-                return article
-            });
-            target.append(...links)
-        })(document.querySelector("nav"));
     </script>
 </body>
 
