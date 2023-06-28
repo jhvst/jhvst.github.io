@@ -24,6 +24,21 @@
 
       perSystem = { pkgs, lib, config, ... }: {
 
+        packages.components = pkgs.stdenv.mkDerivation {
+
+          name = "components";
+          src = ./.;
+
+          phases = [ "unpackPhase" "buildPhase" ];
+
+          buildPhase = ''
+            mkdir -p $out/css
+            mkdir -p $out/html
+            cp css/* $out/css
+            cp html/* $out/html
+          '';
+        };
+
         mission-control.scripts = {
           img = {
             description = "compress img assets";
