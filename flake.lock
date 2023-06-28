@@ -167,11 +167,11 @@
       },
       "locked": {
         "dir": "blogPosts/j1",
-        "lastModified": 1687966036,
-        "narHash": "sha256-d6Bb68rnv1NVU5bf4hWoaadGIkaHve2r2B6KdZMi2P4=",
+        "lastModified": 1687968988,
+        "narHash": "sha256-AHBo0+LMDJ1HOkaZU4ImIPv24mtUfp9NHbs4qK4uoWI=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7cb60e6824aabd0513254b2f3efa3882298b633c",
+        "rev": "569f003069459c1a5402fa01ba3dda7a5026355e",
         "type": "github"
       },
       "original": {
