@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    blog.url = "path:../../";
+    blog.url = "github:jhvst/jhvst.github.io";
     barbell.url = "github:jhvst/barbell";
   };
 
