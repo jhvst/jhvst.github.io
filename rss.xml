@@ -7,6 +7,12 @@
   <link>https://juuso.dev</link>
   <description>Escape from Finnish farmland, Silicon Valley style</description>
   <item>
+    <title>Barbell: Templates in BQN</title>
+    <link>https://juuso.dev/blogPosts/barbell/barbell.html</link>
+    <description>Introducing barbell: barbell is like the templating system Handlebars, but with BQN's Under doing the heavy lifting</description>
+    <pubDate>28 Jun 2023 21:19:00 GMT</pubDate>
+  </item>
+  <item>
     <title>Scheduling Array Operations // Dyalog '22</title>
     <link>https://www.youtube.com/watch?v=Jt6mdYGn9M4</link>
     <description>Scheduling array operations has been a topical theme in the research of tensor computation. With the help of type theory, array operations are parallelised for graphics processing units and distributed computing. Juuso shares his findings in static scheduling, and how it can be used to optimise execution over different hardware and compute infrastructure settings.</description>

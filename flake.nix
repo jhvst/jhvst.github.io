@@ -6,6 +6,7 @@
     flake-root.url = "github:srid/flake-root";
     mission-control.url = "github:Platonic-Systems/mission-control";
     j1.url = "github:jhvst/jhvst.github.io?dir=blogPosts/j1";
+    barbell.url = "github:jhvst/jhvst.github.io?dir=blogPosts/barbell";
   };
 
   outputs =
@@ -37,6 +38,9 @@
 
           phases = [ "unpackPhase" "buildPhase" ];
           buildPhase = ''
+            mkdir -p $out/blogPosts/barbell
+            cp -r ${inputs.barbell.outputs.packages.${system}.barbell}/* $out/blogPosts/barbell
+
             mkdir -p $out/blogPosts/j1
             cp -r ${inputs.j1.outputs.packages.${system}.j1}/* $out/blogPosts/j1
 
