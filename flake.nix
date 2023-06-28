@@ -43,6 +43,7 @@
             cp -r ignition $out
             cp -r SPAs $out
 
+            cp -r css $out
             cp -r img $out
             cp -r videos $out
 
