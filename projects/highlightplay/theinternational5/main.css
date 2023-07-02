@@ -1,0 +1,25 @@
+p[role="start"]::first-letter { 
+	font-size: 200%;
+}
+
+body {
+	width: 70%;
+	margin: auto;
+	margin-bottom: 1rem;
+}
+
+video[role="banner"] {
+	height: 75%;
+	width: 100%;
+	margin: auto;
+}
+
+figure[role="image-container"] {
+	display: flex;
+	justify-content: center;
+}
+
+aside {
+	display: flex;
+	flex-direction: column;
+}

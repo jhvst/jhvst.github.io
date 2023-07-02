@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<link rel="stylesheet" href="./main.css">
+<script src="https://www.google.com/jsapi"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
+
+<section role="banner">
+	<figure>
+		<video role="banner" loop muted autoplay src="./banner.webm" poster="webm-placeholder.png">
+			<img src="./banner-fallback.gif" alt="The International 2015 banner">
+		</video>
+		<figcaption>This page is very multimedia heavy. You might want to give it some time to load.</figcaption>
+	</figure>
+</section>
+
+<h3>Prolog</h3>
+
+<p>I cant recall the exact year when I first time watched eSports, but I remember spectating Halo 3 MLG Pro Circuit broadcasted from Dallas. All of the teams were from United States. Prize pool was $56K.</p>
+
+<p>Few years after that I saw Dota 2 premiered at the first International. Teams around the world were competing for prize pool of $1M, which I like to think as a turning point in terms of prize pools of big events. I had heard of six figure prize pools in Dreamhack, but getting into the two comma club really showed that Valve was in for real with Dota 2.</p>
+
+<p>Now four years have elapsed. The prize pool of The International 5 settled at around $18.4M, once again gathering the best teams in the world to play Dota 2 exclusively at Key Arena, Seattle Center, USA. Worth notifying is that from the $18.4M, circa $16.8M was crowd-funded by the community of Dota 2 by offering them a virtual event ticket for $9.99. From the sales of this "Compendium", 25% went to prize pool and the rest into Valve's pockets.</p>
+
+<p>In return for their bucks the Compendium owners are not only able to watch the stream (which is broadcasted for free anyway), but they are also eligible for event exclusive in-game swag such as hats and visual effects, which they can wield on characters to show their support towards The International. Once the event has started, there is no way to receive these items anymore, which will make you look like a special snowflake in a year or two.</p>
+
+<p>Fancy items or not, eSports is growing.</p>
+
+<h1>The International 5 in numbers</h1>
+
+<p role="start">Roughly a year ago <a href="https://www.juusohaavisto.com/post/talking-twitch-tv">I wrote a script</a>, which talked Twitch chat in loud. I was supposed to stream the audio track online during The International 4, but my 1MB ADSL upload bandwidth shut down my plans.</p>
+
+<p>I ultimately wrote a blog post describing how I did everything, which received a good amount of hits and some feedback. The feedback taught me Twitch's chat is actually just an IRC server broadcasted on website.</p>
+
+<p>I later updated my blog post to show you can leverage the IRC server avoid visiting Twitch's website to read the chat.</p>
+
+<p>Inspired by the project and forced by this year's lack of time, I decided to take on a premise that Twitch's chat could highlight me the best parts of The International 5 while I was sleeping. It proved to work pretty well. I ended up collecting most of the chat data during The International 5, which this blog post is all about. So hang tight and buckle your belts, big data is coming for you with the fierce force of 400'000 Kappas.</p>
+
+<p>Without any further talks, I'll get into graphs.</p>
+
+<div id="chat_charts">
+
+	<section class="wildcard">
+
+		<h3>Wild card</h3>
+
+		<ul>
+			<li>Four team double-elimination bracket.
+				<ul>
+					<li>Top two teams advance to group stage.</li>
+					<li>Bottom two teams are eliminated.</li>
+					<li>All matches are best of three.</li>
+				</ul>
+			</li>
+		</ul>
+
+		<p>The data is clipped because there were unexpected connection problems with Twitch IRC servers and the bot ultimately crashed close to midnight when the stream wen't down.</p>
+		<div id="day1.txt"></div>
+
+		<figure role="image-container">
+
+			<main>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20282377152/in/album-72157656712978726/" title="The Stage Just Before Doors Open on Day 1"><img src="https://farm1.staticflickr.com/311/20282377152_da766ca5c4_z.jpg" width="640" height="426" alt="The Stage Just Before Doors Open on Day 1"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+			</main>
+
+			<aside>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20102725128" title="The Doors Have Opened on Day 1"><img src="https://farm4.staticflickr.com/3774/20102725128_6ff6973ab0_n.jpg" width="320" height="213" alt="The Doors Have Opened on Day 1"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/19670014244" title="The Analyst Desk"><img src="https://farm1.staticflickr.com/454/19670014244_8f85c34961_n.jpg" width="320" height="213" alt="The Analyst Desk"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+			</aside>
+
+		</figure>
+
+	</section>
+
+	<section class="group-stages">
+		<h3>Group stages</h3>
+		<p>Group stages were a lot more stable in regards of data collection. Although, on third day the bot crashed because of memory leak. The memory leak was patched the next day.</p>
+		<div id="day2.txt"></div>
+
+		<div id="day3.txt"></div>
+
+		<figure role="image-container">
+
+			<aside>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20142198068" title="2015 The International Dota 2 Tournament"><img src="https://farm1.staticflickr.com/431/20142198068_dfe115244f_n.jpg" width="320" height="213" alt="2015 The International Dota 2 Tournament"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20143940488" title="Day 3: Team Secret  vs. Invictus Gaming"><img src="https://farm1.staticflickr.com/360/20143940488_02c4e2453e_n.jpg" width="320" height="213" alt="Day 3: Team Secret  vs. Invictus Gaming"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+			</aside>
+
+			<main>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20167683419/in/album-72157656712978726/" title="MPV Phoenix vs. Vici Gaming"><img src="https://farm1.staticflickr.com/314/20167683419_f7742d5f34_z.jpg" width="640" height="426" alt="MPV Phoenix vs. Vici Gaming"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+			</main>
+
+		</figure>
+
+		<div id="day4.txt"></div>
+		<div id="data.txt"></div>
+	</section>
+
+	<section class="main-event">
+		<h3>Main event</h3>
+		<p>During the main event data logging worked as it should, except for two 30 minute blackouts during the finals. Being aware of the bot's bad manners, I had pre-emptively configured it to make persistent backup logs. In the end, we got a nice graph of all dates! Success!</p>
+		<div id="ms1.txt"></div>
+		<div id="ms2.txt"></div>
+		<div id="ms3.txt"></div>
+
+		<figure role="image-container">
+
+			<main>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20352036526/in/album-72157656712978726/" title="Aegis of Champions"><img src="https://farm1.staticflickr.com/400/20352036526_0d068f0954_z.jpg" width="640" height="427" alt="Aegis of Champions"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+			</main>
+
+			<aside>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20133721379" title="Day 2: Team Secret vs. EHOME"><img src="https://farm1.staticflickr.com/498/20133721379_023ec2f011_n.jpg" width="320" height="213" alt="Day 2: Team Secret vs. EHOME"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20222189470/in/album-72157656712978726/" title="LGD Gaming vs. Evil Geniuses"><img src="https://farm1.staticflickr.com/348/20222189470_96b8227070_n.jpg" width="320" height="213" alt="LGD Gaming vs. Evil Geniuses"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+			</aside>
+
+		</figure>
+
+		<div id="ms4.txt"></div>
+		<div id="ms5.txt"></div>
+		<div id="bmain6.txt"></div>
+
+
+		<figure role="image-container">
+
+			<aside>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20173953749/in/album-72157656712978726/" title="EHOME vs. Vici Gaming"><img src="https://farm1.staticflickr.com/295/20173953749_afc6368e7a_n.jpg" width="320" height="213" alt="EHOME vs. Vici Gaming"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20230382028" title="EG Rise to Claim The International 2015 Aegis of Champions"><img src="https://farm1.staticflickr.com/555/20230382028_2c2cb956a3_n.jpg" width="320" height="213" alt="EG Rise to Claim The International 2015 Aegis of Champions"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+			</aside>
+
+			<main>
+
+				<a data-flickr-embed="true"  href="https://www.flickr.com/photos/dota2ti/20231665809/in/album-72157656712978726/" title="The Arena During the Grand Final"><img src="https://farm4.staticflickr.com/3734/20231665809_405e798352_z.jpg" width="640" height="427" alt="The Arena During the Grand Final"></a><script async src="//embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>
+
+			</main>
+
+		</figure>
+
+	</section>
+
+	<p>Some bullet points from stream graphs:</p>
+	<ul>
+		<li>The biggest message peak was achieved on August 3rd, 5:29 pm UTC, when <strong>3306</strong> messages were sent during <strong>a single minute.</strong> The peak was caused by stream crash.</li>
+
+	</ul>
+
+</div>
+
+<div id="donutchart" style="width: 900px; height: 500px;"></div>
+
+<script>
+
+google.load('visualization', '1', {packages: ['corechart', 'line']});
+google.setOnLoadCallback(initgraphs);
+
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) { 
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+  };
+}
+
+function ytlink(date, stamp, messages, seconds, link) {
+	return `
+	<div style="padding:5px 15px 5px 15px;">
+		<p>{0}</p>
+		<p>Messages sent <strong>{2}</strong></p>
+		<p><a href="{4}{3}">{1}</a></p>
+	</div>`.format(date, stamp, messages, seconds, link)
+}
+
+function initgraphs() {
+	draw("day1.txt", "Jul 26 16:00:00", "Wild Card", "http://www.twitch.tv/dota2ti/v/8720475?t=", 390)
+	draw("day2.txt", "Jul 27 16:00:00", "Group Stage Day 1", "http://www.twitch.tv/dota2ti/v/8720475?t=", 390)
+	draw("day3.txt", "Jul 28 16:00:00", "Group Stage Day 2", "http://www.twitch.tv/dota2ti/v/8720475?t=", 390)
+	draw("day4.txt", "Jul 29 16:00:00", "Group Stage Day 3", "http://www.twitch.tv/dota2ti/v/8720475?t=", 390)
+	draw("day5.txt", "Jul 30 16:00:00", "Group Stage Day 4", "https://youtu.be/kEsdm2TfvRw?t=", 0)
+	draw("ms1.txt", "Aug 3 16:00:00", "Main Event Day 1", "https://youtu.be/kEsdm2TfvRw?t=", 0)
+	draw("ms2.txt", "Aug 4 16:00:00", "Main Event Day 2", "https://youtu.be/kEsdm2TfvRw?t=", 0)
+	draw("ms3.txt", "Aug 5 16:00:00", "Main Event Day 3", "https://youtu.be/kEsdm2TfvRw?t=", 0)
+	draw("ms4.txt", "Aug 6 16:00:00", "Main Event Day 4", "https://youtu.be/kEsdm2TfvRw?t=", 0)
+	draw("ms5.txt", "Aug 7 16:00:00", "Main Event Day 5", "https://youtu.be/kEsdm2TfvRw?t=", 0)
+	draw("ms6.txt", "Aug 8 16:00:00", "Main Event Day 6", "https://youtu.be/kEsdm2TfvRw?t=", 0)
+	drawPie()
+}
+
+function drawPie() {
+	
+	var data = google.visualization.arrayToDataTable([
+		['Emoticons', 'Count during TI5'],
+		['Kappa', 434708],		
+		['DansGame', 39831],
+		['BabyRage', 48922],
+		['PuppeyFace', 26414],
+		['DendiFace', 101502],
+		['SwiftRage', 42921],
+		['OpieOP', 18664],
+		['SoBayed', 52314],
+		['FailFish', 81106],
+		['CoolCat', 69245],
+		['WutFace', 69383],
+		['ANELE', 84216],
+		['ResidentSleeper', 119073],
+		['4Head', 147070],
+		['BibleThump', 208594],
+		['PJSalt', 63374],
+		['RuleFive', 23679],
+		['Kreygasm', 100662],
+		['EleGiggle', 163239],
+		['PogChamp', 208014],
+		['BrokeBack', 21441],
+		['OneHand', 11745],
+		['HeyGuys', 13097],
+		['deIlluminati', 29880],
+		['TTours', 20778],
+		['NotLikeThis', 70833],
+		['KappaPride', 228565],
+		['WinWaker', 9393],
+		['FrankerZ', 11358],
+	]);
+
+	var options = {
+		title: 'Twitch emoticon spread during The International 5',
+		pieHole: 0.4,
+	};
+
+	var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
+	chart.draw(data, options);
+
+}
+
+function draw(filename, date, title, link, offset) {
+
+	Papa.parse("./"+filename, {
+		download: true,
+		complete: function(results) {
+
+			var csv = results.data
+			var start = moment(date, "MMM DD HH:mm:ss");
+
+			csv.forEach(function(d) {
+
+				var now = moment(d[0], "MMM DD HH:mm:ss");
+				var diff = moment(now, "DD/MM/YYYY HH:mm:ss").diff(moment(start, "DD/MM/YYYY HH:mm:ss"));
+				var stamp = moment.utc(diff).format("HH[h]mm[m]ss[s]");
+				var seconds = diff/1000;
+
+				d[0] = moment(d[0], "MMM DD HH:mm:ss").toDate();
+				d[1] = +d[1];
+				d[2] = ytlink(moment(d[0]).format("MMMM Do, h:mm:ss a"), stamp, d[1], seconds+offset, link);
+			});
+
+			var data = new google.visualization.DataTable();
+			data.addColumn('date', 'X');
+			data.addColumn('number', 'Messages');
+			data.addColumn({type: 'string', role: 'tooltip', p: {html:true}});
+			data.addRows(csv)
+
+			var options = {
+				title: 'Dota 2: The International 5, {0} Twitch chat messages'.format(title),
+				/*hAxis: {
+					title: 'Date (UTC)'
+				},*/
+				vAxis: {
+					title: 'Messages per minute'
+				},
+				tooltip: {
+					isHtml: true,
+					trigger: 'selection'
+				},
+				legend: { position: 'none' },
+			};
+
+			var e = document.createElement("div");
+			document.getElementById(filename).appendChild(e);
+
+			var chart = new google.visualization.AreaChart(e);
+			chart.draw(data, options);
+
+		}
+	})
+}
+
+</script>
