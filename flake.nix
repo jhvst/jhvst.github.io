@@ -5,8 +5,13 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-root.url = "github:srid/flake-root";
     mission-control.url = "github:Platonic-Systems/mission-control";
+
+    # blogposts
     j1.url = "github:jhvst/jhvst.github.io?dir=blogPosts/j1";
     barbell.url = "github:jhvst/jhvst.github.io?dir=blogPosts/barbell";
+
+    # papers
+    bsc-thesis.url = "github:jhvst/jhvst.github.io?dir=papers/bsc-thesis";
   };
 
   outputs =
@@ -43,6 +48,9 @@
 
             mkdir -p $out/blogPosts/j1
             cp -r ${inputs.j1.outputs.packages.${system}.j1}/* $out/blogPosts/j1
+
+            mkdir -p $out/papers/bsc-thesis
+            cp -r ${inputs.bsc-thesis.outputs.packages.${system}.bsc-thesis}/* $out/papers/bsc-thesis
 
             cp -r ignition $out
             cp -r SPAs $out
@@ -89,6 +97,7 @@
             validator-nu
             watch
             pngquant
+            pandoc
           ];
         };
 

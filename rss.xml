@@ -97,6 +97,12 @@
     <pubDate>16 Oct 2018 09:58:00 GMT</pubDate>
   </item>
   <item>
+    <title>Latency-optimized edge computing in 5G cellular networks</title>
+    <link>https://juuso.dev/papers/bsc-thesis/bsc-thesis.html</link>
+    <description>The purpose of this thesis is to research latency-optimized edge computing in 5G cellular networks. In specific, the research focuses on low-latency software-defined services on OSS core network implementations.</description>
+    <pubDate>01 Jul 2018 12:00:00 GMT</pubDate>
+  </item>
+  <item>
     <title>Z-Sukupolvi ja Tietojohtaminen</title>
     <link>https://juuso.dev/genz.html</link>
     <description>Essee Z-sukupolvesta ja siitä, miten heitä tulisi johtaa</description>
