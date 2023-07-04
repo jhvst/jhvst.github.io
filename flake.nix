@@ -49,6 +49,9 @@
             mkdir -p $out/blogPosts/j1
             cp -r ${inputs.j1.outputs.packages.${system}.j1}/* $out/blogPosts/j1
 
+            mkdir -p $out/projects/highlightplay/theinternational5
+            cp -r projects/highlightplay/theinternational5/* $out/projects/highlightplay/theinternational5
+
             mkdir -p $out/papers/bsc-thesis
             cp -r ${inputs.bsc-thesis.outputs.packages.${system}.bsc-thesis}/* $out/papers/bsc-thesis
 
