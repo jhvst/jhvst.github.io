@@ -9,6 +9,7 @@
     # blogposts
     j1.url = "github:jhvst/jhvst.github.io?dir=blogPosts/j1";
     barbell.url = "github:jhvst/jhvst.github.io?dir=blogPosts/barbell";
+    vksum.url = "github:jhvst/jhvst.github.io?dir=blogPosts/vulkan-sum-reduction";
 
     # papers
     bsc-thesis.url = "github:jhvst/jhvst.github.io?dir=papers/bsc-thesis";
@@ -48,6 +49,9 @@
 
             mkdir -p $out/blogPosts/j1
             cp -r ${inputs.j1.outputs.packages.${system}.j1}/* $out/blogPosts/j1
+
+            mkdir -p $out/blogPosts/vulkan-sum-reduction
+            cp -r ${inputs.vksum.outputs.packages.${system}.default}/* $out/blogPosts/vulkan-sum-reduction
 
             mkdir -p $out/projects/highlightplay/theinternational5
             cp -r projects/highlightplay/theinternational5/* $out/projects/highlightplay/theinternational5
