@@ -99,6 +99,14 @@
             color: #111;
         }
 
+        header {
+            background-color: yellow;
+        }
+
+        header>* {
+            margin: 0;
+        }
+
         article {
             margin: auto;
             max-width: 35em;
@@ -135,6 +143,30 @@
 </head>
 
 <body>
+    <header style="border: 3px dotted black; padding: 1em; /* margin: 1em; */ display: flex; flex-direction: column; align-content: revert; /* align-items: center; */ justify-content: true; /* justify-items: left; */ margin: auto; width: 35em;">
+        <p style="border-bottom: 2px solid black; /* align-self: flex-start; */">
+            <b style="margin-right: 1em;">Page 0</b>
+            <time style="text-transform: uppercase;">|pubDate|</time>
+        </p>
+        <h2 style="font-size: 3em; text-transform: uppercase; font-family: sans-serif; border-bottom: 2px solid black;">Juuso Haavisto</h2>
+        <div style="align-items: center; display: flex; flex-basis: 4; column-gap: 10px; /* flex-direction: row; */ justify-content: space-between;"> <span style="/* max-width: 10%; */ align-self: start; /* font-size: 100%; */ font-size: 4em; font-family: monospace;">!</span>
+            <div style="flex-grow: 1; /* max-width: 30%; */ border-right: 1px solid black;">
+                <h3 style="margin: 0;">@osnnr</h3>
+                <p style="margin: 0;">Tweet, star, or e-mail juuso@mail.com</p>
+            </div>
+            <div style="flex-grow: 1; border-right: 1px solid black; /* max-width: 30%; */ /* height: 93%; */">
+                <h3 style="/* border-right: 3px solid black; */ margin: 0;">business@ponkila.com</h3>
+                <p style="margin: 0;">NixOS-based PXE infrastructure and devops consulting</p>
+            </div>
+            <div style="flex-grow: 1;">
+                <h3 style="margin: 0;"><a href="/rss.xml">RSS</a></h3>
+                <p style="margin: 0;">Yesterday's news today</p>
+            </div>
+
+
+        </div>
+
+    </header>
     <article>
         |article|
     </article>
