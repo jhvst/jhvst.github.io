@@ -143,32 +143,43 @@
 </head>
 
 <body>
-    <header style="border: 3px dotted black; padding: 1em; display: flex; flex-direction: column; align-content: revert; margin: auto; width: 35em;">
-        <p style="border-bottom: 2px solid black; /* align-self: flex-start; */">
-            <b style="margin-right: 1em;">Page 0</b>
-            <time datetime="|datetime|" style="text-transform: uppercase;">|pubDate|</time>
-        </p>
-        <h2 style="font-size: 3em; text-transform: uppercase; font-family: sans-serif; border-bottom: 2px solid black;">Juuso Haavisto</h2>
-        <div style="align-items: center; display: flex; column-gap: 10px; /* flex-direction: row; */ justify-content: space-between;"> <span style="/* max-width: 10%; */ align-self: start; /* font-size: 100%; */ font-size: 4em; font-family: monospace;">!</span>
-            <div style="flex-grow: 1; /* max-width: 30%; */ border-right: 1px solid black;">
-                <h3 style="margin: 0;">@osnnr</h3>
-                <p style="margin: 0;">Tweet, star, or e-mail juuso@mail.com</p>
+    <article itemscope itemtype="https://schema.org/BlogPosting" itemid="https://juuso.dev/blogPosts/|name|/|slug|.html">
+        <header style="border: 3px dotted black; padding: 1em; display: flex; flex-direction: column;">
+            <p style="border-bottom: 2px solid black;">
+                <b style="margin-right: 1em;">Word count
+                    <span itemprop="wordCount">|wordCount|</span>
+                </b>
+                <time itemprop="datePublished" datetime="|datetime|">|pubDate|</time>
+            </p>
+            <div itemprop="author" itemscope itemtype="https://schema.org/Person">
+                <h2 itemprop="name" style="border-bottom: 2px solid black;">
+                    <a itemprop="url" href="https://juuso.dev">Juuso Haavisto</a>
+                </h2>
+                <div style="align-items: center; display: flex; column-gap: 10px; justify-content: space-between;">
+                    <div style="border-right: 1px solid black;">
+                        <h3 style="margin: 0;"><a itemprop="sameAs" href="https://twitter.com/osnnr">@osnnr</a></h3>
+                        <p style="margin: 0;">Tweet, star, or e-mail <a href="mailto:juuso@mail.com" itemprop="email">juuso@mail.com</a></p>
+                    </div>
+                    <div style="border-right: 1px solid black;">
+                        <h3 style="margin: 0;"><a href="mailto:business@ponkila.com">business@ponkila.com</a></h3>
+                        <p style="margin: 0;">NixOS-based PXE infrastructure and devops consulting</p>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0;"><a href="/rss.xml">RSS</a></h3>
+                        <p style="margin: 0;">Yesterday's news today</p>
+                    </div>
+                </div>
             </div>
-            <div style="flex-grow: 1; border-right: 1px solid black; /* max-width: 30%; */ /* height: 93%; */">
-                <h3 style="/* border-right: 3px solid black; */ margin: 0;">business@ponkila.com</h3>
-                <p style="margin: 0;">NixOS-based PXE infrastructure and devops consulting</p>
-            </div>
-            <div style="flex-grow: 1;">
-                <h3 style="margin: 0;"><a href="/rss.xml">RSS</a></h3>
-                <p style="margin: 0;">Yesterday's news today</p>
-            </div>
-
-
-        </div>
-
-    </header>
-    <article>
-        |article|
+        </header>
+        <meta itemprop="abstract" content="|description|">
+        <section itemprop="articleBody">
+            |article|
+        </section>
+        <footer>
+            <small>
+                This page has been generated with Nix Flakes. It can be reproduced by running <code>nix build github:jhvst/jhvst.github.io?dir=blogPosts/|name|</code>. Fork at <a href="https://github.com/jhvst/jhvst.github.io">GitHub</a>.
+            </small>
+        </footer>
     </article>
 </body>
 
