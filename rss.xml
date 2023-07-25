@@ -13,6 +13,12 @@
     <pubDate>28 Jun 2023 21:19:00 GMT</pubDate>
   </item>
   <item>
+    <title>iPXE, NixOS, EDK2 UEFI BIOS, and Raspberry Pi 4</title>
+    <link>https://juuso.dev/blogPosts/ipxe-rpi4/ipxe-nixos-edk2-uefi-bios-and-raspberry-pi-4.html</link>
+    <description>This is an excerpt from a reddit comment of mine in response to running NixOS with additional kernel modules on NixOS.</description>
+    <pubDate>12 Nov 2022 11:57:50 GMT</pubDate>
+  </item>
+  <item>
     <title>Scheduling Array Operations // Dyalog '22</title>
     <link>https://www.youtube.com/watch?v=Jt6mdYGn9M4</link>
     <description>Scheduling array operations has been a topical theme in the research of tensor computation. With the help of type theory, array operations are parallelised for graphics processing units and distributed computing. Juuso shares his findings in static scheduling, and how it can be used to optimise execution over different hardware and compute infrastructure settings.</description>
