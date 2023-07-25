@@ -4,7 +4,7 @@
     nixpkgs.url = "github:nixos/nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-root.url = "github:srid/flake-root";
-    blog.url = "github:jhvst/jhvst.github.io";
+    blog-html.url = "github:jhvst/jhvst.github.io?dir=html";
     barbell.url = "github:jhvst/barbell";
   };
 
@@ -50,7 +50,7 @@
             mkdir -p $out/css
             mkdir -p $out/img
             mkdir html
-            cp -r ${inputs.blog.packages.${system}.components}/html/* ./html
+            cp -r ${inputs.blog-html.packages.${system}.default}/* ./html
             cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
             woff2_compress IBMPlexMono-Regular.otf
             cp IBMPlexMono-Regular.woff2 $out/
@@ -63,7 +63,7 @@
             date -d "${pubDate}" -Iminutes > datetime.bar
             cat main.md | wc -w > wordCount.bar
             barbell main.html > article.bar
-            barbell ./html/template_article.html > $out/$(slugify ${title}).html
+            barbell html/template_article.html > $out/$(slugify ${title}).html
             js-beautify -f $out/$(slugify ${title}).html -r
           '';
 
