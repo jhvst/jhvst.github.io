@@ -10,11 +10,11 @@
       },
       "locked": {
         "dir": "blogPosts/barbell",
-        "lastModified": 1690321674,
-        "narHash": "sha256-FBfM0AFMHeWUs0bsty3vWbSV9biNFzF4UZ+SLlyHvi8=",
+        "lastModified": 1690321794,
+        "narHash": "sha256-beI+FpUoNjnDjuCRuYq7FlB9RvKgr47P2sOJH4skaNo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "c7449df78cd1639cedaa44806b7fda9cebb38247",
+        "rev": "45c0b0ade525e80e8a3691c78f4fc2bfd4d7ee56",
         "type": "github"
       },
       "original": {
@@ -382,11 +382,11 @@
       },
       "locked": {
         "dir": "papers/bsc-thesis",
-        "lastModified": 1690321674,
-        "narHash": "sha256-FBfM0AFMHeWUs0bsty3vWbSV9biNFzF4UZ+SLlyHvi8=",
+        "lastModified": 1690321794,
+        "narHash": "sha256-beI+FpUoNjnDjuCRuYq7FlB9RvKgr47P2sOJH4skaNo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "c7449df78cd1639cedaa44806b7fda9cebb38247",
+        "rev": "45c0b0ade525e80e8a3691c78f4fc2bfd4d7ee56",
         "type": "github"
       },
       "original": {
@@ -1199,11 +1199,11 @@
       },
       "locked": {
         "dir": "blogPosts/ipxe-rpi4",
-        "lastModified": 1690321674,
-        "narHash": "sha256-FBfM0AFMHeWUs0bsty3vWbSV9biNFzF4UZ+SLlyHvi8=",
+        "lastModified": 1690321794,
+        "narHash": "sha256-beI+FpUoNjnDjuCRuYq7FlB9RvKgr47P2sOJH4skaNo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "c7449df78cd1639cedaa44806b7fda9cebb38247",
+        "rev": "45c0b0ade525e80e8a3691c78f4fc2bfd4d7ee56",
         "type": "github"
       },
       "original": {
@@ -1247,11 +1247,11 @@
       },
       "locked": {
         "dir": "blogPosts/j1",
-        "lastModified": 1690321674,
-        "narHash": "sha256-FBfM0AFMHeWUs0bsty3vWbSV9biNFzF4UZ+SLlyHvi8=",
+        "lastModified": 1690321794,
+        "narHash": "sha256-beI+FpUoNjnDjuCRuYq7FlB9RvKgr47P2sOJH4skaNo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "c7449df78cd1639cedaa44806b7fda9cebb38247",
+        "rev": "45c0b0ade525e80e8a3691c78f4fc2bfd4d7ee56",
         "type": "github"
       },
       "original": {
@@ -2340,11 +2340,11 @@
       },
       "locked": {
         "dir": "blogPosts/vulkan-sum-reduction",
-        "lastModified": 1690321674,
-        "narHash": "sha256-FBfM0AFMHeWUs0bsty3vWbSV9biNFzF4UZ+SLlyHvi8=",
+        "lastModified": 1690321794,
+        "narHash": "sha256-beI+FpUoNjnDjuCRuYq7FlB9RvKgr47P2sOJH4skaNo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "c7449df78cd1639cedaa44806b7fda9cebb38247",
+        "rev": "45c0b0ade525e80e8a3691c78f4fc2bfd4d7ee56",
         "type": "github"
       },
       "original": {
