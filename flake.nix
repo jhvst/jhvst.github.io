@@ -110,6 +110,18 @@
 
       };
 
+      flake =
+        let
+          inherit (self) outputs;
+        in
+        {
+
+          templates.default = {
+            path = ./templates;
+            description = "A flake for blogPosts";
+          };
+
+        };
 
     };
 }
