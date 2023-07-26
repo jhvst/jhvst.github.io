@@ -13,6 +13,12 @@
     <pubDate>28 Jun 2023 21:19:00 GMT</pubDate>
   </item>
   <item>
+    <title>RAMsteam</title>
+    <link>https://juuso.dev/blogPosts/RAMsteam/ramsteam.html</link>
+    <description>Explanation more or less how Linux boots.</description>
+    <pubDate>29 Nov 2022 02:19:00 GMT</pubDate>
+  </item>
+  <item>
     <title>iPXE, NixOS, EDK2 UEFI BIOS, and Raspberry Pi 4</title>
     <link>https://juuso.dev/blogPosts/ipxe-rpi4/ipxe-nixos-edk2-uefi-bios-and-raspberry-pi-4.html</link>
     <description>This is an excerpt from a reddit comment of mine in response to running NixOS with additional kernel modules on NixOS.</description>
