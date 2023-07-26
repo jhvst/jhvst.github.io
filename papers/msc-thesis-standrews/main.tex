@@ -9,7 +9,6 @@
 \usepackage{pifont}
 \usepackage{dirtytalk}
 \usepackage{graphicx}
-\graphicspath{{assets/}}
 \usepackage{glossaries}
 \usepackage{listings}
 \usepackage{threeparttable}
@@ -66,15 +65,15 @@
     \vspace{4cm}
     \begin{center}
         \huge{Static Semantics of Rank Polymorphism}
-    \end{center}    
-    
+    \end{center}
+
     \begin{figure*}[ht]
         \centering
         \begin{minipage}[b]{0.35\textwidth}
-            \includegraphics[width=\textwidth]{01-standard-vertical-black-text.png}
+            \includegraphics[width=\textwidth]{./assets/01-standard-vertical-black-text.png}
         \end{minipage}
     \end{figure*}
-    
+
     \begin{textblock}{200}(10,12)%
     \obeylines
     \setlength{\parskip}{0cm}
@@ -85,7 +84,7 @@
         Supervisor: \textit{Dr.} Christopher Brown
         June 2021
     \end{textblock}%
-    
+
 \end{titlepage}
 
 \section*{Declaration}
@@ -100,7 +99,7 @@ I thank my supervisor Christopher Brown for helping me to learn Idris.
 
 % Purpose
 The prevalence of multi-core systems in the 21st century has increased interest in programming languages for parallel computation. In general, the challenge of parallel computation can be considered two-fold: 1) to have a language that can express and promote parallel constructs and 2) that such language allows static inference of parallel patterns to schedule the work on hardware efficiently. This study focuses on the second part, proposing static semantics using dependent types for an array programming language that exhibits rank polymorphism. We conduct our research empirically using the Idris language for dependent types and target a three-rank fragment of APL as the modeled parallel language. Our work can be considered an enhancement effort of introducing static type checking to APL using Idris. We demonstrate how rank polymorphism can be captured for scalars, vectors, and matrices using a generic one-dimensional vector with stride information. We also demonstrate how dependent types can statically capture so-called shape errors, lacking in current-day APL implementations. Further, we stipulate how Idris can statically type compute kernels for parallel execution on graphics processing units. The contribution is imposing correctness to rank polymorphic languages using dependent types to express parallel scheduling schemes. We imply how to guide parallel scheduling with a strong type system may lead to enhanced execution of workloads usually done with GPUs, such as applications in machine learning.
-    
+
 \end{abstract}
 
 \tableofcontents
@@ -152,25 +151,25 @@ is redefined. We will still check for termination but in a smaller scope. These 
 \begin{figure}
     \begin{lstlisting}
     #version 450
-    
+
     layout(std430, set = 0, binding = 0) buffer LeftBuffer {
         float numbers[];
     } lhs;
-    
+
     layout(std430, set = 0, binding = 1) buffer RightBuffer {
         float numbers[];
     } rhs;
-    
+
     void main() {
         uint index = gl_GlobalInvocationID.x;
         lhs.numbers[index] += rhs.numbers[index];
-    }    
+    }
     \end{lstlisting}
     \caption{An example GPGPU kernel.}
     \label{fig:kernel}
 \end{figure}
 
-Suppose that at runtime of the kernel in Fig. \ref{fig:kernel}, we give the \verb|lhs| variable values $[1,2,3,4]$ and the \verb|rhs| variable values $[4,3,2,1]$. In common languages, the main is ran only once. One interpretation would be to expect the final value of \verb|lhs| to be $[5, 2, 3, 4]$. But, the result is $[5, 5, 5, 5]$ in the SIMD model. This is because the main function is run per each \textit{invocation}, which resembles a thread. The number of invocations requested can be changed easily, with a theoretical upper bound being a software-defined restriction, usually $2^{30}-1$ per block dimension with the Vulkan \gls{API}. The point is, that because each value is assigned its own thread and its own data cell, the normal recursive functional operations do not apply because a single thread does not have visibility to the whole data set by default. While an interesting endeavor to try to model SIMD functionally, it was considered out of the scope of this study. As such, we instead decided to leave the data values out completely. 
+Suppose that at runtime of the kernel in Fig. \ref{fig:kernel}, we give the \verb|lhs| variable values $[1,2,3,4]$ and the \verb|rhs| variable values $[4,3,2,1]$. In common languages, the main is ran only once. One interpretation would be to expect the final value of \verb|lhs| to be $[5, 2, 3, 4]$. But, the result is $[5, 5, 5, 5]$ in the SIMD model. This is because the main function is run per each \textit{invocation}, which resembles a thread. The number of invocations requested can be changed easily, with a theoretical upper bound being a software-defined restriction, usually $2^{30}-1$ per block dimension with the Vulkan \gls{API}. The point is, that because each value is assigned its own thread and its own data cell, the normal recursive functional operations do not apply because a single thread does not have visibility to the whole data set by default. While an interesting endeavor to try to model SIMD functionally, it was considered out of the scope of this study. As such, we instead decided to leave the data values out completely.
 
 However, even though the computation model we target is different, the parallel \emph{patterns} for SIMD can still be catered for. The previous notion continues: the idea is to give hints to the thread scheduler on \emph{how} some value could be computed, instead of trying to model \emph{what} the value is. For example, the parallelism on the example above could be modeled as having two vectors of length four being fitted on top of each other. In our model, we say that in this case, there is parallelism of 4 in the y-direction. In comparison, x-direction parallelism would mean that some values are dependent on the vector neighbors compared to the other argument. E.g., a reduction of 4 values in a vector to 1 would have the x-direction parallelism of 4. This functionality is mainly meant for future work since it does not strictly relate to shape analysis. However, it is still a relevant piece that can benefit from the shape analysis later on (as the number of divergences or values to sum are known). Nevertheless, this establishes the point of Idris: with dependent types, we type-check APL programs, answering whether some APL program will go wrong or not (and with Idris' totality checker, we gain confidence in holding this property at all times), and with parallelism modeling, we can leave basis for future work in further aiding the scheduler in optimizing the computation with parallelism, inherently common in our modeled array language, APL.
 
@@ -189,7 +188,7 @@ We still do check for termination. However, what we check to terminate only appl
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{overview.pdf}
+  \includegraphics[width=\columnwidth]{./assets/overview.pdf}
   \caption{High-level overview of the research done in this study, and how they relate to previous work}
   \source{\cite{gpupoly}}
   \label{fig:ov}
@@ -286,7 +285,7 @@ Yet, APL's power, \emph{rank polymorphism}, starts to become more apparent only 
 ↓1 2 3│
 │4 5 6│
 │7 8 9│
-└~────┘    
+└~────┘
 \end{verbatim}
 
 Here, we can see that the functionality of the \verb|⍴| changed when it has arguments on its left and right-hand side. This dyadic form defines that we want to create a 3x3 matrix from the values we get from \verb|⍳ 9|. Next, we can see that the addition operation still works:
@@ -319,7 +318,7 @@ Considering related work, type systems for parallelism could be considered to be
 
 \emph{Static} rank polymorphism can be considered an approach to capture the notion of shapely types. Recently, the subject has been studied in Northeastern University \cite{slepak2014array, slepak2019semantics, shivers2019introduction}, University of Oxford \cite{gibbons2017aplicative}, and University of Copenhagen \cite{henriksen:phdthesis}. These approaches involve dependent types: at Northeastern, they have their language called Remora, at Copenhagen sized-types (a fragment of dependent types) are utilized on their language Futhark, and at Oxford, dependent Haskell was used. Recent industry work can be found from Google as Dex \cite{paszke2021getting}, which proliferates typed indices.
 
-Regarding this work, it quickly became evident that the rational decision to capture static rank polymorphism should follow the general direction pioneered by the related work. As such, we settled with dependent types. And rather conveniently for us, almost as if by plan, the continuation institution after the previous thesis work became the University of St Andrews. This coincides with the place where the dependently typed language \emph{Idris} is developed. As such, it was both logical and convenient to choose Idris as the language for this thesis work. Further, Idris bears some novelty to the previous works: Idris can also be used as a theorem prover like Agda and Coq. This allows theorem prover capabilities to be used, well, to prove properties such as \emph{completeness} and \emph{soundness} pragmatically, i.e., without us coming up with the type system on our own. 
+Regarding this work, it quickly became evident that the rational decision to capture static rank polymorphism should follow the general direction pioneered by the related work. As such, we settled with dependent types. And rather conveniently for us, almost as if by plan, the continuation institution after the previous thesis work became the University of St Andrews. This coincides with the place where the dependently typed language \emph{Idris} is developed. As such, it was both logical and convenient to choose Idris as the language for this thesis work. Further, Idris bears some novelty to the previous works: Idris can also be used as a theorem prover like Agda and Coq. This allows theorem prover capabilities to be used, well, to prove properties such as \emph{completeness} and \emph{soundness} pragmatically, i.e., without us coming up with the type system on our own.
 
 \subsection{GPUs as Parallel Processors}
 
@@ -328,14 +327,14 @@ GPUs are arguably the most ubiquitous special-purpose parallel processors. Histo
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.25]{m1.png}
+  \includegraphics[scale=0.25]{./assets/m1.png}
   \caption{Simplified representation of the Apple M1 system-on-chip device. Important features: GPU and CPU share the same processor. There are four queue families which only have a single queue each. This design allows low latency but has relatively low throughput: the queue count can bottleneck the device if many command buffers are submitted in parallel. The die size of system-on-chips is also smaller, making it physically hard to compete with throughput with discrete graphics cards.}
   \label{fig:m1}
 \end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.25]{rtx.png}
+  \includegraphics[scale=0.25]{./assets/rtx.png}
   \caption{Simplified representation of the Nvidia RTX 2080 discrete GPU. Important features: GPU and CPU are different processors, so communication between the two happens via the relatively slow PCIe lane. There are two compute-capable queue families which have several queues each. This design has high latency but high throughput: much work can be queued in parallel if the CPU has the cores to do it, but the PCIe lane can be a limit for large datasets. But, when the kernel does get started, the device outperforms commercial off-the-shelf GPU system-on-chips in performance.}
   \label{fig:rtx}
 \end{figure}
@@ -397,7 +396,7 @@ This will output 10. For matrices, the reduction is made x-wise and the resultin
 1 2 3
 4 5 6
 7 8 9
-        
+
         +/ mat
 6 15 24
 \end{verbatim}
@@ -409,7 +408,7 @@ This will output 10. For matrices, the reduction is made x-wise and the resultin
     OpDecorate %vector_struct Block
     OpDecorate %vector DescriptorSet 0
     OpDecorate %vector Binding 1
-    
+
     %int = OpTypeInt 32 0
     %float = OpTypeFloat 32
     %uint_4 = OpConstant %int 4
@@ -432,13 +431,13 @@ Thus, the challenge this thesis work proposes is about typing the length of the 
     mkRank len s = case len > s of
       True => the (Fin 3) 2
       False => if (len > 1) then the (Fin 3) 1 else the (Fin 3) 0
-    
+
     data Dim: (rows, stride, len: Nat) -> Type where
       MkDim: (rows, stride: Nat)
         -> {auto NZs : So (stride > 0)}
         -> {auto NZs : So (rows > 0)}
         -> Dim rows stride (rows * stride)
-    
+
     data Shape: (rank: Fin 3) -> Dim rows stride len -> Type where
       SomeScalar:
         Shape
@@ -457,14 +456,14 @@ Thus, the challenge this thesis work proposes is about typing the length of the 
         -> Shape
             (mkRank (rows * stride) stride)
             (MkDim rows stride)
-\end{lstlisting}    
+\end{lstlisting}
 \caption{Our polymorphic shape type}
 \label{fig:shape}
 \end{figure}
-        
+
 On line 12, we have the \verb|Shape| type. The type signature is read as follows: the first argument to \verb|Shape| is called rank, which is of type \verb|Fin 3|. \verb|Fin 3| corresponds to the set of natural numbers that are strictly less than 3. Next, the second parameter must be of type \verb|Dim|. The \verb|Dim| type in itself requires three parameters: rows, stride, and len. From line 6, we can see that these variables are natural numbers \verb|Nat|. On lines 8 and 9, we can also see that the sole constructor of the \verb|Dim| data structure, called \verb|MkDim|, requires implicit runtime proof that stride and rows are greater than 0. If and only if \verb|MkDim| allows so, can a \verb|Dim| be created and.
 
-We have now covered the first line of the \verb|Shape| definition. The next lines of our interest are 13, 17, and 23. On these lines, the constructors for scalars, vectors, and matrices are defined (called \verb|SomeScalar|, \verb|SomeVect|, \verb|SomeMat| respectively. This stresses the previous notion that we do not care about \emph{what} values these corresponds to, just the shape). The most important part is noticing that we are now effectively considering all data formats to be matrices. E.g., on lines 14-16, we can see that scalars are, in fact, just matrices under special conditions. To differentiate these special conditions, the \verb|mkRank| function on lines 1-4 is used. This function declares a rank (of type \verb|Fin 3|) for each \verb|Shape|. The declaration is a bit hard to read, but in effect, the scalars are defined as matrices with a length of 1. Vectors are defined as matrices that have equal length and stride. This implies that matrices are arrays with more than a single value and must have at least two rows (implied by the stride being less than the length of the array). 
+We have now covered the first line of the \verb|Shape| definition. The next lines of our interest are 13, 17, and 23. On these lines, the constructors for scalars, vectors, and matrices are defined (called \verb|SomeScalar|, \verb|SomeVect|, \verb|SomeMat| respectively. This stresses the previous notion that we do not care about \emph{what} values these corresponds to, just the shape). The most important part is noticing that we are now effectively considering all data formats to be matrices. E.g., on lines 14-16, we can see that scalars are, in fact, just matrices under special conditions. To differentiate these special conditions, the \verb|mkRank| function on lines 1-4 is used. This function declares a rank (of type \verb|Fin 3|) for each \verb|Shape|. The declaration is a bit hard to read, but in effect, the scalars are defined as matrices with a length of 1. Vectors are defined as matrices that have equal length and stride. This implies that matrices are arrays with more than a single value and must have at least two rows (implied by the stride being less than the length of the array).
 
 In effect, by having the \verb|Shape| be the singular data structure to represent all plausible ranks of our APL fragment, our type system only ever needs to pattern match a single data structure. This simplifies the code a lot and solidifies the notion that rank polymorphism is about the shape (rank and the dimensions) of the array, not the values\footnote{Though, no rule without exceptions. An exception of this is filter operation.}.
 
@@ -474,13 +473,13 @@ But why Idris? Cannot the \verb|Shape| be represented in some other language? To
 
 \begin{lstlisting}[language=Go]
     type Rank int
-    
+
     const (
         Scalar Rank = iota // Scalar = 0
         Vector             // Vector = 1
         Matrix             // Matrix = 2
     )
-    
+
     type Shape struct {
         rank Rank
         rows, stride, len uint
@@ -533,7 +532,7 @@ To demonstrate constant generic types, we show constant values to be defined for
         left: [T; N],
         right: [T; N],
     }
-    
+
     impl<T: Debug, const N: usize> Debug for ArrayPair<T, N> {
         // ...
     }
@@ -545,7 +544,7 @@ Similarly, and more interesting to our use-case, type level morphology where the
     fn split_first<T, const N: usize>(arr: [T; N]) -> (T, [T; N - 1]) {
         // ...
     }
-    
+
     fn generic_function<const M: usize>(arr: [i32; M]) {
         // ...
         let (head, tail) = split_first(arr);
@@ -561,9 +560,9 @@ And more importantly, in Rust, should the length of the arr be 0, the compiler w
         -> {auto NZs : So (stride > 0)}
         -> {auto NZs : So (rows > 0)}
         -> Dim rows stride (rows * stride)
-\end{verbatim}		
-		
-The NZs proofs could then be provided to some function, e.g., with: 
+\end{verbatim}
+
+The NZs proofs could then be provided to some function, e.g., with:
 
 \begin{verbatim}
     Reduce : Shape q (MkDim (S r) (S n)) -> Phase
@@ -605,7 +604,7 @@ It could be said that most people familiarize polymorphism with object orientate
 \begin{lstlisting}[language=Haskell]
     data T: Fin 3 -> Type where
       mkT: (ff: Fin 3) -> T ff
-    
+
     f : T 1 -> Nat
     f t = 1
 \end{lstlisting}
@@ -629,11 +628,11 @@ If the function is used on each constructor under Shape, it allows automatic ref
   \item \verb|SomeVect 1|, which returns:
   \begin{itemize}
     \item \verb|Shape FZ (MkDim 1 1)|
-  \end{itemize}  
+  \end{itemize}
   \item \verb|SomeScalar|, which returns:
   \begin{itemize}
     \item \verb|Shape FZ (MkDim 1 1)|
-  \end{itemize}  
+  \end{itemize}
 \end{itemize}
 
 In other words, even if the constructor for vector or matrix is used, but the input corresponds to a scalar, then the identity of a scalar is returned instead of vector or matrix. The equivalence interface between the type would thus correspond to equivalent rank and dimension.
@@ -656,10 +655,10 @@ A cuboid of an inner matrix would become a pretty complicated structure, which m
       Plus | Minus
       | Slash | Backslash
       | Equal ... and so on
-    
+
     data Parallelism: Nat -> Nat -> Type where
       mkPar: (x: Nat) -> (y: Nat) -> Parallelism x y
-    
+
     record Phase where
       constructor MkPhase
       operation : Operation
@@ -758,7 +757,7 @@ In other words, Idris confirms that the APL operation will return some scalar. N
 When we try to run the program in Dyalog APL, we get:
 
 \begin{verbatim}
-    LENGTH ERROR: Mismatched left and right argument shapes    
+    LENGTH ERROR: Mismatched left and right argument shapes
 \end{verbatim}
 
 As we can see, APL will notice this type of error, but under the hood, this is not static analysis. We can see this with a delay function:
@@ -813,7 +812,7 @@ Modeling parallelism on type-level became an evident requirement in the previous
     \item Bytecode \emph{vectorization} (i.e., SPIR-V) specific:
     \begin{itemize}
         \item Each GPU core has a SIMD lane which allows certain special operations documented in the SPIR-V specification\footnote{\url{https://www.khronos.org/registry/spir-v/specs/unified1/SPIRV.html#_a_id_group_a_group_and_subgroup_instructions}} to be executed fast. The SIMD lane is a variable across GPU manufacturers, and it \emph{may} be varying between different cores over a single execution. In general, the lower bound for manufacturers is on Intel, which defines the SIMD lane to \emph{usually} have the width of 8 values. The upper bound is usually of AMD's domain, which has SIMD lanes of widths of \emph{usually} 64 values. As such, an optimization rises: one does not need to schedule 5 cores for 10 values if the operation is SIMD-capable. In our example, it is, so we can instead schedule a single core to sum the values using a single call, which likely has lower latency.
-        \item A single data value in SPIR-V can be a scalar, vector, or matrix. Vectors and matrices are limited: a vector can have $1..4$ values, and a matrix can have dimensions from $1..4 x 1..4$. This means that a single operation can abstracts SIMD calls over an array of values. What this means is that a single group call on AMD would operate on 64 values which might at most be 4x4 each, making a single opcode effectively operate over $1024$ values at once. However, a decision logic would be needed to figure out when to compose the data into these abstractions, and if so, what lengths to use. 
+        \item A single data value in SPIR-V can be a scalar, vector, or matrix. Vectors and matrices are limited: a vector can have $1..4$ values, and a matrix can have dimensions from $1..4 x 1..4$. This means that a single operation can abstracts SIMD calls over an array of values. What this means is that a single group call on AMD would operate on 64 values which might at most be 4x4 each, making a single opcode effectively operate over $1024$ values at once. However, a decision logic would be needed to figure out when to compose the data into these abstractions, and if so, what lengths to use.
     \end{itemize}
     \item Scheduling (i.e., Vulkan) specific:
     \begin{itemize}
@@ -824,7 +823,7 @@ Modeling parallelism on type-level became an evident requirement in the previous
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.1]{1024px-RAID_0.svg.png}
+  \includegraphics[scale=0.1]{./assets/1024px-RAID_0.svg.png}
   \caption{Diagram of a RAID 0 setup.}
   \source{Colin M.L. Burnett (via Wikipedia)}
   \label{fig:raid0}
@@ -839,7 +838,7 @@ But what about the bytecode optimization, i.e., vectorization? This comes to the
         EQorQT: (vec: Vect n Int) ->
             -> {auto isQT : (count 0 vec) > (len (vec - 1))}
             -> Value (S (max vec))
-        
+
     reduce : Vect n Int -> Shape [...]
     reduce v = SomeScalar (logicalAND (1 (EQorQT v)))
 \end{lstlisting}
@@ -848,21 +847,21 @@ So, the point is that on line 7, we do computation on the vector values, but we 
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.25]{reduce.png}
+  \includegraphics[scale=0.25]{./assets/reduce.png}
   \caption{Visualization of a 4-value vector reduction.}
   \label{fig:reduce}
 \end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.25]{scan.png}
+  \includegraphics[scale=0.25]{./assets/scan.png}
   \caption{Visualization of a 4-value vector scan.}
   \label{fig:scan1}
 \end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.25]{scan2.png}
+  \includegraphics[scale=0.25]{./assets/scan2.png}
   \caption{Alternative visualization of a 4-value vector scan without explicit shape information. $a$ values are starting values, $o$ values are result values.}
   \label{fig:scan2}
 \end{figure}
@@ -912,7 +911,7 @@ Termination: ensure termination of functions that operate on the Shape type
 \end{tabular}
     \begin{tablenotes}
     \item [a] We get no errors when running the source file, despite having \verb|%default total| enabled.
-    \end{tablenotes}    
+    \end{tablenotes}
     \end{threeparttable}
 \end{center}
 \end{table*}
@@ -938,7 +937,7 @@ s2.idr:57:1-54:
    |
 57 | Reduce {q=FZ} o = MkPhase Slash o (mkPar 0 0)
    | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Shaped.Reduce is not total as there are missing cases    
+Shaped.Reduce is not total as there are missing cases
 \end{verbatim}
 
 As our implementation does not complain about such errors by default, we know that our program is total, thus terminating.
@@ -956,20 +955,20 @@ As our implementation does not complain about such errors by default, we know th
     Reduce {q=FZ} o = MkPhase Slash o (mkPar 0 0)
     Reduce {q=FS(FZ)} {n} o = MkPhase Slash SomeScalar (mkPar (S n) 0)
     Reduce {q=FS(FS(FZ))} {r} {n} o = MkPhase Slash (SomeVect (S n)) (mkPar ((S n)*(S r)) 0)
-    
+
     Scan : Shape p (MkDim (S r) (S n)) -> Phase
     Scan {r} {n} o = MkPhase Backslash o (mkPar ((S n)*(S r)) 0)
-    
+
     -- shape (Sum SomeScalar SomeScalar)
     -- shape (Sum (SomeVect 4) (SomeVect 4))
     -- shape (Sum (SomeMat 3 3) (SomeMat 3 3))
     Sum : Shape p (MkDim (S r) (S n)) -> Shape p (MkDim (S r) (S n)) -> Phase
     Sum {r} {n} a o = MkPhase Plus o (mkPar 0 ((S n)*(S r)))
-    
+
     -- shape (NSum SomeScalar (SomeVect 4))
     -- shape (NSum SomeScalar (SomeMat 3 3))
     NSum : Shape 0 (MkDim (S r) (S n)) -> Shape p (MkDim (S j) (S m)) -> Phase
-    NSum {j} {m} a o = MkPhase Plus (SomeMat (S j) (S m)) (mkPar 0 ((S j)*(S m)))   
+    NSum {j} {m} a o = MkPhase Plus (SomeMat (S j) (S m)) (mkPar 0 ((S j)*(S m)))
 \end{lstlisting}
     \caption{Modeled operations: Reduce, Scan, Sum.}
     \label{fig:modeled}
@@ -992,7 +991,7 @@ In summary, we consider that we were able to fulfill everything we wanted. The i
 
 \begin{figure}
   \centering
-  \includegraphics[scale=0.25]{freduc.png}
+  \includegraphics[scale=0.25]{./assets/freduc.png}
   \caption{Visualization of 16-valued vector sum reduction over 4 invocation "cores". The final result is 40, found at index 1 of core \#1, supposing indexing starts from 1.}
   \label{fig:freduc}
 \end{figure}
@@ -1026,8 +1025,8 @@ In the future, it would be interesting to apply Idris 2 to our current version f
 %- mirror the intro
 %- what the thesis was about
 %- what went well, what did not, what i would different, future work
-%- does it work, repeat 
-%- what to do if they would continue, 
+%- does it work, repeat
+%- what to do if they would continue,
 
 This study was motivated by the need to add a type system for GPU programs. This need was identified in a previous study, in which we had to do it manually. We chose dependently typed Idris to do this. We found that shape analysis done with Idris can help parallel program execution in two ways: a) in scheduling and b) in vectorizing bytecode. Having chosen APL as the modeled parallel language, we found that a type system could be added without any semantic changes to APL itself, thanks to how strict APL is. We demonstrated the ability to detect shape errors, and on the other hand, the ability to parse strongly typed intermediary types for our initial purpose. This is useful for correctness and performance reasons: we know that scheduled programs will not go wrong, and we know precisely the amount of resources our computation tasks use. Future studies could exploit this static information to split computation into smaller pieces. This might be useful in a network of GPUs, in which tasks are broadcasted into a distributed network.
 
@@ -1049,7 +1048,7 @@ record Phase where
 ...
 
 f : Shape q (MkDim (S n) (S v)) -> Phase
-f o = MkPhase Slash SomeScalar (mkPar 0 0)  
+f o = MkPhase Slash SomeScalar (mkPar 0 0)
 \end{verbatim}
 
 Even though it seems like the two are equivalent, these challenges would probably be circumvented after more learning to choose the proper functional programming abstractions. However, nevertheless, the initial goal was met regardless. Other challenges included the extensive background of the study: much time was spent on refining the fundamental importance of Idris. Many related works also attempt to capture the data effect done to arrays via the APL functions. However, it soon became evident that an attempt to model actual parallel computation in Idris was fighting the windmills. A resolution was much more abstract than initially planned. While depressing on the code output front, the higher abstraction cut the chase straight into the types, which allowed more thought to be put into classifying programs and parallelism. Yet, the model is easy to extend in future work. Future work would also include approaches to complete mechanization of typing the SPIR-V programs. There is no read-eval-print-loop or foreign-function-interface coded into the program, which would be required when the actual GPU scheduler code via Rust asks for type-checking. At the same time, upgrading to Idris 2 probably makes sense.
@@ -1060,7 +1059,7 @@ Alas, despite general difficulties, the project was finally successful: given an
 \chapter{SPIR-V code artifacts}
 
 \begin{figure}
-    
+
     \begin{lstlisting}[
         basicstyle=\tiny, %or \small or \footnotesize etc.
     ]
