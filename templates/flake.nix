@@ -58,9 +58,10 @@
             echo "${title}" > title.bar
             echo "${description}" > description.bar
             echo "${pubDate}" > pubDate.bar
-            echo "${name} > name.bar
+            echo "${name}" > name.bar
             slugify ${title} > slug.bar
             date -d "${pubDate}" -Iminutes > datetime.bar
+            cat main.md | wc -w > wordCount.bar
             barbell main.html > article.bar
             barbell html/template_article.html > $out/$(slugify ${title}).html
             js-beautify -f $out/$(slugify ${title}).html -r
