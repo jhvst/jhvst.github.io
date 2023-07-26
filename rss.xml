@@ -61,6 +61,11 @@
     <pubDate>28 Aug 2021 12:00:00 GMT</pubDate>
   </item>
   <item>
+    <title>Static Semantics of Rank Polymorphism</title>
+    <link>https://juuso.dev/papers/msc-thesis-standrews/msc-thesis-standrews.html</link>
+    <pubDate>21 Jun 2021 18:58:00 GMT</pubDate>
+  </item>
+  <item>
     <title>Leveraging APL and SPIR-V languages to write network functions to be deployed on Vulkan compatible GPUs</title>
     <link>https://hal.inria.fr/hal-03155647/</link>
     <description>Optimizing Python code by rewriting it in APL, and then translating it into Vulkan SPIR-V</description>

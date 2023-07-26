@@ -15,6 +15,7 @@
 
     # papers
     bsc-thesis.url = "github:jhvst/jhvst.github.io?dir=papers/bsc-thesis";
+    standrews.url = "github:jhvst/jhvst.github.io?dir=papers/msc-thesis-standrews";
   };
 
   outputs =
@@ -66,6 +67,9 @@
 
             mkdir -p $out/papers/bsc-thesis
             cp -r ${inputs.bsc-thesis.outputs.packages.${system}.bsc-thesis}/* $out/papers/bsc-thesis
+
+            mkdir -p $out/papers/msc-thesis-standrews
+            cp -r ${inputs.standrews.outputs.packages.${system}.default}/* $out/papers/msc-thesis-standrews
 
             cp -r ignition $out
             cp -r SPAs $out
