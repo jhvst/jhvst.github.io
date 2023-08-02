@@ -6,7 +6,11 @@ What the rank polymorphism does is _lifting_ of binary operations onto higher ar
 
 ## Denotational semantics: dependent types
 
-There are also other constraints. In APL and BQN, operations are always either _monadic_ or _dyadic_, meaning the operations either take one or two arguments. When the programmer cannot easily create OOP style structures with numerous arguments, the challenge quickly becomes about thinking programming as a set of transformations over a single data-set. Semantically this introduces another challenge: the code is sometimes back and forth during a single line, because the existance of a left-hand argument makes the semantics of the operation to vary. For example, `=` with a single argument returns the rank of the array BQN, but with two arguments it checks for equality:
+The basis of a rank polymorphic language are its _atoms_. Atoms here mean function values and value literals. All atoms share the same single data type, which is a rank polymorphic array. This type carries no visible type signature in traditional implementations like APL, even though there are certain cases in which a type error may occur, such as with product of two matrices, which is defined as Hadamard product hence requires matrix shape symmetry. Some more novel array programming languages like Google Dex implement dependent types to resolve these runtime errors statically.
+
+Function applications are called _monadic_ when taking a single argument and _dyadic_ when taking two. Suppose that $F$ is the set of all functions and $x$ and $w$ as elements of the set of subjects $s$, then the set of monadic functions are ones which are called with $F x$ and dyadics with $w F x$.
+
+In BQN, monadic `=` returns array rank, but dyadic checks for equality:
 
 ```
   = 1‿2‿3
@@ -18,15 +22,13 @@ There are also other constraints. In APL and BQN, operations are always either _
 ⟨ 1 0 0 ⟩
 ```
 
-As there are no explicit type declarations, the flow of array programs can be sometimes challenging to understand at a glance. But when it does flow, the proponents declare this as a _tool of thought_.
-
-Nonetheless, it is rather easy to derive a rule of grammar for the language from this: a function $F$ always contains a right hand argument $x$, but sometimes it may containt a left hand argument $w$. In BQN, this pattern matching for function bodies works by separating the statements with a $;$
+In BQN a user-defined dyadic function can be implemented with pattern matching. First, the expression is wrapped into clauses, and then the cases are separated with a comma:
 
 ```
 { 1-case ; 2-case }
 ```
 
-The point-free or _tacit_ version to check whether an expression is a monadic or dyadic can be done with the valence `⊘`:
+The point-free a.k.a _tacit_ version can be done with the valence `⊘` function combinator:
 
 ```
         {𝕨0⊘1𝕩} 'x'
