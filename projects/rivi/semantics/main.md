@@ -116,7 +116,39 @@ It quickly became apparent that writing GPU kernels by hand is an error-prone en
 
 To turn this communication method into a static property begs for use the use of quantitative type systems, which are well known to be implemented in Idris 2 and Granule. How to do this in a manner that preserves algebraic properties was then another question -- the point should not be whether it can be done, but whether the resulting construct is generally useful to model parallel algorithms. This point is further amplified as the art of verifying GPU kernels posthumously with model checker is already the topic of [a whole research group](https://multicore.doc.ic.ac.uk/projects/gpuverify/).
 
-In an __IFIP Working Group 2.1__ group meeting in Oxford, Conor McBride presented an approach of modeling types in a similar fashion to a spreadsheet: given a row and a column, the cell in the intersection is a type which is dependent on the _header_ row and column. Conor also made the point of thinking this as a cube of sorts, in which ever higher dimensions could depend on arbitrary amount of these headers.
+ presented an approach of modeling types in a similar fashion to a spreadsheet: given a row and a column, the cell in the intersection is a type which is dependent on the _header_ row and column. Conor also made the point of thinking this as a cube of sorts, in which ever higher dimensions could depend on arbitrary amount of these headers.
+
+## A primer to SPIR-V
+
+This work attempts to model SPIR-V, which is a single static assignment language for parallel hardware. We use SPIR-V because it is supported by the Vulkan graphics and compute API, which is a modern and widely supported API to interact with GPUs regardless of the manufacturer or the underlying operating system. In effect, Vulkan and SPIR-V are practical means to execute parallel programs on GPUs in a platform-agnostic way.
+
+SPIR-V, the language used by Vulkan, is quite similar to LLVM's intermediate representation but it works like a shader language. Shader languages are programmed from the viewpoint of a single thread in a _grid_ of threads, instead of the Von-Neumann style of the whole grid. So, suppose that the threads on a GPU create a two-dimensional spreadsheet: the program source code defines the actions taken by each cell of the spreadsheet, instead of describing how to modify spreadsheet as a collection of cells. This is most likely a passage from how graphics programming controls single pixels instead of the whole framebuffer.
+
+General purpose programming from the point of a single cell introduces an inherent structure to programming which is used for communication between different cells. One of these properties is a subgroup, which is a subset of active threads capable of executing operations using each other's values without hardware communication overhead. Subgroups have a length determined by the hardware, which can be queried using Vulkan API. The length is often some power of two. Suppose set of subgroups $S$, then a subgroup is a $s \in S$, which is characterized by $\bar{s} \in \{2^n\}$. Each cell $c$ in a subgroup has an index within the subgroup: $c^i | i \in 0..\bar{s}$. A set of subgroups create a matrix of cells. Suppose we have four subgroups with a uniform length of eight. We can represent this as a set of a cells in a two-dimensional matrix in which the cells are tuples which determine their location _in the perspective of subgroups_:
+
+```
+  (↕4) ≍⌜ ↕8
+┌─
+╵ ⟨ 0 0 ⟩ ⟨ 0 1 ⟩ ⟨ 0 2 ⟩ ⟨ 0 3 ⟩ ⟨ 0 4 ⟩ ⟨ 0 5 ⟩ ⟨ 0 6 ⟩ ⟨ 0 7 ⟩
+  ⟨ 1 0 ⟩ ⟨ 1 1 ⟩ ⟨ 1 2 ⟩ ⟨ 1 3 ⟩ ⟨ 1 4 ⟩ ⟨ 1 5 ⟩ ⟨ 1 6 ⟩ ⟨ 1 7 ⟩
+  ⟨ 2 0 ⟩ ⟨ 2 1 ⟩ ⟨ 2 2 ⟩ ⟨ 2 3 ⟩ ⟨ 2 4 ⟩ ⟨ 2 5 ⟩ ⟨ 2 6 ⟩ ⟨ 2 7 ⟩
+  ⟨ 3 0 ⟩ ⟨ 3 1 ⟩ ⟨ 3 2 ⟩ ⟨ 3 3 ⟩ ⟨ 3 4 ⟩ ⟨ 3 5 ⟩ ⟨ 3 6 ⟩ ⟨ 3 7 ⟩
+                                                                  ┘
+```
+
+Suppose we call this matrix $subgroups$. We can then compute the index of cell in the global context as follows:
+
+```
+  {+´(8‿1)×⊢}¨subgroups
+┌─
+╵  0  1  2  3  4  5  6  7
+   8  9 10 11 12 13 14 15
+  16 17 18 19 20 21 22 23
+  24 25 26 27 28 29 30 31
+                          ┘
+```
+
+
 
 In various blog posts I have tried to model my practical learnings from the world of SPIR-V, but these quite never struck any abstract notion useful enough to convey the challenge that lies in the GPU kernel. However, with Conor's approach, my presentation can be reiterated:
 
