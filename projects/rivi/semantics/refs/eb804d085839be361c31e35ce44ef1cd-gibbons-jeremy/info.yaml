@@ -1,0 +1,20 @@
+author: Gibbons, Jeremy
+author_list:
+- affiliation:
+  - name: University of Oxford, UK
+  family: Gibbons
+  given: Jeremy
+doi: 10.22152/programming-journal.org/2022/6/7
+files: []
+issue: '2'
+journal: The Art, Science, and Engineering of Programming
+language: en
+month: 11
+papis_id: 9bc5a93736563cb806fef3ebf44b5158
+publisher: Aspect-Oriented Software Association (AOSA)
+ref: ContinuationPaGibbon2021
+title: Continuation-Passing Style, Defunctionalization, Accumulations, and Associativity
+type: article
+url: http://dx.doi.org/10.22152/programming-journal.org/2022/6/7
+volume: '6'
+year: 2021

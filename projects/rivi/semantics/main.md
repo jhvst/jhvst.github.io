@@ -120,11 +120,13 @@ To turn this communication method into a static property begs for use the use of
 
 ## A primer to SPIR-V
 
-This work attempts to model SPIR-V, which is a single static assignment language for parallel hardware. We use SPIR-V because it is supported by the Vulkan graphics and compute API, which is a modern and widely supported API to interact with GPUs regardless of the manufacturer or the underlying operating system. In effect, Vulkan and SPIR-V are practical means to execute parallel programs on GPUs in a platform-agnostic way.
+This work attempts to model SPIR-V, which is a single static assignment language for parallel hardware. We use SPIR-V because it is heterogenious over GPUs, meaning it works with various GPU manufacturers and operating systems. Heteoregenuity also makes SPIR-V a tricky language to target because the language allows varying hardware implementations for its operations. Our goal is to simplify the mental burden caused by this variability by employing dependent type systems.
 
-SPIR-V, the language used by Vulkan, is quite similar to LLVM's intermediate representation but it works like a shader language. Shader languages are programmed from the viewpoint of a single thread in a _grid_ of threads, instead of the Von-Neumann style of the whole grid. So, suppose that the threads on a GPU create a two-dimensional spreadsheet: the program source code defines the actions taken by each cell of the spreadsheet, instead of describing how to modify spreadsheet as a collection of cells. This is most likely a passage from how graphics programming controls single pixels instead of the whole framebuffer.
+SPIR-V is a derivation of LLVM's intermediate representation as a shader language. Shader languages are programmed from the viewpoint of a single coordinate in a three dimensional _grid_ of threads. Thinking about this in two dimensions first is easier -- the coordinates are cells on a spreadsheet. In shader languages the program source code defines the actions taken by each cell of the spreadsheet, instead of the program describing how to modify the spreadsheet as a collection of cells. This programming model arguably suits graphics computing better than general-purpose computing, because it is much easier to wrap one's head around to control pixels on a screen rather than spreadsheet cells. To elaborate, in a graphical program neighboring pixels often share some inherent context together by the basis of their location on the screen, but with general-purpose programs indicies much more rarely have strong relation to neigboring values in an arrays other dimension. By the basis of this, we propose to copy the approach detailed in [TypeSystemsFoMcbrid2022] to use the header and column indices as types for each of the cells.
 
-General purpose programming from the point of a single cell introduces an inherent structure to programming which is used for communication between different cells. One of these properties is a subgroup, which is a subset of active threads capable of executing operations using each other's values without hardware communication overhead. Subgroups have a length determined by the hardware, which can be queried using Vulkan API. The length is often some power of two. Suppose set of subgroups $S$, then a subgroup is a $s \in S$, which is characterized by $\bar{s} \in \{2^n\}$. Each cell $c$ in a subgroup has an index within the subgroup: $c^i | i \in 0..\bar{s}$. A set of subgroups create a matrix of cells. Suppose we have four subgroups with a uniform length of eight. We can represent this as a set of a cells in a two-dimensional matrix in which the cells are tuples which determine their location _in the perspective of subgroups_:
+The grid that holds thread coordinates comes in various levels. This hierarchical structure provides a single cell various mechanisms to communicate between different cells. There also exists a level called _subgroup_ on which cells are able to also operate together. Here, a local subset of active threads are capable of executing operations using each other's values without hardware communication overhead. This in turn makes subgroups the most performant level of abstraction to do computing on.
+
+Subgroups have a length determined by the hardware, which can be queried using an API. The length is often some power of two. Suppose set of subgroups $S$, then a subgroup is a $s \in S$, which is characterized by $\bar{s} \in \{2^n\}$. Each cell $c$ in a subgroup has an index within the subgroup: $c^i | i \in 0..\bar{s}$. A set of subgroups create a matrix of cells. Suppose we have four subgroups with a uniform length of eight. We can represent this as a set of a cells in a two-dimensional matrix in which the cells are tuples which determine their location in the perspective of subgroups:
 
 ```
   (↕4) ≍⌜ ↕8
@@ -146,6 +148,18 @@ Suppose we call this matrix $subgroups$. We can then compute the index of cell i
   16 17 18 19 20 21 22 23
   24 25 26 27 28 29 30 31
                           ┘
+```
+
+Now we have a view to the x-dimension of a global context. Global context is cuboid of dimension $(x,y,z)$ where $\{x,y,z\} \in 1..1024$. Suppose we want the same dimensions as above, we could use the dimensions $\{8,1,1\}$:
+
+```
+  ⍉⍉(↕8‿1‿1) ˘ subgroups
+┌─
+┆ ⟨ 0 0 0 ⟩ ⟨ 1 0 0 ⟩ ⟨ 2 0 0 ⟩ ⟨ 3 0 0 ⟩ ⟨ 4 0 0 ⟩ ⟨ 5 0 0 ⟩ ⟨ 6 0 0 ⟩ ⟨ 7 0 0 ⟩
+  ⟨ 0 0 0 ⟩ ⟨ 1 0 0 ⟩ ⟨ 2 0 0 ⟩ ⟨ 3 0 0 ⟩ ⟨ 4 0 0 ⟩ ⟨ 5 0 0 ⟩ ⟨ 6 0 0 ⟩ ⟨ 7 0 0 ⟩
+  ⟨ 0 0 0 ⟩ ⟨ 1 0 0 ⟩ ⟨ 2 0 0 ⟩ ⟨ 3 0 0 ⟩ ⟨ 4 0 0 ⟩ ⟨ 5 0 0 ⟩ ⟨ 6 0 0 ⟩ ⟨ 7 0 0 ⟩
+  ⟨ 0 0 0 ⟩ ⟨ 1 0 0 ⟩ ⟨ 2 0 0 ⟩ ⟨ 3 0 0 ⟩ ⟨ 4 0 0 ⟩ ⟨ 5 0 0 ⟩ ⟨ 6 0 0 ⟩ ⟨ 7 0 0 ⟩
+                                                                                  ┘
 ```
 
 
