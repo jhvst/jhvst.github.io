@@ -35,3 +35,15 @@ subgroups ← G idx
 G2 ← {⍉⍉(↕8‿1‿2) ˘ 𝕩}
 
 ↑‿8 ⥊ 32↑ ⍷⥊ G2 subgroups
+
+ {≠⥊+´}⌾⊏ subgroups
+
+buffer ← •Show ↑‿8 ⥊ •rand.Deal 32
+
+•Show 0 ⊏ buffer
+
+•Show {≠⥊+´}⌾⊢ (0 ⊏ buffer)
+
+{≠⥊+´}⌾⊏ buffer
+
+↑‿8 ⥊ 32↑ ⍷⥊ G2 subgroups

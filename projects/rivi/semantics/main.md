@@ -122,11 +122,11 @@ To turn this communication method into a static property begs for use the use of
 
 This work attempts to model SPIR-V, which is a single static assignment language for parallel hardware. We use SPIR-V because it is heterogenious over GPUs, meaning it works with various GPU manufacturers and operating systems. Heteoregenuity also makes SPIR-V a tricky language to target because the language allows varying hardware implementations for its operations. Our goal is to simplify the mental burden caused by this variability by employing dependent type systems.
 
-SPIR-V is a derivation of LLVM's intermediate representation as a shader language. Shader languages are programmed from the viewpoint of a single coordinate in a three dimensional _grid_ of threads. Thinking about this in two dimensions first is easier -- the coordinates are cells on a spreadsheet. In shader languages the program source code defines the actions taken by each cell of the spreadsheet, instead of the program describing how to modify the spreadsheet as a collection of cells. This programming model arguably suits graphics computing better than general-purpose computing, because it is much easier to wrap one's head around to control pixels on a screen rather than spreadsheet cells. To elaborate, in a graphical program neighboring pixels often share some inherent context together by the basis of their location on the screen, but with general-purpose programs indicies much more rarely have strong relation to neigboring values in an arrays other dimension. By the basis of this, we propose to copy the approach detailed in [TypeSystemsFoMcbrid2022] to use the header and column indices as types for each of the cells.
+SPIR-V is a derivation of LLVM's intermediate representation as a shader language. Shader languages are programmed from the viewpoint of a single coordinate in a three dimensional _grid_ of threads. Thinking about this in two dimensions first is easier -- the coordinates are cells on a spreadsheet. In shader languages the program source code defines the actions taken by each cell of the spreadsheet, instead of the program describing how to modify the spreadsheet as a collection of cells. This programming model arguably suits graphics computing better than general-purpose computing, because it is much easier to wrap one's head around to control pixels on a screen rather than spreadsheet cells. To elaborate, in a graphical program neighboring pixels often share some inherent context together by the basis of their location on the screen, but with general-purpose programs indicies much more rarely have strong relation to neigboring values in an arrays other dimension. By the basis of this, we propose to copy the approach detailed in [@TypeSystemsFoMcbrid2022] to use the header and column indices as types for each of the cells.
 
 The grid that holds thread coordinates comes in various levels. This hierarchical structure provides a single cell various mechanisms to communicate between different cells. There also exists a level called _subgroup_ on which cells are able to also operate together. Here, a local subset of active threads are capable of executing operations using each other's values without hardware communication overhead. This in turn makes subgroups the most performant level of abstraction to do computing on.
 
-Subgroups have a length determined by the hardware, which can be queried using an API. The length is often some power of two. Suppose set of subgroups $S$, then a subgroup is a $s \in S$, which is characterized by $\bar{s} \in \{2^n\}$. Each cell $c$ in a subgroup has an index within the subgroup: $c^i | i \in 0..\bar{s}$. A set of subgroups create a matrix of cells. Suppose we have four subgroups with a uniform length of eight. We can represent this as a set of a cells in a two-dimensional matrix in which the cells are tuples which determine their location in the perspective of subgroups:
+Subgroups have a length $\bar{s}$ determined by the hardware, which can be queried using an API. The length is often some power of two. The length defines the number of cells that a single subgroup $s$ may _at most_ contain. Each cell $c$ in a subgroup has an index within that subgroup $c_i$ such that $i \lt \bar{s}$. For demonstration, suppose $\bar{s} = 8$ and a set of subgroups $S = \{s_0, s_1, s_2, s_3\}$. We can view this as a matrix of indices $c_{\langle row,col \rangle}$. We also get that the number of cells is $|S| \times \bar{s} = 32$.
 
 ```
   (↕4) ≍⌜ ↕8
@@ -138,7 +138,11 @@ Subgroups have a length determined by the hardware, which can be queried using a
                                                                   ┘
 ```
 
-Suppose we call this matrix $subgroups$. We can then compute the index of cell in the global context as follows:
+Each cell has information that is a tuple of the row and column index of the subgroup: `subgroup: Col -> Row -> [Col x Row]`. Cells' value can be retrieved by in the level of subgroups using the the information encoded by subgroup: `cell: Col x Row -> Loc`. It is reasonable to bound the `Loc` by the length of the input buffer. An input buffer[^1] `buf` is always a one dimensional vector indexed by its length: `buf = Vect n a` where `n` is of type `N` and `a` is of type `Q`. Now, `buf 32 (Loc)` would retrieve us the value in the given location.
+
+[^1]: The input is called a buffer because the Vulkan API runtime creates I/O resources in the RAM of the computer which support a variety of streaming interfaces with different control granularities and scheduling schemes between the CPU RAM and the GPU RAM. This makes it possible to have a synchronous access between various RAM regions which have read/write access by both the CPU and RAM. This coincidentally implies that changes to the buffer are not directly observed by either one of the hardware devices. However, these semantics are considered _stem of stone brambles_ that should we should not get attached at this time.
+
+We can make this a bit more explicit first. Suppose the matrix above is called $subgroups$. We can then compute the index of cell in the global context as follows:
 
 ```
   {+´(8‿1)×⊢}¨subgroups
@@ -150,7 +154,7 @@ Suppose we call this matrix $subgroups$. We can then compute the index of cell i
                           ┘
 ```
 
-Now we have a view to the x-dimension of a global context. Global context is cuboid of dimension $(x,y,z)$ where $\{x,y,z\} \in 1..1024$. Suppose we want the same dimensions as above, we could use the dimensions $\{8,1,1\}$:
+Now we have a view to the x-dimension of a global context. A global view `global` is thus of type `global: [buf] -> X x Y x Z`. A global context is not an index into the underlying buffer -- it is triple which shows which thread is assigned to control whichever cell. The global context is constructed from a cuboid of dimension $(x,y,z)$ where $\{x,y,z\} \in 1..1024$. Suppose we want the same dimensions as above, we could use the dimensions $\{8,1,1\}$:
 
 ```
   ⍉⍉(↕8‿1‿1) ˘ subgroups
@@ -162,7 +166,48 @@ Now we have a view to the x-dimension of a global context. Global context is cub
                                                                                   ┘
 ```
 
+This means that `buf 32 0` denotes the thread which is computing the value to the cell. In this case, it is thread `0 0 0`. This means that if we do an operation $F$ on each of the first element of a row, we have to control it using thread indexed by `0 0 0`. Suppose that we would want to add `1` to the value in the buffer's cell, we would write: `if (thread 0 0 0) then buf 32 X += 1`. Similarly, we could climb back a level to the level of subgroups to do a group operation `fold`: `if (thread 0 0 0) then (buf 32 X) = fold (subgroup s 0)`. The semantics of fold are contrived: the `s` is automatically expanded into the current subgroup. This means that `fold (subgroup s 0) = (subgroup 0 0) + (subgroup 1 0) + (subgroup 2 0) + ...` up to the length of the subgroup $\bar{s}$. Moreover, the write happens on each cell $c^i$ of the subgroup automatically. For example, if we call `fold` on the _cell_ `0 0 0`, then it is the same as doing the following:
 
+```
+  buffer ← ↑‿8 ⥊ •rand.Deal 32
+┌─
+╵ 15 26 29  4  8  6 11  7
+  20 30 16 24 17  9 25  1
+  12 10 14 18 27 21 23 13
+  22  3 31  2  5  0 28 19
+                          ┘
+  0 ⊏ buffer
+⟨ 15 26 29 4 8 6 11 7 ⟩
+
+  {≠⥊+´}⌾⊢(0 ⊏ buffer)
+⟨ 106 106 106 106 106 106 106 106 ⟩
+
+  {≠⥊+´}⌾⊏ buffer
+┌─
+╵ 106 106 106 106 106 106 106 106
+   20  30  16  24  17   9  25   1
+   12  10  14  18  27  21  23  13
+   22   3  31   2   5   0  28  19
+                                  ┘
+```
+
+As we can see, `fold` result applies automatically each cell of which the subgroup contains. However, translating these array language operational semantics to SPIR-V requires us to use the indices extensively. If we would want to sum values from each row, we could instead of using cell at `0 0 0` use the subgroups in which the index is `0 0 0`. This would sum each row for us instead.
+
+The reason for modeling with types comes a bit more clear when we think of different kind of global contexts. Suppose `8 1 2`:
+
+```
+  G ← {⍉⍉(↕8‿1‿2) ˘ 𝕩}
+  ↑‿8 ⥊ 32↑ ⍷⥊ G subgroups
+
+┌─
+╵ ⟨ 0 0 0 ⟩ ⟨ 1 0 0 ⟩ ⟨ 2 0 0 ⟩ ⟨ 3 0 0 ⟩ ⟨ 4 0 0 ⟩ ⟨ 5 0 0 ⟩ ⟨ 6 0 0 ⟩ ⟨ 7 0 0 ⟩
+  ⟨ 0 0 1 ⟩ ⟨ 1 0 1 ⟩ ⟨ 2 0 1 ⟩ ⟨ 3 0 1 ⟩ ⟨ 4 0 1 ⟩ ⟨ 5 0 1 ⟩ ⟨ 6 0 1 ⟩ ⟨ 7 0 1 ⟩
+  ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩
+  ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩ ⟨ 0 0 0 ⟩
+                                                                                  ┘
+```
+
+This means that if we were to launch a threads in the $Z$ dimensions in addition to eight in the $X$ dimension, then the thread assignment would look as above. The cells which have `0 0 0` assigned means that these would be taken over in some random order after the operations by the previous ones are done. This shows that depending on the amount of threads we spawn, we cannot rely on the cell's index alone -- we actually have to use the subgroups's index, which in contrast to the global thread index does _not_ change.
 
 In various blog posts I have tried to model my practical learnings from the world of SPIR-V, but these quite never struck any abstract notion useful enough to convey the challenge that lies in the GPU kernel. However, with Conor's approach, my presentation can be reiterated:
 

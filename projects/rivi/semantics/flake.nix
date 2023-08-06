@@ -61,7 +61,7 @@
             cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
             woff2_compress IBMPlexMono-Regular.otf
             cp IBMPlexMono-Regular.woff2 $out/
-            pandoc main.md --katex -o main.html
+            pandoc main.md --katex --bibliography=lib.bib --citeproc -o main.html
             echo "${title}" > title.bar
             echo "${description}" > description.bar
             echo "${pubDate}" > pubDate.bar
