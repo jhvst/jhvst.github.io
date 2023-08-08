@@ -42,11 +42,11 @@ In other words, `F valence G x` applies $F$ for $x$, whereas `w F valence G x` a
 
 Considering type-checking, we can say that each operation in BQN is a transformation over a single _shape_, which we define as a _rank polymorphic array_. It is worth noting that these operations are _well-defined_ in terms of type-checking when the operations are monadic: any operation in BQN _should_ be valid in such case. However, this is not true when the operations are dyadic: an operation might be ill-defined if the shapes do not agree on a shape. For example, a plus operation works similarly to Hadamard products: the dimensions have to match.
 
-Capturing ill-defined definitions is called _static rank polymorphism_ in the literature, and there exists various projects which capture this with the use of dependent types, for example, [Remora](https://arxiv.org/abs/1912.13451), [Dex](https://arxiv.org/abs/2104.05372), and in increasing capacity [Futhark](https://futhark-lang.org/blog/2023-05-12-size-type-challenges.html#supporting-arbitrary-size-expressions). In effect, what dependent types provides in this context is a form of denotational semantics to various array operations, answering to _what_ it means to execute some array operation in terms of transformation over the shape type.
+Capturing ill-defined definitions is called _static rank polymorphism_ in the literature, and there exists various projects which capture this with the use of dependent types, for example, [Remora](https://arxiv.org/abs/1912.13451)[@IntroductionToShiver2019], [Dex](https://arxiv.org/abs/2104.05372), and in increasing capacity [Futhark](https://futhark-lang.org/blog/2023-05-12-size-type-challenges.html#supporting-arbitrary-size-expressions). In effect, what dependent types provides in this context is a form of denotational semantics to various array operations, answering to _what_ it means to execute some array operation in terms of transformation over the shape type.
 
 We can model this in Idris as follows:
 
-```c
+```idris
 Reduce : Shape q (MkDim (S r) (S n)) -> Phase
 Reduce {q=FZ} o = MkPhase Slash o
 Reduce {q=FS(FZ)} {n} o = MkPhase Slash SomeScalar
@@ -55,7 +55,7 @@ Reduce {q=FS(FS(FZ))} {r} {n} o = MkPhase Slash (SomeVect (S n))
 
 Where `q` is defined as the rank of the array. A reduce on a scalar is always of the same shape, with a vector it transforms the vector into _SomeScalar_, whereas with a matrix the resulting vector is a _SomeVect_ of the length of the matrices' row length. This is made possible by modeling the _Shape_ type to be a matrix in all cases:
 
-```c
+```idris
 data Shape: (rank: Fin 3) -> Dim rows stride len -> Type where
   SomeScalar:
     Shape
@@ -126,7 +126,14 @@ SPIR-V is a derivation of LLVM's intermediate representation as a shader languag
 
 The grid that holds thread coordinates comes in various levels. This hierarchical structure provides a single cell various mechanisms to communicate between different cells. There also exists a level called _subgroup_ on which cells are able to also operate together. Here, a local subset of active threads are capable of executing operations using each other's values without hardware communication overhead. This in turn makes subgroups the most performant level of abstraction to do computing on.
 
-Subgroups have a length $\bar{s}$ determined by the hardware, which can be queried using an API. The length is often some power of two. The length defines the number of cells that a single subgroup $s$ may _at most_ contain. Each cell $c$ in a subgroup has an index within that subgroup $c_i$ such that $i \lt \bar{s}$. For demonstration, suppose $\bar{s} = 8$ and a set of subgroups $S = \{s_0, s_1, s_2, s_3\}$. We can view this as a matrix of indices $c_{\langle row,col \rangle}$. We also get that the number of cells is $|S| \times \bar{s} = 32$.
+Subgroups have a length $\bar{s}$ determined by the hardware, which can be queried using an API. $\bar{s}$ is often some power of two:
+
+```
+  2⋆↕8
+⟨ 1 2 4 8 16 32 64 128 ⟩
+```
+
+$\bar{s}$ defines the number of cells that a single subgroup $s$ may _at most_ contain. Each cell $c$ in a subgroup has an index within that subgroup $c_i$ such that $i \lt \bar{s}$. For demonstration, suppose $\bar{s} = 8$ and a set of subgroups $S = \{s_0, s_1, s_2, s_3\}$. We can view this as a matrix of indices $c_{\langle row,col \rangle}$:
 
 ```
   (↕4) ≍⌜ ↕8
@@ -138,7 +145,214 @@ Subgroups have a length $\bar{s}$ determined by the hardware, which can be queri
                                                                   ┘
 ```
 
-Each cell has information that is a tuple of the row and column index of the subgroup: `subgroup: Col -> Row -> [Col x Row]`. Cells' value can be retrieved by in the level of subgroups using the the information encoded by subgroup: `cell: Col x Row -> Loc`. It is reasonable to bound the `Loc` by the length of the input buffer. An input buffer[^1] `buf` is always a one dimensional vector indexed by its length: `buf = Vect n a` where `n` is of type `N` and `a` is of type `Q`. Now, `buf 32 (Loc)` would retrieve us the value in the given location.
+The row index corresponds to SPIR-V `SubgroupId` and the column index to `SubgroupLocalInvocationId`. Some operations operate on these indices, such as `OpGroupNonUniformElect` which returns `true` if the `SubgroupLocalInvocationId` is zero. We could model calling this instructions as follows:
+
+```
+  {0 = 1⊑𝕩}¨subgroups
+┌─
+╵ 1 0 0 0 0 0 0 0
+  1 0 0 0 0 0 0 0
+  1 0 0 0 0 0 0 0
+  1 0 0 0 0 0 0 0
+                  ┘
+```
+
+That is to say, all instructions over subgroups operate on a set of indices of subgroups. A more interesting example that operates on the values of the cells is a sum operation. A sum operation corresponds to a select function which takes a set of cells such that $c_{\langle r, col \lt \bar{s}}$. The expansion over the $\bar{s}$ is done automatically. To say we want to operate on the second row is to say:
+
+```
+  1 ⊏ idx
+⟨ ⟨ 1 0 ⟩ ⟨ 1 1 ⟩ ⟨ 1 2 ⟩ ⟨ 1 3 ⟩ ⟨ 1 4 ⟩ ⟨ 1 5 ⟩ ⟨ 1 6 ⟩ ⟨ 1 7 ⟩ ⟩
+```
+
+Suppose the values of the cells would all be 10. Now:
+
+```
+  10¨idx
+┌─
+╵ 10 10 10 10 10 10 10 10
+  10 10 10 10 10 10 10 10
+  10 10 10 10 10 10 10 10
+  10 10 10 10 10 10 10 10
+                          ┘
+```
+
+A sum reduction would be:
+
+```
+  {≠⥊+´}⌾(1⊏⊢) 10¨idx
+┌─
+╵ 10 10 10 10 10 10 10 10
+  80 80 80 80 80 80 80 80
+  10 10 10 10 10 10 10 10
+  10 10 10 10 10 10 10 10
+                          ┘
+```
+
+To see affected values we could do:
+
+```
+  sum ≠ 10¨idx
+┌─
+╵ 0 0 0 0 0 0 0 0
+  1 1 1 1 1 1 1 1
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+                  ┘
+```
+
+To return some changed value, we could say that we want to select the leader of the subgroup:
+
+```
+  {⌊´1‿0 = 𝕩}¨idx
+┌─
+╵ 0 0 0 0 0 0 0 0
+  1 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+                  ┘
+```
+
+The sum of these values is then
+
+```
+  leader + a
+┌─
+╵ 0 0 0 0 0 0 0 0
+  2 1 1 1 1 1 1 1
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+                  ┘
+```
+
+We can then find the cell which we want to read twice as such:
+
+```
+  b = 2
+┌─
+╵ 0 0 0 0 0 0 0 0
+  1 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+                  ┘
+```
+
+Which is equivalent of saying to return the value we have read the most:
+
+```
+  b = ⌈´⥊b
+┌─
+╵ 0 0 0 0 0 0 0 0
+  1 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+                  ┘
+```
+
+We can then do a filter on the flattened array:
+
+```
+  (⥊(b=2)) / (⥊sum)
+⟨ 80 ⟩
+```
+
+The motivation to do the selection over the values that we have accessed the most comes from the fact that this allows us to tie a multiplicity into the array values, and only return the ones that we are interested in.
+
+Following this, suppose a sum reduction of the whole matrix:
+
+```
+  # sum reduce row-vise
+  eachRow ← 1¨idx
+
+barrier
+  # read leader values
+  leaders ← ({⌈´↑‿0 = 𝕩}¨idx)
+
+barrier
+  # zero values from first row
+  zeroing ← ({⌈´0‿↓ = 𝕩}¨idx)
+
+barrier
+  # write leader values to first row
+  move ← 4‿8⥊⍉leaders
+
+barrier
+  # sum first row values
+  sum2 ← ({⌈´0‿↓ = 𝕩}¨idx)
+
+barrier
+  # return first value
+  first ← ({∧´0‿0 = 𝕩}¨idx)
+
+  # count accesses
+  strat1 ← eachRow + leaders + zeroing + move + sum2 + first
+┌─
+╵ 6 4 4 4 3 3 3 3
+  2 1 1 1 1 1 1 1
+  2 1 1 1 1 1 1 1
+  2 1 1 1 1 1 1 1
+                  ┘
+  # count accesses
+  +´⥊strat1
+57
+5 barriers
+```
+
+How can we type check this? We can say that if the type of the sum reduction is a single element, then we the number of elements with the value 5 should equal to the dependent type signature.
+
+Where this comes interesting is to think about the work laid in [@TypeSystemsFoMcbrid2022], in which the row and column headers were set as types. Our motivation is to work our way "back" from the representation using the list lengths of the header and cell as lifetimes. The idea being that operations "deconstruct" the spreadsheet structure by checking if the linear "use-by" counts permit it. This way, we can model various parallel algorithms before actual implementation.
+
+Something that we also note is that even in an array programming language the sum reduction of a matrix is a fold applied twice:
+
+```
+  +´ +´ ˘ 4‿8 ⥊ 1
+32
+```
+
+The same is happening in our example: the existance of multiple accesses in the first row show that we have at some point come down a level of abstraction. See:
+
+```
+  {≠⥊+´}˘ 4‿8 ⥊ 1
+┌─
+╵ 8 8 8 8 8 8 8 8
+  8 8 8 8 8 8 8 8
+  8 8 8 8 8 8 8 8
+  8 8 8 8 8 8 8 8
+                  ┘
+```
+
+```
+  (⥊leaders) / (⥊fold)
+⟨ 8 8 8 8 ⟩
+```
+
+```
+  4‿8⥊ (⥊fold)-⌾((¬⥊4‿8⥊⍉leaders)⊸/) (⥊fold)
+┌─
+╵ 8 8 8 8 0 0 0 0
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+                  ┘
+```
+
+```
+  {≠⥊+´}˘ swap
+┌─
+╵ 32 32 32 32 32 32 32 32
+   0  0  0  0  0  0  0  0
+   0  0  0  0  0  0  0  0
+   0  0  0  0  0  0  0  0
+                          ┘
+```
+
+```
+  ⊑fold_x
+32
+```
+
+The semantics of one dimensional computation become relevant as we start doing computation on the values on the swap phase.
+
+An input buffer[^1] `buf` on the GPU is always a one dimensional vector indexed by its length: `buf = Vect n a` where `n` is of type `N` and `a` is of type `Q`. Now, `buf 32 0` would retrieve us the value in the given location.
 
 [^1]: The input is called a buffer because the Vulkan API runtime creates I/O resources in the RAM of the computer which support a variety of streaming interfaces with different control granularities and scheduling schemes between the CPU RAM and the GPU RAM. This makes it possible to have a synchronous access between various RAM regions which have read/write access by both the CPU and RAM. This coincidentally implies that changes to the buffer are not directly observed by either one of the hardware devices. However, these semantics are considered _stem of stone brambles_ that should we should not get attached at this time.
 
@@ -154,7 +368,9 @@ We can make this a bit more explicit first. Suppose the matrix above is called $
                           ┘
 ```
 
-Now we have a view to the x-dimension of a global context. A global view `global` is thus of type `global: [buf] -> X x Y x Z`. A global context is not an index into the underlying buffer -- it is triple which shows which thread is assigned to control whichever cell. The global context is constructed from a cuboid of dimension $(x,y,z)$ where $\{x,y,z\} \in 1..1024$. Suppose we want the same dimensions as above, we could use the dimensions $\{8,1,1\}$:
+Now we have a view to the x-dimension of a global context. A global view `global` is thus of type `global: [buf] -> X x Y x Z`. A global context is not an index into the underlying buffer -- it is triple which shows which thread is assigned to control whichever cell. The global context is constructed from a cuboid of dimension $(x,y,z)$ where $\{x,y,z\} \in 1..1024$.
+
+One way to do the swap is to launch a thread group with the dimensions that correspond to the subgroup length $\{8,1,1\}$:
 
 ```
   ⍉⍉(↕8‿1‿1) ˘ subgroups
@@ -164,6 +380,73 @@ Now we have a view to the x-dimension of a global context. A global view `global
   ⟨ 0 0 0 ⟩ ⟨ 1 0 0 ⟩ ⟨ 2 0 0 ⟩ ⟨ 3 0 0 ⟩ ⟨ 4 0 0 ⟩ ⟨ 5 0 0 ⟩ ⟨ 6 0 0 ⟩ ⟨ 7 0 0 ⟩
   ⟨ 0 0 0 ⟩ ⟨ 1 0 0 ⟩ ⟨ 2 0 0 ⟩ ⟨ 3 0 0 ⟩ ⟨ 4 0 0 ⟩ ⟨ 5 0 0 ⟩ ⟨ 6 0 0 ⟩ ⟨ 7 0 0 ⟩
                                                                                   ┘
+```
+
+The swap can now be programmed in various ways:
+
+- use the global $\langle0,0,0\rangle$ to do the swaps using the subgroup row number, hence moving every $\langle 0,0,0 \rangle$ to cell $c_{row,0} \to c_{0, row}$ and then doing a subgroup sum
+- use a read _offset_ of 4 in `buf` to effectively cause a transpose effect in which the values assigned to the first subgroup now include every 4th element, thus allowing us to run the subgroup sum operation once again
+
+Both implementations give us the same number 32 in the end, of which the first option is modeled above. The latter would look like this:
+
+```
+  # first sum reduction
+  1¨idx
+┌─
+╵ 1 1 1 1 1 1 1 1
+  1 1 1 1 1 1 1 1
+  1 1 1 1 1 1 1 1
+  1 1 1 1 1 1 1 1
+                  ┘
+
+barrier
+  # read every 8th value
+  4‿8⥊0=8|↕32
+┌─
+╵ 1 0 0 0 0 0 0 0
+  1 0 0 0 0 0 0 0
+  1 0 0 0 0 0 0 0
+  1 0 0 0 0 0 0 0
+                  ┘
+  # zero every 8th value
+  4‿8⥊4=8|↕32
+┌─
+╵ 0 0 0 0 1 0 0 0
+  0 0 0 0 1 0 0 0
+  0 0 0 0 1 0 0 0
+  0 0 0 0 1 0 0 0
+                  ┘
+barrier
+  # sum reduce using offset
+  4‿8⥊0=4|↕32
+┌─
+╵ 1 0 0 0 1 0 0 0
+  1 0 0 0 1 0 0 0
+  1 0 0 0 1 0 0 0
+  1 0 0 0 1 0 0 0
+                  ┘
+
+barrier
+  # return first value
+  ({∧´0‿0 = 𝕩}¨idx)
+┌─
+╵ 1 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+  0 0 0 0 0 0 0 0
+                  ┘
+
+  # count accesses
+  eachRow + fourth + nfourth + ofourth + first
+┌─
+╵ 4 1 1 1 4 1 1 1
+  3 1 1 1 4 1 1 1
+  3 1 1 1 4 1 1 1
+  3 1 1 1 4 1 1 1
+                  ┘
+  # sum accesses
+49
+3 barriers
 ```
 
 This means that `buf 32 0` denotes the thread which is computing the value to the cell. In this case, it is thread `0 0 0`. This means that if we do an operation $F$ on each of the first element of a row, we have to control it using thread indexed by `0 0 0`. Suppose that we would want to add `1` to the value in the buffer's cell, we would write: `if (thread 0 0 0) then buf 32 X += 1`. Similarly, we could climb back a level to the level of subgroups to do a group operation `fold`: `if (thread 0 0 0) then (buf 32 X) = fold (subgroup s 0)`. The semantics of fold are contrived: the `s` is automatically expanded into the current subgroup. This means that `fold (subgroup s 0) = (subgroup 0 0) + (subgroup 1 0) + (subgroup 2 0) + ...` up to the length of the subgroup $\bar{s}$. Moreover, the write happens on each cell $c^i$ of the subgroup automatically. For example, if we call `fold` on the _cell_ `0 0 0`, then it is the same as doing the following:
@@ -209,21 +492,7 @@ The reason for modeling with types comes a bit more clear when we think of diffe
 
 This means that if we were to launch a threads in the $Z$ dimensions in addition to eight in the $X$ dimension, then the thread assignment would look as above. The cells which have `0 0 0` assigned means that these would be taken over in some random order after the operations by the previous ones are done. This shows that depending on the amount of threads we spawn, we cannot rely on the cell's index alone -- we actually have to use the subgroups's index, which in contrast to the global thread index does _not_ change.
 
-In various blog posts I have tried to model my practical learnings from the world of SPIR-V, but these quite never struck any abstract notion useful enough to convey the challenge that lies in the GPU kernel. However, with Conor's approach, my presentation can be reiterated:
-
-Each thread in a GPU kernel is a cell in a larger thread cube. At any point within the hardware, the location of the cell has multiple ways to identify itself, with the smallest denomination being the so-called global identifier. Like an element in a vector, the `gid` is the index of the cell in its global context. Given a dataset of say 16 values, the `gids` of each value in the vector could be represented as iota 16 in BQN terms:
-
-```
-  ↕16
-⟨ 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 ⟩
-```
-
 The next step in the hierarchy is the subgroup, which resembles a single SIMD lane. The lane has a hardware-defined length, which are often powers of two:
-
-```
-  2⋆↕16
-⟨ 1 2 4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384 32768 ⟩
-```
 
 This is called `SubgroupSize` and is often some value between 4 and 64 and can be checked by querying the Vulkan API. For simplicity, let us assume it is 4. A `SubgroupLocalInvocationId` is then a iota of `SubgroupSize`. The number of subgroups is bounded by 32 bit integer: `2147483648`. We would now have:
 
