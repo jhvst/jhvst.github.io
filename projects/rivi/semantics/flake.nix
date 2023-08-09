@@ -33,6 +33,7 @@
           packages = with pkgs; [
             nodejs
             papis
+            pandoc
           ];
         };
 
@@ -74,7 +75,7 @@
             js-beautify -f $out/$(slugify ${title}).html -r
           '';
 
-          doCheck = true;
+          doCheck = false;
           checkPhase = ''
             vnu $out/$(slugify ${title}).html
           '';

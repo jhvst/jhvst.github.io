@@ -1,12 +1,14 @@
 # |title|
 
-Array programming languages like APL and BQN have gained recent interest as a DSL for parallel computing. One reason for this is the constrained programming interface based on rank polymorphic arrays. The upsides are dual: on one hand, dealing with vector data corresponds closely how GPUs deal with flat array structures, and on the other, the program compositions created by the constrained language environment exhibit functional programming paradigm around maps and scans. This is especially useful to avoid so-called _thread divergence_ on GPUs, in which any kind of Von-Neumann style programming essentially stalls the device to a halt, as the GPU program _kernel_ is waiting for single thread to progress.
+Array programming languages like APL and BQN have gained recent interest as a DSL for parallel computing. One reason for this is the constrained programming interface based on rank polymorphic arrays. The upsides are dual: on one hand, dealing with vector data corresponds closely how GPUs deal with flat array structures, and on the other, the program compositions created by the constrained language environment exhibit functional programming paradigm around maps and scans. This is especially useful to avoid so-called _thread divergence_ on GPUs, in which any kind of Von-Neumann style programming essentially stalls the device to a halt, as the parallel _kernel_ is waiting for single thread to progress.
 
-What the rank polymorphism does is _lifting_ of binary operations onto higher array dimensions. That is, irrespective of the array rank, the languages implicitly create iterators over data structures lengths. This avoids the programmer to write `for` loops regardless of whether the operation is applied with a vector or a matrix. Because of this automatic lifting, the challenge quickly becomes about creating program compositions that remain on higher dimensions. This is arguably the main painpoint with using array programming languages, because it differs conceptually a lot from imperative style of programming -- as we are about to see, it is rather trivial to convince a theorem prover that this makes sense, but whether a programmer can wrap their head around it is another question.
+What the rank polymorphism does is _lifting_ of binary operations onto higher array dimensions. That is, irrespective of the array rank, the languages implicitly create iterators over data structures lengths. This avoids the programmer to write `for` loops regardless of whether the operation is applied e.g. with a vector or a matrix. Because of this automatic lifting, the challenge quickly becomes about creating program compositions that remain on higher dimensions. This is arguably the main painpoint with using array programming languages, because it differs conceptually a lot from imperative style of programming.
+
+The main objective of this research is to look into how parallel algorithms could be modeled with advanced type systems. In particular, we will consider dependent types with quantities as a way to compare algorithms, but to also to prove that such models are correct. In general, this kind of modeling is tricky because it requires at least some basic understanding of how these type systems or at least the languages that implement them work, while also grasping fundamentals of low-level programming with parallel hardware like GPUs. As such, this work attempts to describe them both. The idea is that if successful, these kinds of developer tools could provide faster iteration of the implementations of parallel operations on array languages that exhibit these properties in a rather mathematical notation. That is, array programming languages are called _tools of thought_ by their proponents since the 1960s, but the question remains that how well does this translate also to high performance code on hardware that is relevant today. We will through practical examples look into this from both the point of denotational and operational semantics.
 
 ## Denotational semantics: dependent types
 
-The basis of a rank polymorphic language are its _atoms_. Atoms here mean function values and value literals. All atoms share the same single data type, which is a rank polymorphic array. This type carries no visible type signature in traditional implementations like APL, even though there are certain cases in which a type error may occur, such as with product of two matrices, which is defined as Hadamard product hence requires matrix shape symmetry. Some more novel array programming languages like Google Dex implement dependent types to resolve these runtime errors statically.
+The basis of a rank polymorphic language are its _atoms_. Atoms here mean function values and value literals. All atoms share the same single data type, which is a rank polymorphic array. This type carries no visible type signature in traditional implementations like APL. As a consequence, APL and its derivatives may run into runtime _shape_ mismatches, such as with product of two matrices, which are defined as Hadamard products. Recently, these runtime errors have been addressed in dependently typed derivatives such as Google Dex [@GettingToThePaszke2021].
 
 Function applications are called _monadic_ when taking a single argument and _dyadic_ when taking two. Suppose that $F$ is the set of all functions and $x$ and $w$ as elements of the set of subjects $s$, then the set of monadic functions are ones which are called with $F x$ and dyadics with $w F x$.
 
@@ -40,9 +42,9 @@ The point-free a.k.a _tacit_ version can be done with the valence `⊘` function
 
 In other words, `F valence G x` applies $F$ for $x$, whereas `w F valence G x` applies $G$ to $x$ and $w$. Hence, a valence is just a function body of the format `{𝔽𝕩;𝕨𝔾𝕩}`.
 
-Considering type-checking, we can say that each operation in BQN is a transformation over a single _shape_, which we define as a _rank polymorphic array_. It is worth noting that these operations are _well-defined_ in terms of type-checking when the operations are monadic: any operation in BQN _should_ be valid in such case. However, this is not true when the operations are dyadic: an operation might be ill-defined if the shapes do not agree on a shape. For example, a plus operation works similarly to Hadamard products: the dimensions have to match.
+Considering type-checking, we can say that each operation in BQN is a transformation over a single _shape_, which we define as a _rank polymorphic array_. It is worth noting that these operations are _well-defined_ in terms of type-checking when the operations are monadic: any operation in BQN _should_ be valid in such case. However, this is not true when the operations are dyadic: an operation might be ill-defined if the shapes do not agree on a shape. In this perspective, the point of using types is to capture the ill-defined definitions that arise mostly from these dyadic operations.
 
-Capturing ill-defined definitions is called _static rank polymorphism_ in the literature, and there exists various projects which capture this with the use of dependent types, for example, [Remora](https://arxiv.org/abs/1912.13451)[@IntroductionToShiver2019], [Dex](https://arxiv.org/abs/2104.05372), and in increasing capacity [Futhark](https://futhark-lang.org/blog/2023-05-12-size-type-challenges.html#supporting-arbitrary-size-expressions). In effect, what dependent types provides in this context is a form of denotational semantics to various array operations, answering to _what_ it means to execute some array operation in terms of transformation over the shape type.
+Capturing ill-defined definitions in this context is called _static rank polymorphism_. There exists various projects which capture this with the use of dependent types, for example, Remora in [@IntroductionToShiver2019](#ref-IntroductionToShiver2019), [Dex](https://arxiv.org/abs/2104.05372), and in increasing capacity [Futhark](https://futhark-lang.org/blog/2023-05-12-size-type-challenges.html#supporting-arbitrary-size-expressions). In effect, what dependent types provide are _denotational semantics_ to various array operations, answering to what it the terms of types does it mean to execute some array operation over the shape.
 
 We can model this in Idris as follows:
 
@@ -53,7 +55,7 @@ Reduce {q=FS(FZ)} {n} o = MkPhase Slash SomeScalar
 Reduce {q=FS(FS(FZ))} {r} {n} o = MkPhase Slash (SomeVect (S n))
 ```
 
-Where `q` is defined as the rank of the array. A reduce on a scalar is always of the same shape, with a vector it transforms the vector into _SomeScalar_, whereas with a matrix the resulting vector is a _SomeVect_ of the length of the matrices' row length. This is made possible by modeling the _Shape_ type to be a matrix in all cases:
+Where `q` is defined as the rank of the array. A reduce on a scalar is always of the same shape, with a vector it transforms the vector into _SomeScalar_, whereas with a matrix the resulting vector is a _SomeVect_ of the length of the matrices' row length. This also suggests in more concrete terms what it means to talk about denotational semantics: it's not about the values of the array, but instead what form do the results have. In our example, this is made possible by modeling the _Shape_ type to be a matrix in each case:
 
 ```idris
 data Shape: (rank: Fin 3) -> Dim rows stride len -> Type where
@@ -76,13 +78,13 @@ data Shape: (rank: Fin 3) -> Dim rows stride len -> Type where
         (MkDim rows stride)
 ```
 
-Which says that the _Dim_-ensions of the Shape is always consisting of number or rows, a _stride_, and a lenght. Modeling polymorphic arrays this way is often considered folklore: to support arbitrary ranks, the Dim can be an array of dimensions, but for simplification, this three-rank example should suffice to convince the reader for the basic gist. This allows us to capture mismatching shapes e.g. in the following APL expression:
+Which says that the _Dim_-ensions of the Shape consists of number or rows, a _stride_, and a length. Modeling polymorphic arrays this way is often considered folklore knowledge: to support arbitrary ranks, the Dim can be an array of dimensions, but for simplification, this three-rank example could be considered to suffice to communicate the basic gist of our effort. This allows us to capture mismatching shapes e.g. in the following APL expression:
 
-```
+```apl
 1 2 3 4 + (+/ 3 3 ⍴ ⍳9)
 ```
 
-Which in APL gives us an error:
+Which in Dyalog APL gives us an error:
 
 ```
 LENGTH ERROR: Mismatched left and right argument shapes
@@ -112,23 +114,25 @@ The specifics of this implementation are prior work done in [my University of St
 
 In my other master's thesis, done at INRIA while studying at University of Lorraine, I created [a software artifact for running GPU programs](https://github.com/periferia-labs/rivi-loader) using the Vulkan API. This introduced me to specifics of implementing parallel algorithms in SPIR-V, which is a parallel SSA IR similar to that used in LLVM.
 
-It quickly became apparent that writing GPU kernels by hand is an error-prone endeavior, which left me thinking of better ways to do this. As remarked later in the St Andrews's thesis, the connection to the use of quantitative typing was already established: modeling the hardware memory bank communication could be thought as _channels_ (in the session types way) managing linear resources. This is merely an original thought: mainstream languages like Go already use channels with (optionally) bounded lifetimes to do communication between green-threads, or as Go calls them, goroutines. However, anyone with field experience with Go knows that these lifetimes are runtime values, which means that doing communication with goroutines in a dependable way either requires familiarity with Go's race condition checker or modeling the interaction with formal method tools like TLA+.
+It quickly became apparent that writing GPU kernels by hand is an error-prone endeavior, which left me thinking of better ways to do this. As remarked later in the St Andrews's thesis, the connection to the use of quantitative typing was already established: modeling the hardware memory bank communication could be thought as _channels_ (in the session types way) managing linear resources. This is merely an original thought: mainstream languages like Go already use channels with (optionally) bounded lifetimes to do communication between _goroutines_. However, in Go these lifetimes are runtime values, which means that programming communication with goroutines in a dependable way either requires familiarity with Go's race condition checker or modeling the interaction with formal method tools like TLA+.
 
-To turn this communication method into a static property begs for use the use of quantitative type systems, which are well known to be implemented in Idris 2 and Granule. How to do this in a manner that preserves algebraic properties was then another question -- the point should not be whether it can be done, but whether the resulting construct is generally useful to model parallel algorithms. This point is further amplified as the art of verifying GPU kernels posthumously with model checker is already the topic of [a whole research group](https://multicore.doc.ic.ac.uk/projects/gpuverify/).
+To turn this communication method into a static property could also be done in type-level with the use of quantitative type systems. Languages that implement quantitative types include e.g. Idris 2 and Granule. Yet, presenting the algebraic properties still requires answering an another question -- not whether it can be done, but whether the resulting software construct is useful to model parallel algorithms. This branch of research has been done previously by verifying the GPU kernels posthumously with model checker in the [GPU Verify research group](https://multicore.doc.ic.ac.uk/projects/gpuverify/). A good recent literature review of these efforts could be found e.g. in a PhD thesis [@doctoral_thesis_mogers].
 
- presented an approach of modeling types in a similar fashion to a spreadsheet: given a row and a column, the cell in the intersection is a type which is dependent on the _header_ row and column. Conor also made the point of thinking this as a cube of sorts, in which ever higher dimensions could depend on arbitrary amount of these headers.
+Recently, an adjacent work in a type-based approach was presented in [@TypeSystemsFoMcbrid2022] as a form of spreadsheet modeling: given a row and a column, the cell in the intersection is a type which is dependent on the _rows_ and _columns_. Here, the point of thinking this as a cube of sorts was also made to support higher dimensions with an arbitrary amount of these headers. This work hence presents a more algebraic-orientated approach compared to model checking and SMT solvers, which is more in line with our motives. As such, this work places itself in a somewhat of a junction point of employing both the algebraic properties while leaving the optimization of the programs to be done at a runtime phase using an SMT solver. It is relevant to insist that the use of SMT solvers is a somewhat different in our work compared to refinement types like in Liquid Haskell: we do not search for counterexamples for verification purposes with SMT solvers, but instead use the algebraic properties to define a universe of types in which the search process of an optimal operational semantics can be done with type-level guarantees.
 
-## A primer to SPIR-V
+### A primer to SPIR-V
 
-This work attempts to model SPIR-V, which is a single static assignment language for parallel hardware. We use SPIR-V because it is heterogenious over GPUs, meaning it works with various GPU manufacturers and operating systems. Heteoregenuity also makes SPIR-V a tricky language to target because the language allows varying hardware implementations for its operations. Our goal is to simplify the mental burden caused by this variability by employing dependent type systems.
+To approach the motivation to use quantitative types for our effort, we need to understand something about the target language first. This information is disposed as follows:
 
-SPIR-V is a derivation of LLVM's intermediate representation as a shader language. Shader languages are programmed from the viewpoint of a single coordinate in a three dimensional _grid_ of threads. Thinking about this in two dimensions first is easier -- the coordinates are cells on a spreadsheet. In shader languages the program source code defines the actions taken by each cell of the spreadsheet, instead of the program describing how to modify the spreadsheet as a collection of cells. This programming model arguably suits graphics computing better than general-purpose computing, because it is much easier to wrap one's head around to control pixels on a screen rather than spreadsheet cells. To elaborate, in a graphical program neighboring pixels often share some inherent context together by the basis of their location on the screen, but with general-purpose programs indicies much more rarely have strong relation to neigboring values in an arrays other dimension. By the basis of this, we propose to copy the approach detailed in [@TypeSystemsFoMcbrid2022] to use the header and column indices as types for each of the cells.
+This work attempts to model SPIR-V, which is a single static assignment language for parallel hardware. We use SPIR-V because it is heterogenious over GPUs, meaning it works with various GPU manufacturers and operating systems. Heteoregenuity also makes SPIR-V a delightfully tricky language to target because the language allows varying hardware implementations for its operations. Our goal is to simplify the mental burden caused by this variability by employing quantitative type system.
 
-The grid that holds thread coordinates comes in various levels. This hierarchical structure provides a single cell various mechanisms to communicate between different cells. There also exists a level called _subgroup_ on which cells are able to also operate together. Here, a local subset of active threads are capable of executing operations using each other's values without hardware communication overhead. This in turn makes subgroups the most performant level of abstraction to do computing on.
+SPIR-V is a derivation of LLVM's intermediate representation as a shader language. Shader languages are programmed from the viewpoint of a single coordinate in a three dimensional _grid_ of threads. Thinking about this in two dimensions first is easier -- the coordinates are cells on a spreadsheet. In shader languages the program source code defines the actions taken by each cell of the spreadsheet by instructing actions based on the cell's location, instead of the program describing in uniform operations as a collection of cells. The reason for the difference in the programming model stems from how parallel operations were first used in a major capacity in graphics computing to control pixels on a screen. Here, the neighboring pixels on a screen often share some inherent context based on the location on the screen. However, in general-purpose programming the indices rarely have such a strong relation to neigboring values. This causes the programming model to transform itself from the use of accumulators into divide-and-conquer strategies. The challenge then becomes that modeling the divide-and-conquer strategies is often more challenging to think about to the programmer. By the basis of this, we propose to copy the approach detailed in [@TypeSystemsFoMcbrid2022] to use the header and column indices as types for each of the cells.
 
-Subgroups have a length $\bar{s}$ determined by the hardware, which can be queried using an API. $\bar{s}$ is often some power of two:
+The thread grid on a GPU holds thread coordinates in various levels of abstraction. This inherently hierarchical structure provides a single cell various mechanisms to communicate between different cells, to then finally converge on a uniform result. Arguably, the most interesting level happens on _subgroups_ where a small partition of cells are able to also cooperate together. Here, a subset of active threads are capable of executing operations using each other's values with as little hardware communication overhead as possible. This hardware-based constraint thus makes subgroups the most performant hence the most interesting level of abstraction to do computation on.
 
-```
+We now start with examples, which we model in an array programming language called BQN. Subgroups have a length $\bar{s}$ determined by the hardware, which can be queried using an API (we base our work on the Vulkan API for reasons detailed in our previous works ??). $\bar{s}$ is often some power of two:
+
+```bqn
   2⋆↕8
 ⟨ 1 2 4 8 16 32 64 128 ⟩
 ```
@@ -145,7 +149,7 @@ $\bar{s}$ defines the number of cells that a single subgroup $s$ may _at most_ c
                                                                   ┘
 ```
 
-The row index corresponds to SPIR-V `SubgroupId` and the column index to `SubgroupLocalInvocationId`. Some operations operate on these indices, such as `OpGroupNonUniformElect` which returns `true` if the `SubgroupLocalInvocationId` is zero. We could model calling this instructions as follows:
+The row index corresponds to SPIR-V `SubgroupId` and the column index to `SubgroupLocalInvocationId`. Hence, on the level of subgroups $c_{\lange \text{SubgroupId}, \text{SubgroupLocalInvocationId} \rangle}$. Some SPIR-V operations operate over these indices, such as `OpGroupNonUniformElect` which returns `true` if the `SubgroupLocalInvocationId` is zero. We could model calling this instructions as follows:
 
 ```
   {0 = 1⊑𝕩}¨subgroups
@@ -157,14 +161,16 @@ The row index corresponds to SPIR-V `SubgroupId` and the column index to `Subgro
                   ┘
 ```
 
-That is to say, all instructions over subgroups operate on a set of indices of subgroups. A more interesting example that operates on the values of the cells is a sum operation. A sum operation corresponds to a select function which takes a set of cells such that $c_{\langle r, col \lt \bar{s}}$. The expansion over the $\bar{s}$ is done automatically. To say we want to operate on the second row is to say:
+Furthermore, it is relevant to note that just like BQN operation calls each `¨` to operate on per row basis, so does the SPIR-V instruction also operate in a similar manner over subgroups. These semantical _suggestions_ of operational correspondence continue to appear in later examples.
+
+A more interesting example that operates _on the values_ of the cells is a sum operation. A sum operation corresponds to a select function which takes a set of cells such that $c_{\langle r, col \lt \bar{s} \rangle}$. The index generation on $col$ over the $\bar{s}$ is done automatically on SPIR-V. So, to say we want to operate on the second row is to say:
 
 ```
   1 ⊏ idx
 ⟨ ⟨ 1 0 ⟩ ⟨ 1 1 ⟩ ⟨ 1 2 ⟩ ⟨ 1 3 ⟩ ⟨ 1 4 ⟩ ⟨ 1 5 ⟩ ⟨ 1 6 ⟩ ⟨ 1 7 ⟩ ⟩
 ```
 
-Suppose the values of the cells would all be 10. Now:
+Suppose each cell has value $10$. Now:
 
 ```
   10¨idx
@@ -176,7 +182,7 @@ Suppose the values of the cells would all be 10. Now:
                           ┘
 ```
 
-A sum reduction would be:
+A sum reduction using SPIR-V semantics would be:
 
 ```
   {≠⥊+´}⌾(1⊏⊢) 10¨idx
@@ -188,7 +194,7 @@ A sum reduction would be:
                           ┘
 ```
 
-To see affected values we could do:
+SPIR-V subgroup operations write the result to each acting cell. The concept is exact to SIMD instruction on CPUs. So, a sum does not fold, it ravels the _context_ of the subgroup identity. How the communication exactly happens is not explained in the specification, it is implemented on the hardware level. We can also visualize the identity:
 
 ```
   sum ≠ 10¨idx
@@ -200,7 +206,7 @@ To see affected values we could do:
                   ┘
 ```
 
-To return some changed value, we could say that we want to select the leader of the subgroup:
+Returning the result can done from arbitrary cell in the context, but it has to be a coded deterministically -- there is no randomness instruction in SPIR-V. In practice it is probably easiest to do using the subgroup leader index:
 
 ```
   {⌊´1‿0 = 𝕩}¨idx
@@ -212,7 +218,7 @@ To return some changed value, we could say that we want to select the leader of 
                   ┘
 ```
 
-The sum of these values is then
+Now we start our quantitative modeling. We sum identities of acting cells:
 
 ```
   leader + a
@@ -224,19 +230,7 @@ The sum of these values is then
                   ┘
 ```
 
-We can then find the cell which we want to read twice as such:
-
-```
-  b = 2
-┌─
-╵ 0 0 0 0 0 0 0 0
-  1 0 0 0 0 0 0 0
-  0 0 0 0 0 0 0 0
-  0 0 0 0 0 0 0 0
-                  ┘
-```
-
-Which is equivalent of saying to return the value we have read the most:
+In this case, we find our final value from the cell which we have done two reads, which also happens to be the the most used cell. A hypothesis appears: the result of computation is found from a subset of cells, but not necessarily from a proper subset that have been accessed the most. A stronger claim is that cells that have been accessed zero times are redundant. Let us find the subset using our quantified matrix:
 
 ```
   b = ⌈´⥊b
@@ -248,16 +242,22 @@ Which is equivalent of saying to return the value we have read the most:
                   ┘
 ```
 
-We can then do a filter on the flattened array:
+This _view index_ can be used as a filter on the flattened array:
 
 ```
-  (⥊(b=2)) / (⥊sum)
+  (⥊(b = ⌈´⥊b)) / (⥊sum)
 ⟨ 80 ⟩
 ```
 
-The motivation to do the selection over the values that we have accessed the most comes from the fact that this allows us to tie a multiplicity into the array values, and only return the ones that we are interested in.
+We have now demonstrated the basic idea how we want to use quantified types in our work. To reiterate, we want to encode the times that operations access cells using indexes of each level of context available to us. In the above example, the only level of context we used was the subgroup. Next, we introduce the level below which we call the global context.
 
-Following this, suppose a sum reduction of the whole matrix:
+Before we continue, we should also introduce barriers. A barrier is a blocking instruction which is paramount for deterministic results. Barriers come in two forms: _control barriers_, and _memory barriers_. A control barrier waits for each context to converge in execution. A memory barrier ensures that accesses to a cell or cells are observed by a user-defined context. For simplification, we say that our barrier does both.
+
+Quantification of barriers is important because of how it can considered a _code-smell_: the more there are barriers, the more time is spent on waiting. A hypothesis is that minimizing barriers lead to faster algorithms.
+
+In our example above, there is a single barrier after the sum reduction. This is because returning the result before the sum operation is done would not give us the result wanted. Now on, we denote a barrier in our code.
+
+We now continue modeling a sum reduction of the whole matrix. This will introduce us to operations on the global context.
 
 ```
   # sum reduce row-vise
@@ -297,9 +297,13 @@ barrier
 5 barriers
 ```
 
-How can we type check this? We can say that if the type of the sum reduction is a single element, then we the number of elements with the value 5 should equal to the dependent type signature.
+The interesting part happens on the `move` step on $c_{\langle row,0 \rangle} \to c_{\langle 0, row \rangle}$. We followed this with an extra subgroup sum on $c_{\langle 0, col \rangle}$. The result is found from $c_{\langle 0,0 \rangle}$ which is again the most accessed cell.
 
-Where this comes interesting is to think about the work laid in [@TypeSystemsFoMcbrid2022], in which the row and column headers were set as types. Our motivation is to work our way "back" from the representation using the list lengths of the header and cell as lifetimes. The idea being that operations "deconstruct" the spreadsheet structure by checking if the linear "use-by" counts permit it. This way, we can model various parallel algorithms before actual implementation.
+We can revisit typing now. We define that each operation produces a vector of binary values $\{0,1\}$ indexed by $n$. We call such array a _view array_. As a corollary, $n$ must match the shape of our denotational semantics for that operation. There exists an initial view array which is always the size of our input _buffer_. The count of $1$s in the last view array must correspond with the final shape defined by our denotational semantics of the algorithm iff the type can be deduced. If the type cannot be deduced, the program must return. Any view array in between the initial and the last one must have shape that depends on the shape of the previous operation. If all these constraints hold, then the algorithm is considered type-correct.
+
+A corollary: the result is a list iff the final type cannot be deduced. An example of this is a value-dependent filter. The only case in which the type cannot be deduced must hence depend on the value of the cell.
+
+In effect, these statements join static rank polymorphism with operational semantics derived from work of [@TypeSystemsFoMcbrid2022], in which the row and column headers were set as types. Our motivation is to work our way "back" from the representations of the final view array using the list lengths of the header and cell as lifetimes. The idea being that operations "deconstruct" the spreadsheet structure by checking if the linear "use-by" counts permit it. This way, we can model various parallel algorithms before actual implementation.
 
 Something that we also note is that even in an array programming language the sum reduction of a matrix is a fold applied twice:
 
