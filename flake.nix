@@ -1,10 +1,12 @@
 {
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    flake-root.url = "github:srid/flake-root";
-    mission-control.url = "github:Platonic-Systems/mission-control";
+    devenv.url = "github:cachix/devenv";
+    nix2container.url = "github:nlewo/nix2container";
+    nix2container.inputs.nixpkgs.follows = "nixpkgs";
+    mk-shell-bin.url = "github:rrbutani/nix-mk-shell-bin";
 
     # blogposts
     j1.url = "github:jhvst/jhvst.github.io?dir=blogPosts/j1";
@@ -34,8 +36,7 @@
         "x86_64-linux"
       ];
       imports = [
-        inputs.flake-root.flakeModule
-        inputs.mission-control.flakeModule
+        inputs.devenv.flakeModule
       ];
 
       perSystem = { pkgs, lib, config, system, ... }: {
@@ -86,38 +87,14 @@
 
         };
 
-        packages.components = pkgs.stdenv.mkDerivation {
+        devenv.shells.default = {
 
-          name = "components";
-          src = ./.;
-
-          phases = [ "unpackPhase" "buildPhase" ];
-
-          buildPhase = ''
-            mkdir -p $out/css
-            mkdir -p $out/html
-            cp css/* $out/css
-            cp html/* $out/html
-          '';
-        };
-
-        mission-control.scripts = {
-          img = {
-            description = "compress img assets";
-            exec = "${lib.getExe pkgs.pngquant} img/*.png img/*/*.png --ext .png --force --strip --verbose";
-            category = "Tools";
+          scripts = {
+            img-compress = {
+              exec = "${lib.getExe pkgs.pngquant} img/*.png img/*/*.png --ext .png --force --strip --verbose";
+            };
           };
-        };
 
-        devShells.default = pkgs.mkShell {
-          inputsFrom = [ config.mission-control.devShell ];
-
-          packages = with pkgs; [
-            validator-nu
-            watch
-            pngquant
-            pandoc
-          ];
         };
 
       };
