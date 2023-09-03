@@ -19,6 +19,7 @@
     vksum.url = "github:jhvst/jhvst.github.io?dir=blogPosts/vulkan-sum-reduction";
     ipxe-rpi4.url = "github:jhvst/jhvst.github.io?dir=blogPosts/ipxe-rpi4";
     ramsteam.url = "github:jhvst/jhvst.github.io?dir=blogPosts/RAMsteam";
+    modular-neovim.url = "github:jhvst/jhvst.github.io?dir=blogPosts/modular-neovim";
 
     # papers
     bsc-thesis.url = "github:jhvst/jhvst.github.io?dir=papers/bsc-thesis";
@@ -77,6 +78,10 @@
 
             mkdir -p $out/blogPosts/RAMsteam
             cp -r ${inputs.ramsteam.outputs.packages.${system}.default}/* $out/blogPosts/RAMsteam
+
+            mkdir -p $out/blogPosts/modular-neovim
+            cp -r ${inputs.modular-neovim.outputs.packages.${system}.default}/* $out/blogPosts/modular-neovim
+
 
             mkdir -p $out/projects/highlightplay/theinternational5
             cp -r projects/highlightplay/theinternational5/* $out/projects/highlightplay/theinternational5
