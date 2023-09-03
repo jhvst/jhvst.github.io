@@ -25,34 +25,10 @@
     <pubDate>12 Nov 2022 11:57:50 GMT</pubDate>
   </item>
   <item>
-    <title>Scheduling Array Operations // Dyalog '22</title>
-    <link>https://www.youtube.com/watch?v=Jt6mdYGn9M4</link>
-    <description>Scheduling array operations has been a topical theme in the research of tensor computation. With the help of type theory, array operations are parallelised for graphics processing units and distributed computing. Juuso shares his findings in static scheduling, and how it can be used to optimise execution over different hardware and compute infrastructure settings.</description>
-    <pubDate>11 Nov 2022 12:00:00 GMT</pubDate>
-  </item>
-  <item>
-    <title>Unleashing GPUs for Network Function Virtualization: an open architecture based on Vulkan and Kubernetes</title>
-    <link>https://www.semanticscholar.org/paper/Unleashing-GPUs-for-Network-Function-an-open-based-Haavisto-Cholez/af548628c453e47cd1ac32ce7b6bd97970503265</link>
-    <description>General-purpose computing on graphics processing units (GPGPU) is a promising way to speed up computationally intensive network functions, such as performing real-time traffic classification based on machine learning. Recent studies have focused on integrated graphics units and various performance optimizations to address bottlenecks such as latency. However, these approaches tend to produce architecture-specific binaries and lack the orchestration of functions. A complementary effort would be a GPGPU architecture based on standard and open components, which allows the creation of interoperable and orchestrable network functions.This study describes and evaluates such open architecture based on the cross-platform Vulkan API, in which we execute hand-written SPIR-V code as a network function. We also demonstrate a multi-node orchestration approach for our proposed architecture using Kubernetes. We validate our architecture by executing SPIR-V code performing traffic classification with random forest inference. We test this application both on discrete and integrated graphics cards and on x86 and ARM. We find that in all cases the GPUs are faster than the baseline Cython code.</description>
-    <pubDate>25 Apr 2022 12:00:00 GMT</pubDate>
-  </item>
-  <item>
     <title>Vulkan sum reduction</title>
     <link>https://juuso.dev/blogPosts/vulkan-sum-reduction/vulkan-sum-reduction.html</link>
     <description>We describe how we can do sum reduction using SPIR-V subgroups up to vector length of 4096. With SPIR-V, we are able to run this program on GPUs of different manufacturers using the Vulkan GPU API. As Vulkan is supported by Nvidia, AMD, and, e.g., Apple ARM among others, this allows us to build cross-compatible array operations similar to CUDA.</description>
     <pubDate>23 Mar 2022 16:30:00 GMT</pubDate>
-  </item>
-  <item>
-    <title>Metaversumi: Virtuaalitodellisuus, NFT:t ja 5G-verkko | Lohkoketju 6</title>
-    <link>https://www.youtube.com/watch?v=ZVd91Ye4JS8</link>
-    <description>Mikä metaversumi tai metaverse on? Miten AR ("Augmented Reality") eli lisätty todellisuus ja VR ("Virtual Reality") eli virtuaalitodellisuus eroavat toisistaan? Miten metaversumi liittyy lohkoketjuihin ja mikä rooli NFT-teknologialla ja digitaalisella omistajuudella on metaversumissa?</description>
-    <pubDate>03 Dec 2021 18:00:00 GMT</pubDate>
-  </item>
-  <item>
-    <title>Ethereum, EVM ja Solidity | Lohkoketju 5</title>
-    <link>https://www.youtube.com/watch?v=Otpwn420hoc</link>
-    <description>Miten Ethereumin virtuaalikone eli Ethereum virtual machine toimii? Minkälainen ohjelmointikieli Ethereumin Solidity on ja mihin kaikkeen sitä voi käyttää? Mitä eroa on funktionaalisilla ja imperatiivisilla ohjelmointikielillä?</description>
-    <pubDate>03 Dec 2021 17:00:00 GMT</pubDate>
   </item>
   <item>
     <title>On Ethereum node operation</title>
@@ -64,36 +40,6 @@
     <title>Static Semantics of Rank Polymorphism</title>
     <link>https://juuso.dev/papers/msc-thesis-standrews/msc-thesis-standrews.html</link>
     <pubDate>21 Jun 2021 18:58:00 GMT</pubDate>
-  </item>
-  <item>
-    <title>Leveraging APL and SPIR-V languages to write network functions to be deployed on Vulkan compatible GPUs</title>
-    <link>https://hal.inria.fr/hal-03155647/</link>
-    <description>Optimizing Python code by rewriting it in APL, and then translating it into Vulkan SPIR-V</description>
-    <pubDate>29 Jun 2020 12:00:00 GMT</pubDate>
-  </item>
-  <item>
-    <title>Interoperable GPU Kernels as Latency Improver for MEC</title>
-    <link>https://www.semanticscholar.org/paper/fef3dcaa1608447fdf5cf65cbbad3dbf8d90c957</link>
-    <description>Study on GPU shader languages with focus on sharing graphics on MR devices</description>
-    <pubDate>24 Jan 2020 12:00:00 GMT</pubDate>
-  </item>
-  <item>
-    <title>Open-source RANs in Practice: an Over-The-Air Deployment for 5G MEC</title>
-    <link>https://www.semanticscholar.org/paper/5fa1407954fe0e499b2d9ce14003c1ddc4e9af16</link>
-    <description>Setting up an open-source based 5G network</description>
-    <pubDate>17 Jun 2019 12:00:00 GMT</pubDate>
-  </item>
-  <item>
-    <title>"Huawein kieltäneet maat ampuvat omaan jalkaansa"</title>
-    <link>https://www.kauppalehti.fi/uutiset/huawein-kieltaneet-maat-ampuvat-omaan-jalkaansa/f04b6515-a43d-4c15-9839-e2b36bf9de80</link>
-    <description>Oulun yliopistossa tehdään edelläkäyvää 5g-tutkimusta. Huawei ja Samsung houkuttelevat tutkijoita leiriinsä.</description>
-    <pubDate>12 Jun 2019 11:00:00 GMT</pubDate>
-  </item>
-  <item>
-    <title>Freshman Left to Silicon Valley</title>
-    <link>https://startuplifers.org/blog/2019/03/11/freshman-left-to-silicon-valley/</link>
-    <description>Startuplifers alumni Juuso shares his experiences and insights from two startups</description>
-    <pubDate>11 Mar 2019 12:00:00 GMT</pubDate>
   </item>
   <item>
     <title>vacuum cleaners and me</title>
@@ -130,12 +76,6 @@
     <link>https://juuso.dev/genz.html</link>
     <description>Essee Z-sukupolvesta ja siitä, miten heitä tulisi johtaa</description>
     <pubDate>03 Apr 2017 12:00:00 GMT</pubDate>
-  </item>
-  <item>
-    <title>Suomesta Suurempi Striimaamalla</title>
-    <link>https://blogit.kaleva.fi/opiskelijan-aani/suomesta-suurempi-striimaamalla</link>
-    <description>Suomessa on ainutlaatuinen mahdollisuus henkilökohtaiseen markkinointiin mobiiliverkkojen avulla. Miksi sitä ei käytetä hyväksi?</description>
-    <pubDate>17 Mar 2017 12:00:00 GMT</pubDate>
   </item>
   <item>
     <title>The International 5 in Numbers</title>
