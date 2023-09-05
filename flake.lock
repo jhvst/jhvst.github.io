@@ -9,11 +9,11 @@
       },
       "locked": {
         "dir": "blogPosts/barbell",
-        "lastModified": 1693696126,
-        "narHash": "sha256-Eqd68/Wao66/0+++tM/2J0BLsFM4HJhlv8XhgzXOKDs=",
+        "lastModified": 1693918279,
+        "narHash": "sha256-2R/mhRWqpKGo8Acf/3e3XSgWe0xZewnqH6LicejnKHo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7854361efe752e56eafd3a263b297c25cbd928b8",
+        "rev": "80ae5b064d68208449f0c6d84002eb61b3c04b1c",
         "type": "github"
       },
       "original": {
@@ -337,11 +337,11 @@
       },
       "locked": {
         "dir": "papers/bsc-thesis",
-        "lastModified": 1693696126,
-        "narHash": "sha256-Eqd68/Wao66/0+++tM/2J0BLsFM4HJhlv8XhgzXOKDs=",
+        "lastModified": 1693918279,
+        "narHash": "sha256-2R/mhRWqpKGo8Acf/3e3XSgWe0xZewnqH6LicejnKHo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7854361efe752e56eafd3a263b297c25cbd928b8",
+        "rev": "80ae5b064d68208449f0c6d84002eb61b3c04b1c",
         "type": "github"
       },
       "original": {
@@ -403,11 +403,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1693642760,
-        "narHash": "sha256-yphM0TqJM3ci2R9W4E37w64B9XBLHgD4D1IeduOVsmo=",
+        "lastModified": 1693830477,
+        "narHash": "sha256-6j1oNRpjGseDbgg6mJ9H3gmX5U+VAubOLV+iFL9WW30=",
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "ae9100ae735baf5b0c491eabf76c6a9ec0a79757",
+        "rev": "f839f486b98609f3477c0410b31a6f831b390d48",
         "type": "github"
       },
       "original": {
@@ -1672,11 +1672,11 @@
       },
       "locked": {
         "dir": "blogPosts/ipxe-rpi4",
-        "lastModified": 1693696126,
-        "narHash": "sha256-Eqd68/Wao66/0+++tM/2J0BLsFM4HJhlv8XhgzXOKDs=",
+        "lastModified": 1693918279,
+        "narHash": "sha256-2R/mhRWqpKGo8Acf/3e3XSgWe0xZewnqH6LicejnKHo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7854361efe752e56eafd3a263b297c25cbd928b8",
+        "rev": "80ae5b064d68208449f0c6d84002eb61b3c04b1c",
         "type": "github"
       },
       "original": {
@@ -1696,11 +1696,11 @@
       },
       "locked": {
         "dir": "blogPosts/j1",
-        "lastModified": 1693696126,
-        "narHash": "sha256-Eqd68/Wao66/0+++tM/2J0BLsFM4HJhlv8XhgzXOKDs=",
+        "lastModified": 1693918279,
+        "narHash": "sha256-2R/mhRWqpKGo8Acf/3e3XSgWe0xZewnqH6LicejnKHo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7854361efe752e56eafd3a263b297c25cbd928b8",
+        "rev": "80ae5b064d68208449f0c6d84002eb61b3c04b1c",
         "type": "github"
       },
       "original": {
@@ -1725,11 +1725,11 @@
         "wayland": "wayland"
       },
       "locked": {
-        "lastModified": 1693695695,
-        "narHash": "sha256-WB9Ekje0QbCa3OPD3WTl0pzRSbSb1WKRkDQJu0Ce49A=",
+        "lastModified": 1693944925,
+        "narHash": "sha256-bPfP5m8bZoVDod51NOXjRUgPk5pLllmd9XDj4H6ZPvo=",
         "owner": "jhvst",
         "repo": "nix-config",
-        "rev": "08a2c16e828f4de04450ada4aab68f8e94b06e04",
+        "rev": "bb24b27e2ba66cf59e8c2f252ad9d118ad0f0106",
         "type": "github"
       },
       "original": {
@@ -1878,11 +1878,11 @@
       },
       "locked": {
         "dir": "blogPosts/modular-neovim",
-        "lastModified": 1693769088,
-        "narHash": "sha256-0JSv05xEqOA/S+OW05dGuyBv9+oPFBEui8+HpQWeSxg=",
+        "lastModified": 1693918279,
+        "narHash": "sha256-2R/mhRWqpKGo8Acf/3e3XSgWe0xZewnqH6LicejnKHo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "506dbadc1a43af94032db87857ad5987ac65dba1",
+        "rev": "80ae5b064d68208449f0c6d84002eb61b3c04b1c",
         "type": "github"
       },
       "original": {
@@ -2095,11 +2095,11 @@
         "poetry2nix": "poetry2nix_5"
       },
       "locked": {
-        "lastModified": 1693491575,
-        "narHash": "sha256-UwyML7iw3fOkucbJ3XptLgHhC8C8NMYBIQB7rvGuYuE=",
+        "lastModified": 1693750635,
+        "narHash": "sha256-pRaxAPErkZehOvQDrHXXByixffzAInBfFWLM1LwYhso=",
         "owner": "jooooscha",
         "repo": "nixpkgs-vim-extra-plugins",
-        "rev": "91835b6fd0fe5772a2f85f721fc8990e60021955",
+        "rev": "40b62d1f51e94da45eec50bf30d4af3e7590098d",
         "type": "github"
       },
       "original": {
@@ -2777,11 +2777,11 @@
     },
     "nixpkgs_20": {
       "locked": {
-        "lastModified": 1693756349,
-        "narHash": "sha256-kT2wu0fAOBtFq9XS3LXvYKrz/okUBk+58usjHbwDyB0=",
+        "lastModified": 1693916984,
+        "narHash": "sha256-AdU4eojZdbEbAR9hwfndE+PKUfJytBAEfE3kxq53GYs=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "39104a4d5755d940517483879a3b06b28ef5ff6d",
+        "rev": "1429352b37e31a48364f3467b99e2f8acb405235",
         "type": "github"
       },
       "original": {
@@ -2823,11 +2823,11 @@
     },
     "nixpkgs_23": {
       "locked": {
-        "lastModified": 1693692645,
-        "narHash": "sha256-7UUK8+1S3rgK4Ba4WgtutHT3Mazim7TuQ4e2G3w9BqU=",
+        "lastModified": 1693944936,
+        "narHash": "sha256-MOYGIub9uV/hMeiBi/I+S3xQFFyQTqp82Mi64aafAFw=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "3f9e803102d49388de3862e340ac2f9cbe7381e8",
+        "rev": "8004a2c303b5d3be6da5ab3cea64caf754de9f5e",
         "type": "github"
       },
       "original": {
@@ -2885,11 +2885,11 @@
     },
     "nixpkgs_27": {
       "locked": {
-        "lastModified": 1693692645,
-        "narHash": "sha256-7UUK8+1S3rgK4Ba4WgtutHT3Mazim7TuQ4e2G3w9BqU=",
+        "lastModified": 1693944936,
+        "narHash": "sha256-MOYGIub9uV/hMeiBi/I+S3xQFFyQTqp82Mi64aafAFw=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "3f9e803102d49388de3862e340ac2f9cbe7381e8",
+        "rev": "8004a2c303b5d3be6da5ab3cea64caf754de9f5e",
         "type": "github"
       },
       "original": {
@@ -3166,11 +3166,11 @@
         "pre-commit-hooks": "pre-commit-hooks_6"
       },
       "locked": {
-        "lastModified": 1693552651,
-        "narHash": "sha256-U0PdjLxFtgK1a7leKgzqPeorhncO9xo+wmPJ/NK8fIg=",
+        "lastModified": 1693862861,
+        "narHash": "sha256-+ynDsujluFf187KZvyBZ1C/BTty3TtKWuzuvpQ7sy/Q=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "186b790febffd6d16c2ba6bbe55655ddbdeec894",
+        "rev": "b7611f74a9b1107e09925664f652b141926b0b92",
         "type": "github"
       },
       "original": {
@@ -3568,11 +3568,11 @@
       },
       "locked": {
         "dir": "blogPosts/RAMsteam",
-        "lastModified": 1693696126,
-        "narHash": "sha256-Eqd68/Wao66/0+++tM/2J0BLsFM4HJhlv8XhgzXOKDs=",
+        "lastModified": 1693918279,
+        "narHash": "sha256-2R/mhRWqpKGo8Acf/3e3XSgWe0xZewnqH6LicejnKHo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7854361efe752e56eafd3a263b297c25cbd928b8",
+        "rev": "80ae5b064d68208449f0c6d84002eb61b3c04b1c",
         "type": "github"
       },
       "original": {
@@ -3727,11 +3727,11 @@
       },
       "locked": {
         "dir": "papers/msc-thesis-standrews",
-        "lastModified": 1693696126,
-        "narHash": "sha256-Eqd68/Wao66/0+++tM/2J0BLsFM4HJhlv8XhgzXOKDs=",
+        "lastModified": 1693918279,
+        "narHash": "sha256-2R/mhRWqpKGo8Acf/3e3XSgWe0xZewnqH6LicejnKHo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7854361efe752e56eafd3a263b297c25cbd928b8",
+        "rev": "80ae5b064d68208449f0c6d84002eb61b3c04b1c",
         "type": "github"
       },
       "original": {
@@ -4202,11 +4202,11 @@
       },
       "locked": {
         "dir": "blogPosts/vulkan-sum-reduction",
-        "lastModified": 1693696126,
-        "narHash": "sha256-Eqd68/Wao66/0+++tM/2J0BLsFM4HJhlv8XhgzXOKDs=",
+        "lastModified": 1693918279,
+        "narHash": "sha256-2R/mhRWqpKGo8Acf/3e3XSgWe0xZewnqH6LicejnKHo=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7854361efe752e56eafd3a263b297c25cbd928b8",
+        "rev": "80ae5b064d68208449f0c6d84002eb61b3c04b1c",
         "type": "github"
       },
       "original": {
@@ -4294,11 +4294,11 @@
       },
       "locked": {
         "dir": "packages/web-components",
-        "lastModified": 1693696126,
-        "narHash": "sha256-Eqd68/Wao66/0+++tM/2J0BLsFM4HJhlv8XhgzXOKDs=",
+        "lastModified": 1693916235,
+        "narHash": "sha256-rn6Ql0E2z/agCjV5MhhpTeCwpp31evMPYIMSOtryoWA=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7854361efe752e56eafd3a263b297c25cbd928b8",
+        "rev": "e9a87328f2c66a4301ef85d0bd7b60818d5f31b3",
         "type": "github"
       },
       "original": {
