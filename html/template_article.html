@@ -3,9 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>|title|</title>
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Juuso Haavisto">
+
+    <title>|title|</title>
+    <meta property="og:title" content="|title|">
+    <meta name="description" content="|description|">
+    <meta property="og:description" content="|description|">
+
+    <link rel="icon" href="/favicon.svg">
+    <link rel="alternate" type="application/rss+xml" title="Juuso Haavisto" href="/rss.xml">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css" integrity="sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI" crossorigin="anonymous">
 
@@ -50,6 +57,250 @@
         code {
             font-size: 80%;
             font-family: IBM Plex Mono, monospace;
+        }
+
+        pre>code.sourceCode {
+            white-space: pre;
+            position: relative;
+        }
+
+        pre>code.sourceCode>span {
+            display: inline-block;
+            line-height: 1.25;
+        }
+
+        pre>code.sourceCode>span:empty {
+            height: 1.2em;
+        }
+
+        code.sourceCode>span {
+            color: inherit;
+            text-decoration: inherit;
+        }
+
+        div.sourceCode {
+            margin: 1em 0;
+        }
+
+        pre.sourceCode {
+            margin: 0;
+        }
+
+        @media screen {
+            div.sourceCode {
+                overflow: auto;
+            }
+        }
+
+        @media print {
+            pre>code.sourceCode {
+                white-space: pre-wrap;
+            }
+
+            pre>code.sourceCode>span {
+                text-indent: -5em;
+                padding-left: 5em;
+            }
+        }
+
+        pre.numberSource code {
+            counter-reset: source-line 0;
+        }
+
+        pre.numberSource code>span {
+            position: relative;
+            left: -4em;
+            counter-increment: source-line;
+        }
+
+        pre.numberSource code>span>a:first-child::before {
+            content: counter(source-line);
+            position: relative;
+            left: -1em;
+            text-align: right;
+            vertical-align: baseline;
+            border: none;
+            display: inline-block;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            padding: 0 4px;
+            width: 4em;
+            color: #aaaaaa;
+        }
+
+        pre.numberSource {
+            margin-left: 3em;
+            border-left: 1px solid #aaaaaa;
+            padding-left: 4px;
+        }
+
+        div.sourceCode {}
+
+        @media screen {
+            pre>code.sourceCode>span>a:first-child::before {
+                text-decoration: underline;
+            }
+        }
+
+        code span.al {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        /* Alert */
+        code span.an {
+            color: #60a0b0;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        /* Annotation */
+        code span.at {
+            color: #7d9029;
+        }
+
+        /* Attribute */
+        code span.bn {
+            color: #40a070;
+        }
+
+        /* BaseN */
+        code span.bu {
+            color: #008000;
+        }
+
+        /* BuiltIn */
+        code span.cf {
+            color: #007020;
+            font-weight: bold;
+        }
+
+        /* ControlFlow */
+        code span.ch {
+            color: #4070a0;
+        }
+
+        /* Char */
+        code span.cn {
+            color: #880000;
+        }
+
+        /* Constant */
+        code span.co {
+            color: #60a0b0;
+            font-style: italic;
+        }
+
+        /* Comment */
+        code span.cv {
+            color: #60a0b0;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        /* CommentVar */
+        code span.do {
+            color: #ba2121;
+            font-style: italic;
+        }
+
+        /* Documentation */
+        code span.dt {
+            color: #902000;
+        }
+
+        /* DataType */
+        code span.dv {
+            color: #40a070;
+        }
+
+        /* DecVal */
+        code span.er {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        /* Error */
+        code span.ex {}
+
+        /* Extension */
+        code span.fl {
+            color: #40a070;
+        }
+
+        /* Float */
+        code span.fu {
+            color: #06287e;
+        }
+
+        /* Function */
+        code span.im {
+            color: #008000;
+            font-weight: bold;
+        }
+
+        /* Import */
+        code span.in {
+            color: #60a0b0;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        /* Information */
+        code span.kw {
+            color: #007020;
+            font-weight: bold;
+        }
+
+        /* Keyword */
+        code span.op {
+            color: #666666;
+        }
+
+        /* Operator */
+        code span.ot {
+            color: #007020;
+        }
+
+        /* Other */
+        code span.pp {
+            color: #bc7a00;
+        }
+
+        /* Preprocessor */
+        code span.sc {
+            color: #4070a0;
+        }
+
+        /* SpecialChar */
+        code span.ss {
+            color: #bb6688;
+        }
+
+        /* SpecialString */
+        code span.st {
+            color: #4070a0;
+        }
+
+        /* String */
+        code span.va {
+            color: #19177c;
+        }
+
+        /* Variable */
+        code span.vs {
+            color: #4070a0;
+        }
+
+        /* VerbatimString */
+        code span.wa {
+            color: #60a0b0;
+            font-weight: bold;
+            font-style: italic;
         }
 
         pre,
@@ -99,10 +350,6 @@
             color: #111;
         }
 
-        header {
-            background-color: yellow;
-        }
-
         header>* {
             margin: 0;
         }
@@ -144,40 +391,23 @@
 
 <body>
     <article itemscope itemtype="https://schema.org/BlogPosting" itemid="https://juuso.dev/blogPosts/|name|/|slug|.html">
-        <header style="border: 3px dotted black; padding: 1em; display: flex; flex-direction: column;">
-            <p style="border-bottom: 2px solid black;">
-                <b style="margin-right: 1em;">Word count
-                    <span itemprop="wordCount">|wordCount|</span>
-                </b>
-                <time itemprop="datePublished" datetime="|datetime|">|pubDate|</time>
-            </p>
-            <div itemprop="author" itemscope itemtype="https://schema.org/Person">
-                <h2 itemprop="name" style="border-bottom: 2px solid black;">
-                    <a itemprop="url" href="https://juuso.dev">Juuso Haavisto</a>
-                </h2>
-                <div style="align-items: center; display: flex; column-gap: 10px; justify-content: space-between;">
-                    <div style="border-right: 1px solid black;">
-                        <h3 style="margin: 0;"><a itemprop="sameAs" href="https://twitter.com/osnnr">@osnnr</a></h3>
-                        <p style="margin: 0;">Tweet, star, or e-mail <a href="mailto:juuso@mail.com" itemprop="email">juuso@mail.com</a></p>
-                    </div>
-                    <div style="border-right: 1px solid black;">
-                        <h3 style="margin: 0;"><a href="mailto:business@ponkila.com">business@ponkila.com</a></h3>
-                        <p style="margin: 0;">NixOS-based PXE infrastructure and devops consulting</p>
-                    </div>
-                    <div>
-                        <h3 style="margin: 0;"><a href="/rss.xml">RSS</a></h3>
-                        <p style="margin: 0;">Yesterday's news today</p>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <p><i><a href="/rss.xml">Blog</a> of <a href="/">Juuso Haavisto</a></i></p>
+        <p style="display: flex; flex-direction: column; border-bottom: 2px solid black;">
+            <time itemprop="datePublished" datetime="|datetime|">|pubDate|</time>
+            <b style="display: none;"><span itemprop="wordCount">|wordCount|</span> words</b>
+        </p>
         <meta itemprop="abstract" content="|description|">
         <section itemprop="articleBody">
             |article|
         </section>
-        <footer>
+        <footer style="margin: 1em 0 1em 0; border-top: 2px solid black;">
             <small>
-                This page has been generated with Nix Flakes. It can be reproduced by running <code>nix build github:jhvst/jhvst.github.io?dir=blogPosts/|name|</code>. Fork at <a href="https://github.com/jhvst/jhvst.github.io">GitHub</a>.
+                <a href="/">Index</a>
+                <a href="/rss.xml">Archive</a>
+                <br>
+                Generated by <code>nix build "github:jhvst/jhvst.github.io?dir=blogPosts/|name|"</code>
+                <br>
+                Fork at <a href="https://github.com/jhvst/jhvst.github.io">GitHub</a>
             </small>
         </footer>
     </article>
