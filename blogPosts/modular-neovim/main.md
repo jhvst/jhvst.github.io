@@ -38,7 +38,7 @@ So, now that the `.envrc` file hooks into the shell and loads the packages defin
 
 Here, the NixVim project allows us to define the required packages as such:
 
-```
+```nix
 {
   programs.nixvim = {
     enable = true;
@@ -71,7 +71,7 @@ Luckily, the NixVim authors have thought about this _composability_, for which t
 This method will consume a `nixosModule` as its configuration.
 We can thus do the following:
 
-```
+```nix
 packages.neovim = nixvim.legacyPackages.${system}.makeNixvimWithModule {
   inherit pkgs;
   module = {
@@ -101,7 +101,7 @@ Adding this to integrate with `nixosModules` requires redefining the `pkgs` repo
 This is where it becomes a tad complicated.
 First, we have to rewrite the nixpkgs as follows:
 
-```
+```nix
 _module.args.pkgs = import inputs.nixpkgs {
   inherit system;
   overlays = [
@@ -113,7 +113,7 @@ _module.args.pkgs = import inputs.nixpkgs {
 
 The overlay is now pointing to our repository, where we have to produce an overlay:
 
-```
+```nix
 overlayAttrs = {
   inherit (config.packages) himalaya;
 };
@@ -121,7 +121,7 @@ overlayAttrs = {
 
 The expression says to create an overlay of our packages and include the `himalaya` package. Now, in our packages definition, we can do the following:
 
-```
+```nix
 packages = {
   "himalaya" = pkgs.himalaya.overrideAttrs (oldAttrs: {
     buildInputs = oldAttrs.buildInputs ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.darwin.Security ];
@@ -144,7 +144,7 @@ The devenv packages can also be configured in the `flakes.nix` file.
 
 The definition with all the required changes looks as so:
 
-```
+```nix
 bqnlsp.url = "sourcehut:~detegr/bqnlsp";
 devenv.url = "github:cachix/devenv";
 juuso.url = "github:jhvst/nix-config";
@@ -236,13 +236,13 @@ devenv.shells.default = {
 };
 ```
 
-1. First, Nix pulls the remotes from git for LSP of BQN, devenv, and my configuration.
-Then, it makes a lock file for each independently.
-Then, devenv hooks with Nix.
-Then, we define our overlay to get the additional packages our configuration requires.
-Then, we define to build a new version of Neovim using our base config.
-Next, we add specific packages and configurations to [BQN](https://mlochbaum.github.io/BQN/).
-Finally, we define that the patched derivation of Neovim should be added to the shell path using `devenv`.
+1. Nix pulls the remotes from git for LSP of BQN, devenv, and my configuration.
+2. It makes a lock file for each independently.
+3. devenv hooks with Nix.
+4. we define our overlay to get the additional packages our configuration requires.
+5. we define to build a new version of Neovim using our base config.
+6. we add specific packages and configurations to [BQN](https://mlochbaum.github.io/BQN/).
+7. we define that the patched derivation of Neovim should be added to the shell path using `devenv`.
 
 We can now run `nix run .#neovim -- example.bqn`, which will open `example.bqn` in Neovim (arguments to the program fetched via `nix run` have to be separated with double dashes) with all project-specific addons installed!
 
@@ -257,7 +257,7 @@ What about installing the base configuration as our default one?
 
 In my `nix-config` repository, I can define the base configuration of Neovim to be added to my user path using home-manager:
 
-```
+```nix
 home-manager.users.juuso.programs.nixvim = let neovim = (import ../../../nixosModules/neovim) { inherit config pkgs; }; in with neovim.config; {
   inherit colorschemes extraConfigVim extraConfigLua extraPackages plugins extraPlugins;
   enable = true;
@@ -271,7 +271,7 @@ This will read the local nixosModule while inheriting (bringing variables into t
 However, we still need help adding overlays to our local configuration.
 This is arguably a bit simpler: wherever we define the Nix configuration for our computer, we also have to add a nixpkgs overlays definition:
 
-```
+```nix
 nixpkgs.overlays = [
   outputs.overlays.default
 ];

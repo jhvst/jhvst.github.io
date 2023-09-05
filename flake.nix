@@ -118,6 +118,10 @@
 
               let g:limelight_bop = '^'
               let g:limelight_eop = '$'
+
+              augroup autoformat_settings
+                autocmd FileType html,css,sass,scss,less,json,js AutoFormatBuffer js-beautify
+              augroup END
             '';
             extraConfigLua = ''
               require("papis").setup({
@@ -131,6 +135,7 @@
               })
             '';
             extraPackages = with pkgs; [
+              nodePackages.js-beautify
               papis
               sqlite
               yq-go
@@ -147,6 +152,14 @@
               nixneovimplugins.packages.${system}.papis-nvim
               nixneovimplugins.packages.${system}.sqlite-lua
             ];
+            plugins.lsp.servers.html.enable = true;
+            plugins.nvim-cmp = {
+              sources =
+                [
+                  { name = "latex_symbols"; }
+                  { name = "papis"; }
+                ];
+            };
           };
         };
 

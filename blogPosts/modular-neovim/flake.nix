@@ -25,7 +25,7 @@
 
           title = "Modular Neovim with Nix";
           description = "Expanding your Neovim configuration on per-project basis using Nix and devenv.";
-          pubDate = "05 Sep 2023 20:19:00 GMT";
+          pubDate = "03 Sep 2023 20:19:00 GMT";
 
           name = "modular-neovim";
           src = ./.;

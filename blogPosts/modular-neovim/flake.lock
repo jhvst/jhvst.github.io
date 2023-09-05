@@ -1036,11 +1036,11 @@
     },
     "nixpkgs_8": {
       "locked": {
-        "lastModified": 1693756349,
-        "narHash": "sha256-kT2wu0fAOBtFq9XS3LXvYKrz/okUBk+58usjHbwDyB0=",
+        "lastModified": 1693916984,
+        "narHash": "sha256-AdU4eojZdbEbAR9hwfndE+PKUfJytBAEfE3kxq53GYs=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "39104a4d5755d940517483879a3b06b28ef5ff6d",
+        "rev": "1429352b37e31a48364f3467b99e2f8acb405235",
         "type": "github"
       },
       "original": {
@@ -1628,11 +1628,11 @@
       },
       "locked": {
         "dir": "packages/web-components",
-        "lastModified": 1693696126,
-        "narHash": "sha256-Eqd68/Wao66/0+++tM/2J0BLsFM4HJhlv8XhgzXOKDs=",
+        "lastModified": 1693916235,
+        "narHash": "sha256-rn6Ql0E2z/agCjV5MhhpTeCwpp31evMPYIMSOtryoWA=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "7854361efe752e56eafd3a263b297c25cbd928b8",
+        "rev": "e9a87328f2c66a4301ef85d0bd7b60818d5f31b3",
         "type": "github"
       },
       "original": {
