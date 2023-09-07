@@ -59,6 +59,7 @@
             slugify ${title} > slug.bar
             date -d "${pubDate}" -Iminutes > datetime.bar
             cat main.md | wc -w > wordCount.bar
+            cp -r ./img $out/img/
 
             barbell main.html > article.bar
             barbell ./html/template_article.html > $out/barbell.html
