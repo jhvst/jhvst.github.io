@@ -9,11 +9,11 @@
       },
       "locked": {
         "dir": "blogPosts/barbell",
-        "lastModified": 1694120477,
-        "narHash": "sha256-CZ+aoVPfqlDfS6ahO3Dxd2PjCXjP3VW1EcJNGsaJz3Y=",
+        "lastModified": 1694121218,
+        "narHash": "sha256-qVedU9u0GiSsYGNw+18RqByfqWoZQlT8f6XUemOs5nI=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "ce8c581c85ce164a59121744a6964e7f87aae91b",
+        "rev": "78a3541f2ab35d14bca2afacf40275559917f3d1",
         "type": "github"
       },
       "original": {
@@ -184,11 +184,11 @@
       },
       "locked": {
         "dir": "papers/bsc-thesis",
-        "lastModified": 1694120477,
-        "narHash": "sha256-CZ+aoVPfqlDfS6ahO3Dxd2PjCXjP3VW1EcJNGsaJz3Y=",
+        "lastModified": 1694121218,
+        "narHash": "sha256-qVedU9u0GiSsYGNw+18RqByfqWoZQlT8f6XUemOs5nI=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "ce8c581c85ce164a59121744a6964e7f87aae91b",
+        "rev": "78a3541f2ab35d14bca2afacf40275559917f3d1",
         "type": "github"
       },
       "original": {
@@ -645,11 +645,11 @@
       },
       "locked": {
         "dir": "blogPosts/ipxe-rpi4",
-        "lastModified": 1694120477,
-        "narHash": "sha256-CZ+aoVPfqlDfS6ahO3Dxd2PjCXjP3VW1EcJNGsaJz3Y=",
+        "lastModified": 1694121218,
+        "narHash": "sha256-qVedU9u0GiSsYGNw+18RqByfqWoZQlT8f6XUemOs5nI=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "ce8c581c85ce164a59121744a6964e7f87aae91b",
+        "rev": "78a3541f2ab35d14bca2afacf40275559917f3d1",
         "type": "github"
       },
       "original": {
@@ -667,11 +667,11 @@
       },
       "locked": {
         "dir": "blogPosts/j1",
-        "lastModified": 1694120477,
-        "narHash": "sha256-CZ+aoVPfqlDfS6ahO3Dxd2PjCXjP3VW1EcJNGsaJz3Y=",
+        "lastModified": 1694121218,
+        "narHash": "sha256-qVedU9u0GiSsYGNw+18RqByfqWoZQlT8f6XUemOs5nI=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "ce8c581c85ce164a59121744a6964e7f87aae91b",
+        "rev": "78a3541f2ab35d14bca2afacf40275559917f3d1",
         "type": "github"
       },
       "original": {
@@ -721,11 +721,11 @@
       },
       "locked": {
         "dir": "blogPosts/modular-neovim",
-        "lastModified": 1694120477,
-        "narHash": "sha256-CZ+aoVPfqlDfS6ahO3Dxd2PjCXjP3VW1EcJNGsaJz3Y=",
+        "lastModified": 1694121218,
+        "narHash": "sha256-qVedU9u0GiSsYGNw+18RqByfqWoZQlT8f6XUemOs5nI=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "ce8c581c85ce164a59121744a6964e7f87aae91b",
+        "rev": "78a3541f2ab35d14bca2afacf40275559917f3d1",
         "type": "github"
       },
       "original": {
@@ -1367,11 +1367,11 @@
       },
       "locked": {
         "dir": "blogPosts/RAMsteam",
-        "lastModified": 1694120477,
-        "narHash": "sha256-CZ+aoVPfqlDfS6ahO3Dxd2PjCXjP3VW1EcJNGsaJz3Y=",
+        "lastModified": 1694121218,
+        "narHash": "sha256-qVedU9u0GiSsYGNw+18RqByfqWoZQlT8f6XUemOs5nI=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "ce8c581c85ce164a59121744a6964e7f87aae91b",
+        "rev": "78a3541f2ab35d14bca2afacf40275559917f3d1",
         "type": "github"
       },
       "original": {
@@ -1406,11 +1406,11 @@
       },
       "locked": {
         "dir": "papers/msc-thesis-standrews",
-        "lastModified": 1694120477,
-        "narHash": "sha256-CZ+aoVPfqlDfS6ahO3Dxd2PjCXjP3VW1EcJNGsaJz3Y=",
+        "lastModified": 1694121218,
+        "narHash": "sha256-qVedU9u0GiSsYGNw+18RqByfqWoZQlT8f6XUemOs5nI=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "ce8c581c85ce164a59121744a6964e7f87aae91b",
+        "rev": "78a3541f2ab35d14bca2afacf40275559917f3d1",
         "type": "github"
       },
       "original": {
@@ -1473,11 +1473,11 @@
       },
       "locked": {
         "dir": "blogPosts/vulkan-sum-reduction",
-        "lastModified": 1694120477,
-        "narHash": "sha256-CZ+aoVPfqlDfS6ahO3Dxd2PjCXjP3VW1EcJNGsaJz3Y=",
+        "lastModified": 1694121218,
+        "narHash": "sha256-qVedU9u0GiSsYGNw+18RqByfqWoZQlT8f6XUemOs5nI=",
         "owner": "jhvst",
         "repo": "jhvst.github.io",
-        "rev": "ce8c581c85ce164a59121744a6964e7f87aae91b",
+        "rev": "78a3541f2ab35d14bca2afacf40275559917f3d1",
         "type": "github"
       },
       "original": {
