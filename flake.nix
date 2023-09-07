@@ -6,7 +6,7 @@
     mk-shell-bin.url = "github:rrbutani/nix-mk-shell-bin";
     nix2container.inputs.nixpkgs.follows = "nixpkgs";
     nix2container.url = "github:nlewo/nix2container";
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/23.05";
 
     # blogposts
     j1.url = "github:jhvst/jhvst.github.io?dir=blogPosts/j1";

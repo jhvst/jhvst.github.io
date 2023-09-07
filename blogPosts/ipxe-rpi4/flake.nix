@@ -1,7 +1,7 @@
 {
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/23.05";
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-root.url = "github:srid/flake-root";
     blog-html.url = "github:jhvst/jhvst.github.io?dir=html";

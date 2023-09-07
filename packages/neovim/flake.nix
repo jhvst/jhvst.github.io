@@ -95,7 +95,7 @@
           };
         };
 
-        packages.default = config.neovim;
+        packages.default = config.packages.neovim;
 
       };
 

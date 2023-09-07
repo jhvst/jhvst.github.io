@@ -1,7 +1,7 @@
 {
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/23.05";
     web-components.url = "github:jhvst/jhvst.github.io?dir=packages/web-components";
     barbell.url = "github:jhvst/barbell";
   };
