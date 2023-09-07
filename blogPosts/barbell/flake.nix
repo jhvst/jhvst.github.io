@@ -28,8 +28,8 @@
 
         packages.barbell = pkgs.stdenv.mkDerivation rec {
 
-          title = "Barbell: Templates in BQN";
-          description = "Barbell is like the templating system Handlebars, but with BQN's Under doing the heavy lifting";
+          title = "Barbell: Template System in BQN";
+          description = "Barbell is like the template system Handlebars, but with BQN's Under doing the heavy lifting.";
           pubDate = "28 Jun 2023 21:19:00 GMT";
           author = "Juuso Haavisto";
 

@@ -13,9 +13,9 @@
     <pubDate>03 Sep 2023 20:19:00 GMT</pubDate>
   </item>
   <item>
-    <title>Barbell: Templates in BQN</title>
+    <title>Barbell: Template System in BQN</title>
     <link>https://juuso.dev/blogPosts/barbell/barbell.html</link>
-    <description>Introducing barbell: barbell is like the templating system Handlebars, but with BQN's Under doing the heavy lifting</description>
+    <description>Barbell is like the template system Handlebars, but with BQN's Under doing the heavy lifting.</description>
     <pubDate>28 Jun 2023 21:19:00 GMT</pubDate>
   </item>
   <item>
