@@ -1,7 +1,8 @@
 {
 
   inputs = {
-    barbell.url = "github:jhvst/barbell";
+    barbell.inputs.nixpkgs.follows = "nixpkgs";
+    barbell.url = "github:jhvst/barbell?dir=packages/barbell";
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:nixos/nixpkgs";
     web-components.url = "github:jhvst/jhvst.github.io?dir=packages/web-components";
