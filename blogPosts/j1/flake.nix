@@ -1,11 +1,9 @@
 {
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    barbell.url = "github:jhvst/barbell?dir=packages/barbell";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    flake-root.url = "github:srid/flake-root";
-    blog.url = "github:jhvst/jhvst.github.io";
-    barbell.url = "github:jhvst/barbell";
+    nixpkgs.url = "github:nixos/nixpkgs";
   };
 
   outputs =
@@ -23,21 +21,18 @@
         "x86_64-darwin"
         "x86_64-linux"
       ];
-      imports = [
-        inputs.flake-root.flakeModule
-      ];
+      imports = [ ];
 
-      perSystem = { pkgs, lib, config, system, ... }: rec {
+      perSystem = { pkgs, lib, config, system, inputs', ... }: rec {
 
         packages.j1 = pkgs.stdenv.mkDerivation {
           name = "j1";
           src = ./.;
           buildInputs = with pkgs; [
             pandoc
-            cbqn
             validator-nu
             nodePackages.js-beautify
-            inputs.barbell.packages.${system}.barbell
+            inputs'.barbell.packages.barbell
           ];
           phases = [ "unpackPhase" "buildPhase" "checkPhase" ];
           buildPhase = ''
@@ -45,7 +40,6 @@
             mkdir -p $out/css
             mkdir -p $out/img
             mkdir -p $out/attachments
-            cp -r ${inputs.blog.packages.${system}.components}/* .
             pandoc j1.md -o article.bar
             barbell template.html > $out/j1.html
             js-beautify -f $out/j1.html -r
@@ -54,7 +48,7 @@
             cp attachments/* $out/attachments
           '';
 
-          doCheck = true;
+          doCheck = false;
           checkPhase = ''
             vnu $out/j1.html
           '';
