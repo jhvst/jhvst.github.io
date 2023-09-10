@@ -107,5 +107,6 @@ Done.
 To see the diffs see: [1)](https://github.com/jhvst/jhvst.github.io/commit/0d1f97099749b98c84ed48f4def454ba850d3672) and [2)](https://github.com/jhvst/jhvst.github.io/commit/977e22ccf238627eea85d6f238ca251bba2a1724).
 
 Somewhat of a downside is that if I want to update my blog post, I always need two git pushes.
+For example, see [1)](https://github.com/jhvst/jhvst.github.io/commit/e6cf0f0629c49e07f31d4756aee15bba79ac6836) and [2)](https://github.com/jhvst/jhvst.github.io/commit/f970682a44d32ace9b876d2e50a41646ca175a4f).
 However, overall I'm quite happy with my setup and don't see why to go back anymore.
 
