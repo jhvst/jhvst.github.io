@@ -25,7 +25,7 @@
 
           title = "Nix as a Static Site Generator";
           description = "A pathway incremental builds and reproducability";
-          pubDate = "10 Sep 2023 16:45:00 GMT";
+          pubDate = "10 Sep 2023 17:31:00 GMT";
 
           name = "nix-as-a-static-site-generator";
           src = ./.;

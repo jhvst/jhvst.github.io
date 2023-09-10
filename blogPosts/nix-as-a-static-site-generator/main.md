@@ -90,17 +90,22 @@ So what this does is as follows:
 7. the `checkPhase` runs a sanity check using W3C validator `vnu $out/$(slugify ${title}).html` -- this is useful to check that the page was generated OK without actually looking at the file
 8. I can now preview the page in the build folder: `open result`
 
-When I'm done, I push this to GitHub.
+When I'm done, I run `git add flake.lock` and I push this to GitHub.
 This does not include the page on my blog yet, but it creates an URL that I can import.
 The URL looks like: `github:jhvst/jhvst.github.io?dir=blogPosts/${title}`.
 
 I then update my main flake which generates my blog, which is found from the project root folder.
 This works as follows:
 
-1. add a new import: suppose the name of the entry is foo, then I add `foo.url = "github:jhvst/jhvst.github.io?dir=blogPosts/foo`
-2. in the `buildPhase` of my root flake, I add the following lines: `mkdir -p $out/blogPosts/foo` and `cp -r ${inputs.foo.outputs.packages.${system}.default}/* $out/blogPosts/foo` -- this copies the build assets to an URL that I want to have the page
-3. I update the `rss.xml` file if I want it to appear in my RSS feed
-4. `git commit` and `git push` will trigger a GitHub Action which builds my site, and pushes the resulting build folder to GitHub pages
+1. run `nix flake update` so that the new dir folder resolves
+2. add a new import: suppose the name of the entry is foo, then I add `foo.url = "github:jhvst/jhvst.github.io?dir=blogPosts/foo`
+3. in the `buildPhase` of my root flake, I add the following lines: `mkdir -p $out/blogPosts/foo` and `cp -r ${inputs.foo.outputs.packages.${system}.default}/* $out/blogPosts/foo` -- this copies the build assets to an URL that I want to have the page
+4. I update the `rss.xml` file if I want it to appear in my RSS feed
+5. `git commit` and `git push` will trigger a GitHub Action which builds my site, and pushes the resulting build folder to GitHub pages
 
 Done.
+To see the diffs see: [1)](https://github.com/jhvst/jhvst.github.io/commit/0d1f97099749b98c84ed48f4def454ba850d3672) and [2)](https://github.com/jhvst/jhvst.github.io/commit/977e22ccf238627eea85d6f238ca251bba2a1724).
+
+Somewhat of a downside is that if I want to update my blog post, I always need two git pushes.
+However, overall I'm quite happy with my setup and don't see why to go back anymore.
 
