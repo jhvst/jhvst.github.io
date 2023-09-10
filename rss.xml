@@ -7,6 +7,12 @@
   <link>https://juuso.dev</link>
   <description>Escape from Finnish farmland, Silicon Valley style</description>
   <item>
+    <title>Nix as a Static Site Generator</title>
+    <link>https://juuso.dev/blogPosts/nix-as-a-static-site-generator/nix-as-a-static-site-generator.html</link>
+    <description>A pathway incremental builds and reproducability</description>
+    <pubDate>10 Sep 2023 16:45:00 GMT</pubDate>
+  </item>
+  <item>
     <title>Modular Neovim with Nix</title>
     <link>https://juuso.dev/blogPosts/modular-neovim/modular-neovim-with-nix.html</link>
     <description>Expanding your Neovim configuration on per-project basis using Nix and devenv.</description>

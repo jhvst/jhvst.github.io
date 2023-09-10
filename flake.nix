@@ -15,6 +15,7 @@
     ipxe-rpi4.url = "github:jhvst/jhvst.github.io?dir=blogPosts/ipxe-rpi4";
     ramsteam.url = "github:jhvst/jhvst.github.io?dir=blogPosts/RAMsteam";
     modular-neovim.url = "github:jhvst/jhvst.github.io?dir=blogPosts/modular-neovim";
+    nix-static.url = "github:jhvst/jhvst.github.io?dir=blogPosts/nix-as-a-static-site-generator";
 
     # papers
     bsc-thesis.url = "github:jhvst/jhvst.github.io?dir=papers/bsc-thesis";
@@ -68,6 +69,8 @@
             mkdir -p $out/blogPosts/modular-neovim
             cp -r ${inputs.modular-neovim.outputs.packages.${system}.default}/* $out/blogPosts/modular-neovim
 
+            mkdir -p $out/blogPosts/nix-as-a-static-site-generator
+            cp -r ${inputs.nix-static.outputs.packages.${system}.default}/* $out/blogPosts/nix-as-a-static-site-generator
 
             mkdir -p $out/projects/highlightplay/theinternational5
             cp -r projects/highlightplay/theinternational5/* $out/projects/highlightplay/theinternational5
