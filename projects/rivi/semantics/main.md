@@ -199,6 +199,172 @@ Dependent types still guide us to have the base cases, but quantification can ex
 
 Yet, presenting the algebraic properties still requires answering an another question -- not whether it can be done, but whether the resulting software construct is useful to model parallel algorithms.
 
+### The graphics processing unit
+
+__GPU program__ A GPU program in SPIR-V has six different _execution models_.
+Two of these are meant for general-purpose computing: the Open Graphics Library (OpenGL) compute shader, and the Open Computing Language (OpenCL) kernel.
+The compute shader model is purely GPU orientated, whereas the kernel model targets heterogeneous targets such as FPGAs and CPUs.
+For this reason, the functionality in the kernel model is limited to an intersection of hardware capabilities on a varying set of accelerators.
+As such, we only focus on the compute shader model, because this shares functionality with GPU execution models rather than different hardware accelerators.
+
+__Invocations__ Invocations specify the amount of threads that a compute kernel has.
+The set of invocations $I$ is computed from the dimensions of two cubes: _global_ and _local_ group counts.
+Given three integers often denoted as $X$, $Y$, and $Z$ with each having a size $\ge 1$, a set of group counts can be derived using the range command:
+
+```
+|workgroup.bqn|
+```
+
+A distinction of the global and local work groups is that the global work groups cannot do cross-communication between different invocations, but local workgroup can.
+The set of total invocations $I$ is a Cartesian product of local and global work groups.
+The number of invocations $\bar{I}$ can thus be computed using the shape of the Cartesian product:
+
+```
+|workgroup_product.bqn|
+```
+
+Each $i \in I$ has a unique identifier $i_{id}$ which is distinct between global work groups invocations.
+
+__Memory mappings__ The set of $I$ is closely related to _memory mapping_.
+Here, the index of some $i \in I$ determines the memory location from which to load values from a given _storage class_.
+A storage class is like a variable with initial values but with varying visibility granularity within the GPU.
+A SPIR-V program can have multiple storage classes with the complete list described in Section 3.7 in the SPIR-V specification.
+Arguably the most useful of these is the _StorageBuffer_, which is _shared externally, readable and writable, visible across all fnctions in all invocations in all work groups_.
+_Shared externally_ means that it is a memory mapping that can be accessed by both the GPU and the CPU.
+This allows the same buffer to act as input and the output buffer of a compute shader.
+This is in contrast to simple _Input_ and _Output_ storage classes, which require that the program copies memory during runtime from the _Input_ to the _Output_ buffer.
+In other words, _StorageBuffer_ allows in-place memory management hence enables more strategies to achieve static memory allocation.
+_Visible across all functions in all invocations in all work groups_ means that the buffer is an _uniform_ buffer, which means it can be accessed at any location of the program.
+This means that _StorageBuffer_ memory class is similar to CPUs _heap_ memory.
+StorageBuffer also uniquely enables a special memory access pattern known as a _variable pointer_.
+Variable pointers allow a memory region within a StorageBuffer to be selected as a pointer of a result of the following instructions: _OpSelect_, _OpPhi_, _OpFunctionCall_, _OpPtrAccessChain_, _OpLoad_, and _OpConstantNull_.
+Hence, it is possible to either compute memory regions needed for subsequent functions using runtime and statically computed memory mappings.
+
+__Subgroups__ As noted, a local work group can share memory between different invocations.
+This is done using _subgroups_, which correspond to a SIMD lane of a GPU.
+A subgroup $s$ has a length $\bar{s}$ which often is a constant given by an API such as Vulkan.
+Often, it is a multiple of $2$, with common values being $8$ for Intel, $32$ for Nvidia and Apple, and $64$ for AMD.
+Subgroups allow a set of _non-uniform group operations_ to be performed over invocations.
+Suppose our local size of invocations is $128$ and $\bar{s} = 32$.
+This will produce a view over the invocations and the data loaded in them such that we have a matrix $4x32$.
+We can instruct an integer addition on each row using `OpGroupNonUniformIAdd` with `Reduce` which will act on each invocations value with a single instruction.
+
+__Decorations__ From the viewpoint of a CPU, a _StorageBuffer_ is always a vector data-type.
+The view to the compute shader is controlled by _[Decorations](https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#_decoration)_.
+Decorations allow two useful primitives to control the view on the GPU, which are _ArrayStride_ and _Offset_.
+A single _StorageBuffer_ may have multiple different views using statically computed _ArrayStrides_ and _Offsets_.
+For example, setting _ArrayStride_ to $1$ would map each value in the _StorageBuffer_ to each $i \in I$.
+Similarly, setting it to $4$ would map each fourth value to _StorageBuffer_ to each $i \in I$.
+While accesses to memory regions outside of the length of _StorageBuffer_ results in undefined behavior, it is still useful if the compute shader is instructed to do _thread divergence_.
+Here, we can instruct only a subset of $I$'s to act.
+Suppose the values in _StorageBuffer_ is $N \times N$ where $N$ equals to the subgroup length of the GPU.
+Now, using _ArrayStride_ of $N$ causes a transposition of the array values.
+On the other hand, _Offset_ allows skipping $n$ values from _StorageBuffer_ before assigning values to each $i \in $I$.
+This instruction may correspond to reading values in the y-axis of the input: suppose the input is $4x6$ and the subgroup length is $4$.
+We can instruct some $i \in I$ to first skip $5$ values, and then use _stride_ of $5$ to read every value in the last column in the _StorageBuffer_.
+
+
+### BQN modeled SPIR-V
+
+APL was initially used to model the IBM 3/60 system. What we present below is using BQN to model SPIR-V.
+
+The highest level of the SPIR-V views is a the global thread index. Suppose we have a an index of
+
+```
+|global.bqn|
+```
+
+This shows that in the global context each value in the grid acts independently.
+One of the downsides of this is that the y-axis needs communication between different indexes to do operations.
+In this sense, the global view is rather unuseful.
+On one hand, it gives a simplified view to our data, but any computation needs communication between different threads.
+
+To get more useful, we need a different level of grid abstraction which is the subgroup.
+A subgrouop of length $\bar{s}$ does the following:
+
+```
+|subgroup.bqn|
+```
+
+This way, it allows each subgroup to operate on values on that x-axis.
+The elements can be identified using the global index as such, but more useful is the subgroup index:
+
+```
+|subgroup_local.bqn|
+```
+
+Now each row has its own index on which it operates.
+We can create a group operations on the subgroup level.
+
+Suppose we introduce a data vector with actual values:
+
+```
+|subgroup_data.bqn|
+```
+
+We can look how to some subgroup level operation like a prefix sum by using the shape of the subgroup view onto the data:
+
+```
+|subgroup_prefix.bqn|
+```
+
+Or this how it would look on a CPU. But because on GPU, the subgroup actions are SIMD operations the actual output is actually as follows:
+
+```
+|subgroup_prefix_simd.bqn|
+```
+
+The problem is that we have calculated prefixes per subgroup, but the information is in different subgroups.
+This is where the communication between subgroups start to happen, and in which the complexity increases a lot.
+
+To minimize communication, we should focus on a single subgroup onto which we do communication.
+For simplicity, we could focus on the first subgroup, with global thread identifiers $0..3$ (inclusive of $3$).
+Coincidentally, focusing on a single subgroup causes _thread divergence_, which means that other threads are sleeping.
+
+One thing to note when the rows length is equal to the subgroup length, one can do a transpose to get the right values on the first row:
+
+```
+|subgroup_transpose.bqn|
+```
+
+On the GPU, one way to achieve this is to do change the read stride.
+Changing the stride to the length of the subgroup causes hence effectively the transpose effect.
+
+This way, we can first lock into the first subgroup, change the read stride, and then prefix scan again:
+
+```
+|subgroup_transpose_selected.bqn|
+```
+
+
+We can go back to reading the information from subgroups using the index of the subgroup.
+Remind this example:
+
+```
+|subgroup_local.bqn|
+```
+
+We can use the indexes where we have zero (called a _subgroup leader_, or any other arbitrary index) to create a view vector:
+
+```
+|view_vector.bqn|
+```
+
+We can use this to read the values:
+
+```
+|view_values.bqn|
+```
+
+To know where to put these values, we can use the global index:
+
+```
+|subgroup.bqn|
+```
+
+And count where the index is a modulo of the subgroup length:
+
+
 ### A primer to SPIR-V
 
 Note: Here, the more technical presentation compared to car wheels is given. These examples need revamping: the idea in each is to show how the G in Under can be used to selector on which the values change. The idea is to "carry" the quantification with the type. Suppose that we interpret every program to be the type Shape (Shape (Shape (Shape input)))... then the view matrices which encode the type would be fixed first to the Shape of the initial input, which is then carried over the program View (View (View (View input)))... The combination of Shapes and Views is a map over them. The point is to show that in the semantics of "F Under G input" the F corresponds to Shape, the G to View, and the input to input. For superoptimizations, it is important that the initial structure of input is never destroyed, which is indeed guaranteed by Under since it requires the G to always invert any change on input after F is applied.
