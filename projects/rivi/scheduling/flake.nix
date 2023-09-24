@@ -1,11 +1,11 @@
 {
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/23.05";
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-root.url = "github:srid/flake-root";
     blog-html.url = "github:jhvst/jhvst.github.io?dir=html";
-    barbell.url = "github:jhvst/barbell";
+    barbell.url = "github:jhvst/barbell?dir=packages/barbell";
   };
 
   outputs =
@@ -38,8 +38,8 @@
 
         packages.default = pkgs.stdenv.mkDerivation rec {
 
-          title = "Type Guided Scheduling for Heterogenious GPUs";
-          description = "";
+          title = "A Quantified Lens Distributor";
+          description = "A description of how an array programming language with quantified types can distribute processing to lenses of systems.";
           pubDate = "23 Mar 2022 16:30:00 GMT";
 
           name = "type-scheduling";
