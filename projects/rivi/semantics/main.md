@@ -199,6 +199,17 @@ Dependent types still guide us to have the base cases, but quantification can ex
 
 Yet, presenting the algebraic properties still requires answering an another question -- not whether it can be done, but whether the resulting software construct is useful to model parallel algorithms.
 
+## Structure
+
+In the 1960's APL was used to model IBM 3/60 computer system.
+This essays explores using a novel array programming language called BQN to model GPUs instead.
+In specific, we will demonstrate how BQN's operator combinator called Under has an interesting correspondence between views of rank polymorphic arrays and GPUs runtime memory representation.
+
+Array programming languages have always abstracted nitty-gritty of hardware: the original IBM paper did this for register and types, then Dyalog APL did it for multi-core CPUs, and vectorization has been recently handled in BQN with a separate performance orientated DSL called Singeli.
+
+The unifying idea throughout the years has been to provide the programmer with an abstraction to low-level instruction sets by leveraging a standard library that closely corresponds to mathematical notation.
+
+
 ### The graphics processing unit
 
 __GPU program__ A GPU program in SPIR-V has six different _execution models_.

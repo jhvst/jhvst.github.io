@@ -5,7 +5,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     flake-root.url = "github:srid/flake-root";
     blog-html.url = "github:jhvst/jhvst.github.io?dir=packages/web-components";
-    barbell.url = "github:jhvst/barbell";
+    barbell.url = "github:jhvst/barbell?dir=packages/barbell";
   };
 
   outputs =
