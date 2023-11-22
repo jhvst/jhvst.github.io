@@ -5,8 +5,8 @@
     juuso.inputs.nixpkgs.follows = "nixpkgs";
     juuso.url = "github:jhvst/nix-config";
     nixneovimplugins.url = "github:jooooscha/nixpkgs-vim-extra-plugins";
-    nixpkgs.url = "github:nixos/nixpkgs";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs.inputs.nixpkgs.follows = "juuso";
     nixvim.url = "github:nix-community/nixvim";
   };
 
