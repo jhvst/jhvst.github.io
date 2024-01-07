@@ -98,6 +98,10 @@
 
         devenv.shells.default = {
 
+          packages = with pkgs; [
+            butane
+          ];
+
           scripts = {
             img-compress = {
               exec = "${lib.getExe pkgs.pngquant} img/*.png img/*/*.png --ext .png --force --strip --verbose";
