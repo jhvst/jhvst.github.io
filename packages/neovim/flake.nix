@@ -4,7 +4,6 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     juuso.url = "github:jhvst/nix-config";
     nixneovimplugins.url = "github:jooooscha/nixpkgs-vim-extra-plugins";
-    nixvim.inputs.nixpkgs.follows = "nixpkgs";
     nixpkgs.inputs.nixpkgs.follows = "juuso";
     nixvim.url = "github:nix-community/nixvim";
   };
