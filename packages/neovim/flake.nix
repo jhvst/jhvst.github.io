@@ -2,7 +2,6 @@
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
-    juuso.inputs.nixpkgs.follows = "nixpkgs";
     juuso.url = "github:jhvst/nix-config";
     nixneovimplugins.url = "github:jooooscha/nixpkgs-vim-extra-plugins";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
@@ -13,6 +12,7 @@
   outputs =
     inputs@{ self
     , flake-parts
+    , juuso
     , nixneovimplugins
     , nixpkgs
     , nixvim
@@ -46,7 +46,11 @@
               inputs.juuso.outputs.nixosModules.neovim
             ];
             extraConfigVim = ''
-              let g:sqlite_clib_path = '${pkgs.sqlite.out}/lib/libsqlite3.dylib'
+              ${if pkgs.system == "aarch64-darwin" then
+                "let g:sqlite_clib_path = '${pkgs.sqlite.out}/lib/libsqlite3.dylib'"
+              else
+                "let g:sqlite_clib_path = '${pkgs.sqlite.out}/lib/libsqlite3.so'"
+              }
 
               let g:limelight_bop = '^'
               let g:limelight_eop = '$'
@@ -57,9 +61,9 @@
             '';
             extraConfigLua = ''
               require("papis").setup({
-                db_path = "/Users/juuso/.papis/papis-nvim.sqlite3",
+                db_path = "${juuso.nixosConfigurations.starlabs.config.users.users.juuso.home}/.papis/papis-nvim.sqlite3",
                 papis_python = {
-                  dir = "/Users/juuso/.papis",
+                  dir = "${juuso.nixosConfigurations.starlabs.config.users.users.juuso.home}/.papis",
                   info_name = "info.yaml",
                   notes_name = [[notes.org]],
                 },
