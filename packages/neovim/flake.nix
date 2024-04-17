@@ -127,6 +127,7 @@
                   { name = "papis"; }
                 ];
             };
+            plugins.typst-vim.enable = true;
           };
         };
 
