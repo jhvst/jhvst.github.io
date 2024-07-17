@@ -6,7 +6,9 @@
     mk-shell-bin.url = "github:rrbutani/nix-mk-shell-bin";
     nix2container.inputs.nixpkgs.follows = "nixpkgs";
     nix2container.url = "github:nlewo/nix2container";
-    nixpkgs.url = "github:nixos/nixpkgs/23.05";
+    nixpkgs.url = "github:nixos/nixpkgs/24.05";
+    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+    treefmt-nix.url = "github:numtide/treefmt-nix";
 
     # blogposts
     j1.url = "github:jhvst/jhvst.github.io?dir=blogPosts/j1";
@@ -25,18 +27,14 @@
     barbell-pkg.url = "github:jhvst/barbell";
   };
 
-  outputs =
-    inputs@{ self
-    , flake-parts
-    , nixpkgs
-    , ...
-    }:
+  outputs = inputs:
 
-    flake-parts.lib.mkFlake { inherit inputs; } {
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
 
-      systems = nixpkgs.lib.systems.flakeExposed;
+      systems = inputs.nixpkgs.lib.systems.flakeExposed;
       imports = [
         inputs.devenv.flakeModule
+        inputs.treefmt-nix.flakeModule
       ];
 
       perSystem = { pkgs, lib, config, system, inputs', ... }:
@@ -62,59 +60,66 @@
                 '';
               };
             in
-            pkgs.stdenv.mkDerivation
-              rec {
-                inherit name description pubDate src;
-                buildInputs = with pkgs; [
-                  inputs.barbell-pkg.packages.${system}.barbell
-                  nodePackages.js-beautify
-                  pandoc
-                  python311Packages.python-slugify
-                  validator-nu
-                  woff2
-                ];
-                phases = [
-                  "unpackPhase"
-                  "buildPhase"
-                  "checkPhase"
-                ];
-                buildPhase = ''
-                  mkdir -p $out/css
-                  mkdir -p $out/img
-                  mkdir html
-                  cp -r ${web-components.out}/html/* ./html
-                  cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
-                  woff2_compress IBMPlexMono-Regular.otf
-                  cp IBMPlexMono-Regular.woff2 $out/
-                  pandoc $src/main.md -o main.html
+            pkgs.stdenv.mkDerivation rec {
+              inherit name description pubDate src;
+              buildInputs = with pkgs; [
+                inputs'.barbell-pkg.packages.barbell
+                nodePackages.js-beautify
+                pandoc
+                python311Packages.python-slugify
+                validator-nu
+                woff2
+              ];
+              phases = [
+                "unpackPhase"
+                "buildPhase"
+                "checkPhase"
+              ];
+              buildPhase = ''
+                mkdir -p $out/css
+                mkdir -p $out/img
+                mkdir html
+                cp -r ${web-components.out}/html/* ./html
+                cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
+                woff2_compress IBMPlexMono-Regular.otf
+                cp IBMPlexMono-Regular.woff2 $out/
+                pandoc $src/main.md -o main.html
 
-                  echo "${title}" > title.bar
-                  echo "${description}" > description.bar
-                  echo "${pubDate}" > pubDate.bar
-                  echo "${name}" > name.bar
-                  slugify ${title} > slug.bar
-                  date -d "${pubDate}" -Iminutes > datetime.bar
-                  cat $src/main.md | wc -w > wordCount.bar
+                echo "${title}" > title.bar
+                echo "${description}" > description.bar
+                echo "${pubDate}" > pubDate.bar
+                echo "${name}" > name.bar
+                slugify ${title} > slug.bar
+                date -d "${pubDate}" -Iminutes > datetime.bar
+                cat $src/main.md | wc -w > wordCount.bar
 
-                  barbell main.html > article.bar
-                  barbell html/template_article.html > $out/$(slugify ${title}).html
-                  js-beautify -f $out/$(slugify ${title}).html -r
-                '';
+                barbell main.html > article.bar
+                barbell html/template_article.html > $out/$(slugify ${title}).html
+                js-beautify -f $out/$(slugify ${title}).html -r
+              '';
 
-                doCheck = true;
-                checkPhase = ''
-                  vnu $out/$(slugify ${title}).html
-                '';
+              doCheck = true;
+              checkPhase = ''
+                vnu $out/$(slugify ${title}).html
+              '';
 
-              };
+            };
         in
-        rec {
+        {
 
           packages."apple-music-linux-pipewire" = mkBlogPost rec {
             name = "apple-music-linux-pipewire";
             title = "Apple Music on Linux using Pipewire";
             description = "Streaming DRM music to Linux from an iPhone";
             pubDate = "28 Jan 2024 16:10:00 GMT";
+            src = ./blogPosts/${name};
+          };
+
+          packages."higher-order-filter-bqn-uiua" = mkBlogPost rec {
+            name = "higher-order-filter-bqn-uiua";
+            title = "Higher Order Filter: BQN vs Uiua";
+            description = "";
+            pubDate = "17 Jul 2024 16:00:00 GMT";
             src = ./blogPosts/${name};
           };
 
@@ -177,6 +182,7 @@
 
             packages = with pkgs; [
               butane
+              ripgrep
             ];
 
             scripts = {
@@ -187,21 +193,18 @@
 
           };
 
-        };
-
-      flake =
-        let
-          inherit (self)
-            outputs;
-        in
-        {
-
-          templates.default = {
-            path = ./templates;
-            description = "A flake for blogPosts";
+          treefmt.config = {
+            projectRootFile = "flake.nix";
+            flakeFormatter = true;
+            flakeCheck = true;
+            programs = {
+              nixpkgs-fmt.enable = true;
+              deadnix.enable = true;
+              statix.enable = true;
+            };
+            settings.global.excludes = [ "*/flake.nix" ];
           };
 
         };
-
     };
 }
