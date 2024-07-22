@@ -5,19 +5,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="tree-sitter.js"></script>
-  <script src="libbqn.js"></script>
-  <script src="main.js"></script>
+  <script type="module" src="libbqn.js"></script>
+  <script type="module" src="main.js"></script>
   <style>
-    .uiua .variable {
-      color: #cc6666;
+    .uiua .operator {
+      color: #f0c36f;
     }
 
     .uiua .function {
-      color: red;
+      color: #54b0fc;
     }
 
-    .uiua .type {
-      color: #f0c674;
+    .uiua [class^="constant"] {
+      color: #f85;
+    }
+
+    .uiua .comment {
+      color: #888;
     }
 
     .bqn .numeric {
@@ -57,6 +61,9 @@
 
     body {
       font-size: 1.2em;
+      margin: auto;
+      width: 40em;
+      margin-top: 1em;
     }
 
     code,
@@ -70,23 +77,40 @@
 
 <body>
 
-  <div>
-    tree-sitter: <input disabled type="checkbox" id="Parser" />
+  <div>IBMPlexMono: <input disabled type="checkbox" id="font" /></div>
+  <div>tree-sitter: <input disabled type="checkbox" id="Parser" /></div>
 
-    <form id="bqn-form">
-      tree-sitter-bqn:
-      <input disabled type="checkbox" id="BQN" />
-      <input disabled type="checkbox" id="BQN-highlights" />
-    </form>
-  </div>
+  <form id="bqn-form">
+    <fieldset>
+      <legend>
+        BQN
+        [tree-sitter-bqn:
+        <input disabled type="checkbox" id="BQN" />
+        <input disabled type="checkbox" id="BQN-highlights" />]
+        [libbqn.js:
+        <input disabled type="checkbox" id="BQN-eval" />]
+      </legend>
+      <code class="bqn">1 + 2</code>
+      <hr>
+      <pre class="bqn">_CountWhere ← {≠/𝔽⟜𝕨𝕩}
+        2> _CountWhere 1‿2‿3‿4‿5</pre>
+    </fieldset>
+  </form>
 
-  <code class="bqn">1 + 2</code>
-
-  <hr>
-
-  <pre class="bqn">_CountWhere ← {≠/𝔽⟜𝕨𝕩}
-    2> _CountWhere 1‿2‿3‿4‿5</pre>
-
+  <form id="uiua-form">
+    <fieldset>
+      <legend>
+        Uiua
+        [tree-sitter-uiua:
+        <input disabled type="checkbox" id="Uiua" />
+        <input disabled type="checkbox" id="Uiua-highlights" />]
+      </legend>
+      <pre class="uiua">[1 5 8 2]
+        /+. # Sum
+        ⧻: # Length
+        ÷ # Divide</pre>
+    </fieldset>
+  </form>
 </body>
 
-<html>
+</html>

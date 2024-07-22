@@ -1,88 +1,66 @@
-document.addEventListener("DOMContentLoaded", function() {
+//@ts-check
+import { bqn } from "./libbqn.js";
 
-  const Parser = async () => {
-    const ctx = window.TreeSitter;
-    await ctx.init();
-    document.getElementById("Parser").checked = true;
-    return ctx;
-  };
+document.addEventListener("DOMContentLoaded", async () => {
 
   const BQN = async (treesitter) => {
-    const ctx = new treesitter();
-    const language = await treesitter.Language.load("tree-sitter-bqn.wasm");
-    ctx.setLanguage(language);
+    const ctx = new treesitter().setLanguage(await treesitter.Language.load("tree-sitter-bqn.wasm"));
     document.getElementById("BQN").checked = true;
-    return ctx;
-  };
-
-  const highlighter = async (ctx) => {
-    let res = await fetch("highlights.scm")
-    let highlights = await res.text();
-    const query = ctx.language.query(highlights)
+    const query = ctx.language.query(await (await fetch("highlights.scm")).text())
     document.getElementById("BQN-highlights").checked = true;
-    return query
-  };
-
-  const fmt = (ctx, query) => {
     document.querySelectorAll('.bqn').forEach((el) => {
-      const code = el.textContent;
-      const tree = ctx.parse(code);
-
-      const adjusted = query.matches(tree.rootNode).flatMap((match) => match.captures);
-      const arr = adjusted.map((el) => {
-        return {
-          name: el.name,
-          text: el.node.text,
-          start: el.node.startIndex,
-          end: el.node.endIndex
-        }
-      })
-      const elems = Object.groupBy(arr, ({ start }) => {
-        return start
-      })
-
-      const spans = Object.values(elems).map((el) => {
-        const span = document.createElement("span")
-        const tags = el.map((tag) => tag.name)
-        span.classList.add(...tags)
-        span.textContent = el[0].text
-        span.setAttribute("data-start", el[0].start)
-        span.setAttribute("data-end", el[0].end)
-        return span
-      })
-      const fmt = spans.map((s, i) => {
-        var sub = "";
-        if (i > 0) {
-          const start = s.getAttribute("data-start")
-          const end = spans[i - 1].getAttribute("data-end")
-          const diff = start - end
-          if (diff > 0) {
-            sub += code.substring(start, end)
-          }
-        }
-        return `${sub}${s.outerHTML}`
-      }).join("")
-      el.innerHTML = fmt
+      const reBQN = `${el.textContent}\n# Result: ${bqn(el.textContent)}`
+      document.getElementById("BQN-eval").checked = true;
+      el.innerHTML = fmt(reBQN, query.matches(ctx.parse(reBQN).rootNode).flatMap(m => m.captures))
     });
   }
 
-  const main = async () => {
-    const treesitter = await Parser();
-    const treesitter_bqn = await BQN(treesitter);
-    const highlights = await highlighter(treesitter_bqn)
-    fmt(treesitter_bqn, highlights)
-
-    document.querySelectorAll(".bqn").forEach((el) => {
-      const code = el.textContent;
-      const result = bqn(code)
-      console.log(result)
-      const output = document.createElement("output")
-      output.value = `Result: ${result}`;
-      el.append(output)
-    })
-
+  const Uiua = async (treesitter) => {
+    const ctx = new treesitter().setLanguage(await treesitter.Language.load("tree-sitter-uiua.wasm"));
+    document.getElementById("Uiua").checked = true;
+    const query = ctx.language.query(await (await fetch("highlights-uiua.scm")).text())
+    document.getElementById("Uiua-highlights").checked = true;
+    document.querySelectorAll('.uiua').forEach((el) => {
+      el.innerHTML = fmt(el.textContent, query.matches(ctx.parse(el.textContent).rootNode).flatMap(q => q.captures))
+    });
   }
 
-  main();
+  const fmt = (code, block) => {
+    return Object.values(Object.groupBy(
+      block.map(capture => {
+        const offset = new Array(capture.node.endIndex - capture.node.startIndex).fill(1)
+        return new Array(code.length).fill(0).toSpliced(capture.node.startIndex, offset.length, ...offset)
+      }).reduce((acc, curr) => acc.map((x, y) => x + curr[y]), new Array(code.length).fill(0))
+        .reduce((xs, x, idx) => x === 0 ? xs.concat(idx) : xs, new Array())
+        .map(idx => {
+          return {
+            name: "whitespace",
+            node: {
+              text: code.at(idx),
+              startIndex: idx,
+              endIndex: idx,
+              type: "whitespace"
+            }
+          }
+        })
+        .concat(...block)
+        .sort((a, b) => a.node.startIndex - b.node.startIndex)
+      , capture => [capture.node.startIndex, capture.node.endIndex]))
+      .map(capture => {
+        const span = document.createElement("span")
+        const tags = capture.map(x => x.name)
+        const grammarType = capture.map(x => x.node.type)
+        span.classList.add(...tags)
+        span.classList.add(...grammarType)
+        span.textContent = capture[0].node.text
+        return span.outerHTML
+      }).join("");
+  }
+
+  document.getElementById("font").checked = true;
+  await window.TreeSitter.init()
+  document.getElementById("Parser").checked = true;
+  await BQN(window.TreeSitter);
+  await Uiua(window.TreeSitter);
 
 });
