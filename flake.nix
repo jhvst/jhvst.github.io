@@ -27,12 +27,13 @@
     barbell-pkg.url = "github:jhvst/barbell";
   };
 
-  outputs = inputs:
+  outputs = { self, ... }@inputs:
 
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
 
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
       imports = [
+        inputs.flake-parts.flakeModules.easyOverlay
         inputs.devenv.flakeModule
         inputs.treefmt-nix.flakeModule
       ];
@@ -106,6 +107,69 @@
             };
         in
         {
+
+          _module.args.pkgs = import inputs.nixpkgs {
+            inherit system;
+            overlays = [
+              self.overlays.default
+            ];
+            config = { };
+          };
+
+          overlayAttrs = {
+            inherit (config.packages)
+              tree-sitter;
+          };
+
+          packages."tree-sitter" = inputs'.nixpkgs.legacyPackages.tree-sitter.override {
+            webUISupport = true;
+          };
+
+          packages."tree-sitter-uiua-wasm" = pkgs.stdenv.mkDerivation {
+            pname = "tree-sitter-uiua-wasm";
+            version = "0.22.6";
+            src = pkgs.fetchFromGitHub {
+              owner = "shnarazk";
+              repo = "tree-sitter-uiua";
+              rev = "942e8365d10b9b62be9f2a8b0503459d3d8f3af3";
+              hash = "sha256-yWlUnFbM0WsV7VhQQcTfogLarsV1yBhTBuea2LZukN8=";
+            };
+
+            phases = [
+              "unpackPhase"
+              "buildPhase"
+            ];
+            buildPhase = ''
+              mkdir -p .emscriptencache
+              export EM_CACHE=$(pwd)/.emscriptencache
+              mkdir -p $out/bin
+              ${config.packages.tree-sitter}/bin/tree-sitter build --wasm
+              cp tree-sitter-uiua.wasm $out/bin/
+            '';
+          };
+
+          packages."tree-sitter-bqn-wasm" = pkgs.stdenv.mkDerivation rec {
+            pname = "tree-sitter-bqn-wasm";
+            version = "0.3.2";
+            src = pkgs.fetchFromGitHub {
+              owner = "shnarazk";
+              repo = "tree-sitter-bqn";
+              rev = "v${version}";
+              hash = "sha256-/FsA5GeFhWYFl1L9pF+sQfDSyihTnweEdz2k8mtLqnY=";
+            };
+
+            phases = [
+              "unpackPhase"
+              "buildPhase"
+            ];
+            buildPhase = ''
+              mkdir -p .emscriptencache
+              export EM_CACHE=$(pwd)/.emscriptencache
+              mkdir -p $out/bin
+              ${config.packages.tree-sitter}/bin/tree-sitter build --wasm
+              cp tree-sitter-bqn.wasm $out/bin/
+            '';
+          };
 
           packages."apple-music-linux-pipewire" = mkBlogPost rec {
             name = "apple-music-linux-pipewire";
