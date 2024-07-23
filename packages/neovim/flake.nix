@@ -58,9 +58,6 @@
               let g:mkdp_browser = '${pkgs.kdePackages.falkon}/bin/falkon'
               let g:mkdp_echo_preview_url = 1
 
-              augroup autoformat_settings
-                autocmd FileType html,css,sass,scss,less,json,js AutoFormatBuffer js-beautify
-              augroup END
             '';
             extraConfigLua = ''
               require("papis").setup({
@@ -119,7 +116,13 @@
               pkgs.vimExtraPlugins.papis-nvim
               pkgs.vimExtraPlugins.sqlite-lua
             ];
-            plugins.lsp.servers.html.enable = true;
+            plugins.lsp.servers = {
+              html.enable = true;
+              tsserver.enable = true;
+            };
+            plugins.treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+              typescript
+            ];
             plugins.cmp.settings = {
               sources =
                 [
