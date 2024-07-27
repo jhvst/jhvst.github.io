@@ -2,415 +2,265 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="Juuso Haavisto">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Juuso Haavisto">
 
-    <title>|title|</title>
-    <meta property="og:title" content="|title|">
-    <meta name="description" content="|description|">
-    <meta property="og:description" content="|description|">
+  <title>|title|</title>
+  <meta property="og:title" content="|title|">
+  <meta name="description" content="|description|">
+  <meta property="og:description" content="|description|">
 
-    <link rel="icon" href="/favicon.svg">
-    <link rel="alternate" type="application/rss+xml" title="Juuso Haavisto" href="/rss.xml">
+  <link rel="icon" href="/favicon.svg">
+  <link rel="alternate" type="application/rss+xml" title="Juuso Haavisto" href="/rss.xml">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css" integrity="sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI" crossorigin="anonymous">
+  |head|
 
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js" integrity="sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t" crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var mathElements = document.getElementsByClassName("math");
-            var macros = [];
-            for (var i = 0; i < mathElements.length; i++) {
-                var texText = mathElements[i].firstChild;
-                if (mathElements[i].tagName == "SPAN") {
-                    katex.render(texText.data, mathElements[i], {
-                        displayMode: mathElements[i].classList.contains('display'),
-                        throwOnError: false,
-                        macros: macros,
-                        fleqn: false
-                    });
-                }
-            }
+
+      const BQN = async (treesitter) => {
+        const ctx = new treesitter().setLanguage(await treesitter.Language.load("tree-sitter-bqn.wasm"));
+        const query = ctx.language.query(await (await fetch("highlights-bqn.scm")).text())
+        document.querySelectorAll('.bqn').forEach((el) => {
+          var result = bqn(el.textContent);
+          if (typeof result === "function") {
+            result = `${result.m}-${result.name} function`;
+          }
+          const reBQN = `${el.textContent}\n# Result: ${result}`
+          el.innerHTML = fmt(reBQN, query.matches(ctx.parse(reBQN).rootNode).flatMap(m => m.captures))
         });
-    </script>
+      }
 
-    <style>
-        @font-face {
-            font-family: 'IBM Plex Mono';
-            font-style: normal;
-            font-weight: 400;
-            src: local("IBM Plex Mono"), local("IBMPlexMono"), url("IBMPlexMono-Regular.woff2") format("woff2");
-        }
+      const Uiua = async (treesitter) => {
+        const ctx = new treesitter().setLanguage(await treesitter.Language.load("tree-sitter-uiua.wasm"));
+        const query = ctx.language.query(await (await fetch("highlights-uiua.scm")).text())
+        document.querySelectorAll('.uiua').forEach((el) => {
+          el.innerHTML = fmt(el.textContent, query.matches(ctx.parse(el.textContent).rootNode).flatMap(q => q.captures))
+        });
+      }
 
-        body {
-            font-size: 124%;
-            background-color: #fafafa;
-            color: #333;
-        }
+      const fmt = (code, block) => {
+        return Object.values(Object.groupBy(
+          block.map(capture => {
+            const offset = new Array(capture.node.endIndex - capture.node.startIndex).fill(1)
+            return new Array(code.length).fill(0).toSpliced(capture.node.startIndex, offset.length, ...offset)
+          }).reduce((acc, curr) => acc.map((x, y) => x + curr[y]), new Array(code.length).fill(0))
+            .reduce((xs, x, idx) => x === 0 ? xs.concat(idx) : xs, new Array())
+            .map(idx => {
+              return {
+                name: "whitespace",
+                node: {
+                  text: code.at(idx),
+                  startIndex: idx,
+                  endIndex: idx,
+                  type: "whitespace"
+                }
+              }
+            })
+            .concat(...block)
+            .sort((a, b) => a.node.startIndex - b.node.startIndex)
+          , capture => [capture.node.startIndex, capture.node.endIndex]))
+          .map(capture => {
+            const span = document.createElement("span")
+            const tags = capture.map(x => x.name)
+            const grammarType = capture.map(x => x.node.type)
+            span.classList.add(...tags)
+            span.classList.add(...grammarType)
+            span.textContent = capture[0].node.text
+            return span.outerHTML
+          }).join("");
+      }
 
-        .katex {
-            font-size: inherit;
-        }
+      await window.TreeSitter.init()
+      await BQN(window.TreeSitter);
+      await Uiua(window.TreeSitter);
+    });
+  </script>
 
-        code {
-            font-size: 80%;
-            font-family: IBM Plex Mono, monospace;
-        }
+  <style>
+    .uiua .variable {
+      color: #f0c36f;
+    }
 
-        pre>code.sourceCode {
-            white-space: pre;
-            position: relative;
-        }
+    .uiua .operator {
+      color: #f0c36f;
+    }
 
-        pre>code.sourceCode>span {
-            display: inline-block;
-            line-height: 1.25;
-        }
+    .uiua .function {
+      color: #54b0fc;
+    }
 
-        pre>code.sourceCode>span:empty {
-            height: 1.2em;
-        }
+    .uiua [class^="constant"] {
+      color: #f85;
+    }
 
-        code.sourceCode>span {
-            color: inherit;
-            text-decoration: inherit;
-        }
+    .uiua .comment {
+      color: #888;
+    }
 
-        div.sourceCode {
-            margin: 1em 0;
-        }
+    .bqn .numeric {
+      color: #a73227;
+    }
 
-        pre.sourceCode {
-            margin: 0;
-        }
+    .bqn .function {
+      color: #3aa548;
+    }
 
-        @media screen {
-            div.sourceCode {
-                overflow: auto;
-            }
-        }
+    .bqn .comment {
+      color: #3f3daa;
+    }
 
-        @media print {
-            pre>code.sourceCode {
-                white-space: pre-wrap;
-            }
+    .bqn .special {
+      color: #93428b;
+    }
 
-            pre>code.sourceCode>span {
-                text-indent: -5em;
-                padding-left: 5em;
-            }
-        }
+    .bqn .operator {
+      color: #9c7dc1;
+    }
 
-        pre.numberSource code {
-            counter-reset: source-line 0;
-        }
+    .bqn [class^="punctuation"] {
+      color: #862f9e;
+    }
 
-        pre.numberSource code>span {
-            position: relative;
-            left: -4em;
-            counter-increment: source-line;
-        }
+    output {
+      display: block;
+    }
 
-        pre.numberSource code>span>a:first-child::before {
-            content: counter(source-line);
-            position: relative;
-            left: -1em;
-            text-align: right;
-            vertical-align: baseline;
-            border: none;
-            display: inline-block;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            padding: 0 4px;
-            width: 4em;
-            color: #aaaaaa;
-        }
+    @font-face {
+      font-family: 'IBM Plex Mono';
+      font-style: normal;
+      font-weight: 400;
+      src: local("IBM Plex Mono"), local("IBMPlexMono"), url("IBMPlexMono-Regular.woff2") format("woff2");
+    }
 
-        pre.numberSource {
-            margin-left: 3em;
-            border-left: 1px solid #aaaaaa;
-            padding-left: 4px;
-        }
+    body {
+      font-size: 124%;
+      background-color: #fafafa;
+      color: #333;
+    }
 
-        div.sourceCode {}
+    .katex {
+      font-size: inherit;
+    }
 
-        @media screen {
-            pre>code.sourceCode>span>a:first-child::before {
-                text-decoration: underline;
-            }
-        }
+    code {
+      font-family: IBM Plex Mono, monospace;
+    }
 
-        code span.al {
-            color: #ff0000;
-            font-weight: bold;
-        }
+    pre,
+    p>code,
+    li>code,
+    dd>code,
+    td>code {
+      overflow: scroll;
+      background: #eee;
+      word-wrap: break-word;
+      box-decoration-break: clone;
+      padding: .1rem .3rem .2rem;
+      border-radius: .2rem;
+    }
 
-        /* Alert */
-        code span.an {
-            color: #60a0b0;
-            font-weight: bold;
-            font-style: italic;
-        }
+    pre {
+      font-size: 1.24rem;
+    }
 
-        /* Annotation */
-        code span.at {
-            color: #7d9029;
-        }
+    pre code {
+      counter-reset: line-numbering;
+    }
 
-        /* Attribute */
-        code span.bn {
-            color: #40a070;
-        }
+    pre code>span {
+      display: inline-flex;
+    }
 
-        /* BaseN */
-        code span.bu {
-            color: #008000;
-        }
+    pre code>span::before {
+      content: counter(line-numbering);
+      counter-increment: line-numbering;
+      padding-right: .8em;
+      /* space after numbers */
+      margin-right: 5px;
+      width: 1.5em;
+      text-align: right;
+      opacity: 0.5;
+      background-color: #efefef;
+    }
 
-        /* BuiltIn */
-        code span.cf {
-            color: #007020;
-            font-weight: bold;
-        }
+    h1 {
+      font-weight: 900;
+      color: #111;
+    }
 
-        /* ControlFlow */
-        code span.ch {
-            color: #4070a0;
-        }
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-weight: 700;
+      color: #111;
+    }
 
-        /* Char */
-        code span.cn {
-            color: #880000;
-        }
+    header>* {
+      margin: 0;
+    }
 
-        /* Constant */
-        code span.co {
-            color: #60a0b0;
-            font-style: italic;
-        }
+    article {
+      margin: auto;
+      max-width: 35em;
+    }
 
-        /* Comment */
-        code span.cv {
-            color: #60a0b0;
-            font-weight: bold;
-            font-style: italic;
-        }
+    blockquote {
+      margin: 0;
+    }
 
-        /* CommentVar */
-        code span.do {
-            color: #ba2121;
-            font-style: italic;
-        }
+    blockquote p {
+      padding: 15px;
+      background: #eee;
+      border-radius: 5px;
+    }
 
-        /* Documentation */
-        code span.dt {
-            color: #902000;
-        }
+    hr {
+      width: 100%;
+      border: 1px solid #fafafa;
+    }
 
-        /* DataType */
-        code span.dv {
-            color: #40a070;
-        }
+    a:hover {
+      opacity: .7;
+    }
 
-        /* DecVal */
-        code span.er {
-            color: #ff0000;
-            font-weight: bold;
-        }
+    a {
+      color: inherit;
+    }
 
-        /* Error */
-        code span.ex {}
-
-        /* Extension */
-        code span.fl {
-            color: #40a070;
-        }
-
-        /* Float */
-        code span.fu {
-            color: #06287e;
-        }
-
-        /* Function */
-        code span.im {
-            color: #008000;
-            font-weight: bold;
-        }
-
-        /* Import */
-        code span.in {
-            color: #60a0b0;
-            font-weight: bold;
-            font-style: italic;
-        }
-
-        /* Information */
-        code span.kw {
-            color: #007020;
-            font-weight: bold;
-        }
-
-        /* Keyword */
-        code span.op {
-            color: #666666;
-        }
-
-        /* Operator */
-        code span.ot {
-            color: #007020;
-        }
-
-        /* Other */
-        code span.pp {
-            color: #bc7a00;
-        }
-
-        /* Preprocessor */
-        code span.sc {
-            color: #4070a0;
-        }
-
-        /* SpecialChar */
-        code span.ss {
-            color: #bb6688;
-        }
-
-        /* SpecialString */
-        code span.st {
-            color: #4070a0;
-        }
-
-        /* String */
-        code span.va {
-            color: #19177c;
-        }
-
-        /* Variable */
-        code span.vs {
-            color: #4070a0;
-        }
-
-        /* VerbatimString */
-        code span.wa {
-            color: #60a0b0;
-            font-weight: bold;
-            font-style: italic;
-        }
-
-        pre,
-        p>code,
-        li>code,
-        dd>code,
-        td>code {
-            overflow: scroll;
-            background: #eee;
-            word-wrap: break-word;
-            box-decoration-break: clone;
-            padding: .1rem .3rem .2rem;
-            border-radius: .2rem;
-        }
-
-        pre code.sourceCode {
-            counter-reset: line-numbering;
-        }
-
-        pre code>span {
-            display: inline-flex;
-        }
-
-        pre code>span::before {
-            content: counter(line-numbering);
-            counter-increment: line-numbering;
-            padding-right: .8em;
-            /* space after numbers */
-            margin-right: 5px;
-            width: 1.5em;
-            text-align: right;
-            opacity: 0.5;
-            background-color: #efefef;
-        }
-
-        h1 {
-            font-weight: 900;
-            color: #111;
-        }
-
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-weight: 700;
-            color: #111;
-        }
-
-        header>* {
-            margin: 0;
-        }
-
-        article {
-            margin: auto;
-            max-width: 35em;
-        }
-
-        blockquote {
-            margin: 0;
-        }
-
-        blockquote p {
-            padding: 15px;
-            background: #eee;
-            border-radius: 5px;
-        }
-
-        hr {
-            width: 100%;
-            border: 1px solid #fafafa;
-        }
-
-        a:hover {
-            opacity: .7;
-        }
-
-        a {
-            color: inherit;
-        }
-
-        img {
-            max-width: 100%;
-        }
-    </style>
+    img {
+      max-width: 100%;
+    }
+  </style>
 
 </head>
 
 <body>
-    <article itemscope itemtype="https://schema.org/BlogPosting" itemid="https://juuso.dev/blogPosts/|name|/|slug|.html">
-        <p><i><a href="/rss.xml">Blog</a> of <a href="/">Juuso Haavisto</a></i></p>
-        <p style="display: flex; flex-direction: column; border-bottom: 2px solid black;">
-            <time itemprop="datePublished" datetime="|datetime|">|pubDate|</time>
-            <b style="display: none;"><span itemprop="wordCount">|wordCount|</span> words</b>
-        </p>
-        <meta itemprop="abstract" content="|description|">
-        <section itemprop="articleBody">
-            |article|
-        </section>
-        <footer style="margin: 1em 0 1em 0; border-top: 2px solid black;">
-            <small>
-                <a href="/">Index</a>
-                <a href="/rss.xml">Archive</a>
-                <br>
-                Generated by <code>nix build "github:jhvst/jhvst.github.io#|name|"</code>
-                <br>
-                Fork at <a href="https://github.com/jhvst/jhvst.github.io">GitHub</a>
-            </small>
-        </footer>
-    </article>
+  <article itemscope itemtype="https://schema.org/BlogPosting" itemid="https://juuso.dev/blogPosts/|name|/|slug|.html">
+    <p><i><a href="/rss.xml">Blog</a> of <a href="/">Juuso Haavisto</a></i></p>
+    <p style="display: flex; flex-direction: column; border-bottom: 2px solid black;">
+      <time itemprop="datePublished" datetime="|datetime|">|pubDate|</time>
+      <b style="display: none;"><span itemprop="wordCount">|wordCount|</span> words</b>
+    </p>
+    <meta itemprop="abstract" content="|description|">
+    <section itemprop="articleBody">
+      |article|
+    </section>
+    <footer style="margin: 1em 0 1em 0; border-top: 2px solid black;">
+      <small>
+        <a href="/">Index</a>
+        <a href="/rss.xml">Archive</a>
+        <br>
+        Generated by <code>nix build "github:jhvst/jhvst.github.io#|name|"</code>
+        <br>
+        Fork at <a href="https://github.com/jhvst/jhvst.github.io">GitHub</a>
+      </small>
+    </footer>
+  </article>
 </body>
 
 </html>

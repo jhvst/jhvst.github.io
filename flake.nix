@@ -45,6 +45,8 @@
             , title
             , description
             , pubDate
+            , distInclude ? ""
+            , distInstall ? ""
             , src
             ,
             }:
@@ -62,7 +64,7 @@
               };
             in
             pkgs.stdenv.mkDerivation rec {
-              inherit name description pubDate src;
+              inherit name description pubDate src distInstall distInclude;
               buildInputs = with pkgs; [
                 inputs'.barbell-pkg.packages.barbell
                 nodePackages.js-beautify
@@ -84,8 +86,9 @@
                 cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
                 woff2_compress IBMPlexMono-Regular.otf
                 cp IBMPlexMono-Regular.woff2 $out/
-                pandoc $src/main.md -o main.html
+                pandoc $src/main.md --no-highlight -o main.html
 
+                echo "${distInclude}" > head.bar
                 echo "${title}" > title.bar
                 echo "${description}" > description.bar
                 echo "${pubDate}" > pubDate.bar
@@ -97,6 +100,8 @@
                 barbell main.html > article.bar
                 barbell html/template_article.html > $out/$(slugify ${title}).html
                 js-beautify -f $out/$(slugify ${title}).html -r
+
+                ${distInstall}
               '';
 
               doCheck = true;
@@ -124,7 +129,7 @@
 
           packages."tree-sitter" = (inputs'.nixpkgs.legacyPackages.tree-sitter.override {
             webUISupport = true;
-          }).overrideAttrs (prev: {
+          }).overrideAttrs (_: {
             preInstall = ''
               mkdir -p $out/lib
               cp lib/binding_web/tree-sitter.js $out/lib
@@ -175,6 +180,9 @@
               mkdir -p $out/bin
               ${config.packages.tree-sitter}/bin/tree-sitter build --wasm
               cp tree-sitter-bqn.wasm $out/bin/
+
+              mkdir -p $out/queries
+              cp -r queries/* $out/queries
             '';
           };
 
@@ -191,6 +199,21 @@
             title = "Higher Order Filter: BQN vs Uiua";
             description = "";
             pubDate = "17 Jul 2024 16:00:00 GMT";
+            distInstall = ''
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
+
+              cp ${pkgs.mbqn}/share/bqn/libbqn.js $out/libbqn.js
+              cp ${config.packages.tree-sitter-bqn-wasm}/bin/tree-sitter-bqn.wasm $out/tree-sitter-bqn.wasm
+              cp ${config.packages.tree-sitter-bqn-wasm}/queries/highlights.scm $out/highlights-bqn.scm
+
+              cp ${config.packages.tree-sitter-uiua-wasm}/bin/tree-sitter-uiua.wasm $out/tree-sitter-uiua.wasm
+              cp ${pkgs.tree-sitter-grammars.tree-sitter-uiua}/queries/highlights.scm $out/highlights-uiua.scm
+            '';
+            distInclude = ''
+              <script src="libbqn.js"></script>
+              <script src="tree-sitter.js"></script>
+            '';
             src = ./blogPosts/${name};
           };
 
@@ -224,6 +247,9 @@
 
               mkdir -p $out/blogPosts/${apple-music-linux-pipewire.name}
               cp -r ${apple-music-linux-pipewire.out}/* $out/blogPosts/${apple-music-linux-pipewire.name}
+
+              mkdir -p $out/blogPosts/${higher-order-filter-bqn-uiua.name}
+              cp -r ${higher-order-filter-bqn-uiua.out}/* $out/blogPosts/${higher-order-filter-bqn-uiua.name}
 
               mkdir -p $out/projects/highlightplay/theinternational5
               cp -r projects/highlightplay/theinternational5/* $out/projects/highlightplay/theinternational5
