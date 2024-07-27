@@ -118,12 +118,19 @@
 
           overlayAttrs = {
             inherit (config.packages)
-              tree-sitter;
+              tree-sitter
+              tree-sitter-lib-js
+              tree-sitter-lib-wasm
+              ;
           };
 
           packages."tree-sitter" = inputs'.nixpkgs.legacyPackages.tree-sitter.override {
             webUISupport = true;
           };
+
+          packages."tree-sitter-lib-js" = pkgs.callPackage ./packages/tree-sitter-lib-js { };
+
+          packages."tree-sitter-lib-wasm" = pkgs.callPackage ./packages/tree-sitter-lib-wasm { };
 
           packages."tree-sitter-uiua-wasm" = pkgs.stdenv.mkDerivation {
             pname = "tree-sitter-uiua-wasm";
