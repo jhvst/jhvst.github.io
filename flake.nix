@@ -196,9 +196,9 @@
 
           packages."higher-order-filter-bqn-uiua" = mkBlogPost rec {
             name = "higher-order-filter-bqn-uiua";
-            title = "Higher Order Filter: BQN vs Uiua";
-            description = "";
-            pubDate = "17 Jul 2024 16:00:00 GMT";
+            title = "Combinatory Tetris";
+            description = "Implementing a higher-order filter in Uiua and BQN";
+            pubDate = "31 Jul 2024 10:00:00 GMT";
             distInstall = ''
               cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
               cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
