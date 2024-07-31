@@ -7,6 +7,12 @@
   <link>https://juuso.dev</link>
   <description>Escape from Finnish farmland, Silicon Valley style</description>
   <item>
+    <title>Combinatory Tetris</title>
+    <link>https://juuso.dev/blogPosts/higher-order-filter-bqn-uiua/combinatory-tetris.html</link>
+    <description>Implementing a higher-order filter in Uiua and BQN</description>
+    <pubDate>31 Jul 2024 10:00:00 GMT</pubDate>
+  </item>
+  <item>
     <title>Apple Music on Linux using Pipewire</title>
     <link>https://juuso.dev/blogPosts/apple-music-linux-pipewire/apple-music-on-linux-using-pipewire.html</link>
     <description>Streaming DRM music to Linux from an iPhone</description>
