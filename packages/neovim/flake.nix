@@ -6,51 +6,38 @@
     nixneovimplugins.url = "github:NixNeovim/NixNeovimPlugins";
     nixpkgs.inputs.nixpkgs.follows = "juuso";
     nixvim.url = "github:nix-community/nixvim";
+    papis.url = "github:jghauser/papis.nvim";
   };
 
-  outputs =
-    inputs@{ self
-    , flake-parts
-    , juuso
-    , nixneovimplugins
-    , nixpkgs
-    , nixvim
-    , ...
-    }:
+  outputs = inputs@{ ... }:
 
-    flake-parts.lib.mkFlake { inherit inputs; } {
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
 
       systems = [
-        "aarch64-darwin"
         "aarch64-linux"
-        "x86_64-darwin"
         "x86_64-linux"
       ];
-      imports = [ ];
 
-      perSystem = { pkgs, lib, config, system, ... }: {
+      perSystem = { pkgs, config, system, ... }: {
 
         _module.args.pkgs = import inputs.nixpkgs {
           inherit system;
           overlays = [
             inputs.juuso.overlays.default
             inputs.nixneovimplugins.overlays.default
+            inputs.papis.overlays.default
           ];
           config = { };
         };
 
-        packages.neovim = nixvim.legacyPackages.${system}.makeNixvimWithModule {
+        packages.neovim = inputs.nixvim.legacyPackages.${system}.makeNixvimWithModule {
           inherit pkgs;
           module = {
             imports = [
               inputs.juuso.outputs.nixosModules.neovim
             ];
             extraConfigVim = ''
-              ${if pkgs.system == "aarch64-darwin" then
-                "let g:sqlite_clib_path = '${pkgs.sqlite.out}/lib/libsqlite3.dylib'"
-              else
-                "let g:sqlite_clib_path = '${pkgs.sqlite.out}/lib/libsqlite3.so'"
-              }
+              "let g:sqlite_clib_path = '${pkgs.sqlite.out}/lib/libsqlite3.so'"
 
               let g:limelight_bop = '^'
               let g:limelight_eop = '$'
@@ -60,16 +47,6 @@
 
             '';
             extraConfigLua = ''
-              require("papis").setup({
-                db_path = "${juuso.nixosConfigurations.starlabs.config.users.users.juuso.home}/.papis/papis-nvim.sqlite3",
-                papis_python = {
-                  dir = "${juuso.nixosConfigurations.starlabs.config.users.users.juuso.home}/.papis",
-                  info_name = "info.yaml",
-                  notes_name = [[notes.org]],
-                },
-                enable_keymaps = true,
-              })
-
               local gknapsettings = {
                 delay = 420,
                 mdoutputext = "pdf",
@@ -111,18 +88,14 @@
               markdown-preview-nvim # :MarkdownPreview
               nui-nvim
               null-ls-nvim
-              plenary-nvim
+              papis-nvim
             ] ++ [
-              pkgs.vimExtraPlugins.papis-nvim
               pkgs.vimExtraPlugins.sqlite-lua
             ];
             plugins.lsp.servers = {
               html.enable = true;
-              tsserver.enable = true;
+              ts-ls.enable = true;
             };
-            plugins.treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
-              typescript
-            ];
             plugins.cmp.settings = {
               sources =
                 [
