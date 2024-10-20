@@ -1,0 +1,230 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx} % Required for inserting images
+
+\usepackage[style=ieee]{biblatex}
+\addbibresource{main.bib}
+\graphicspath{{assets/}}
+
+
+\title{APL on GPUs}
+\author{Juuso Haavisto}
+\date{October 2023}
+
+\begin{document}
+
+\begin{flushleft}
+\LARGE\bfseries \makeatletter\@title\makeatother \medskip \par
+\Large\mdseries \makeatletter\@author\makeatother \par
+\end{flushleft}
+
+\title{Static rank polymorphism}
+\author{Juuso Haavisto, University of Oxford}
+
+% The thesis proposal is the most important part of the transfer examination. It should be concise, and supported by an extensive literature review, demonstrating the candidate’s command of related work in the literature. There is no formal word limit, but as a rough guide, the literature review should be around 5000 words, and the thesis proposal should be around 6 pages. The literature review should be a first-draft of the literature review chapter of the thesis. A well-written literature review should be a useful basis with reference to which the examiners can assess the originality of the thesis proposal
+
+% The literature review should survey the state of the art in the PRS’s chosen area.
+
+% It should explain the background of the proposed research, the results that have been obtained by other researchers, and the conclusions that may be drawn. The student is expected to give a clear and coherent account, demonstrating competence in organising ideas and presenting them in a scholarly manner.
+
+\section{Previous Research}
+
+This literature review describes relevant concepts and approaches toward realizing an array programming language that works on GPUs.
+On a very abstract level, there are two parts to this:
+
+The first is to define the language. This could be thought of as defining the denotational semantics for rank polymorphism.
+
+The second is leveraging this definition for performance optimizations. This could be thought as defining operational semantics for various rank polymorphic array operations, but in such a way, that allows for heterogenous scheduling at runtime.
+
+In other words, there are two things that we ask: how can we create a finite object that represents a rank polymorphic array programming language, and then, how can exhaustive state space search with MaxSMT solvers benefit from this? 
+
+The research methodology has a significant amount of empirical work that overlaps various research tandems. As such, it is also important background information to note that a proof of concept language that fulfills the description above already exists. This language has a convoluted execution pipeline that works as follows: 
+
+- the source array programming language (BQN) is type-checked with Idris, which provides us a well-typed fragment of the source language BQN,
+
+- the outputs static information to the SMT solver (SavileRow). SavileRow then uses the Vulkan loader program to fetch constraints of the specific set of accelerators to derive a constraint model for the solver. The constraint model is then linked with the static type information to find a schedule for the program to be run. 
+
+- This schedule is then fed into the Vulkan loader interface, which actually runs the program and returns the computation result as a Rust pointer.
+
+This approach enables automatic scheduling of array operations over heterogeneous hardware. It can be integrated with pre-existing scripting languages like Python via Rust language bindings as a library, or to existing array programming languages like BQN to accelerate a fragment of the language using heuristics-based offloading.
+
+\subsection{Array Programming Languages}
+
+The branch of programming languages known as array programming languages started from A Programming Language (APL) \cite{iverson1962programming}, which was initially introduced as a blackboard notation used by Kenneth Iverson to teach matrix algebra at Harvard. 
+The notation became a programming language when Iverson was hired by IBM to create a programming language for the IBM 3/60 machine \cite{falkoff1964formal}. 
+From those initial technical reports to Iverson's Turing Award talk, Iverson emphasized APL and its notation as a "tool of thought". 
+In a sense, a significant role of APL since the IBM 3/60 was a high-level abstraction of computer systems in a terse "blackboard" notation made of purposefully designed glyphs that represent common functional programming patterns. 
+APL was also the first language to introduce the generalization of various functional patterns over a multi-dimensional array data structure, colloquially known as rank polymorphism.
+
+APL never quite hit the zeitgeists of the programming community, but rather lived on as quirky language used in the proprietary enterprise sector. 
+Over the years, various academic work on the language itself has happened, mostly in the context of compiling APL. 
+APL was, and the current implementations (Dyalog APL) and derivations (J, k, q, BQN) are interpreted languages. 
+Compilation was considered as a means to squeeze extra performance out of the language. 
+Projects such as Single Assignment C (SAC) and APEX were used to target APL onto parallel hardware and to exploit low-level performance intrinsics such as vector instructions. 
+However, none of these efforts proved to be useful enough to become mainstream in the APL community.
+
+This changed when the topic was taken up again in the 2010s. A PhD dissertation proposed a fragment of Dyalog APL called co-dfns which compiles into GPU code.
+The PhD thesis also included a parallel AST parser written in APL using a data structure called Node Coordinate Matrix.
+This work motivated two major lines of continuation: parallel AST parsing (snake guy, BQN), and GPU code generation from APL (aaron paper, nvidia, mine).
+
+\subsection{GPU Acceleration}
+
+Deciding to use APL to generate GPU code was no accident: it was a move made first by many other APL-esque programming libraries, such as NumPy of Python, Accelerate of Haskell, and languages with multiple compiler levels (in specific, LLVM-based languages with programmable medium interpresentation layer) like Julia and Rust.
+Technically, most GPU acceleration approaches are homogeneous, as they are based on Nvidia's CUDA language, which only works on Nvidia GPUs.
+The state-of-the-art of heterogeneous GPU computing is Vulkan, which is a cross-platform and multi-vendor API, developed as an open-source project.
+
+Vulkan is the CPU-side of the API, and hence manages scheduling and memory allocation of GPU programs.
+It is developed by the Khronos Group, an industry consortium responsible for managing open standard APIs.
+Vulkan is designed to have significantly less runtime overhead compared to its predecessor, OpenGL.
+This is achieved by moving many responsibilities to the application developer, such as memory management and command buffer generation, which typically were handled by the driver in OpenGL.
+For this reason, Developers using Vulkan have more direct control over the GPU's operations. This allows for better optimization but also means that the developer needs to manage more details manually.
+
+The programming of the GPU tasks happens in a language that must compile to SPIR-V, which is a single static assignment based language for parallel computing.
+SPIR-V is tightly integrated with the Vulkan API, providing various benefits like improved performance and control over hardware among platform-agnostic vector instructions.
+SPIR-V also allows for reflection, which means that a program can inspect the contents of the shader or kernel, such as the input and output variables and resources required, at runtime.
+
+From our empirical experiments, the Vulkan API is a useful abstraction because it allows both static and runtime values to be embedded into the GPU programs.
+However, this requires the use of advanced Vulkan features, which are only available in more recent versions of the API.
+Relevant to array programs, it means that shape sizes, which effectively act as loop boundaries for various array operations, can be embedded as special constant values called push constants. 
+This way, the execution of the GPU program can be controlled using values derived from type checking, and SMT solvers, without recompilation.
+The same approach can be used to abstract heterogeneous properties of the GPUs, such as vector instruction lengths.
+In comparison, CPU-accelerated versions of array languages, such as BQN, require compiling the interpreter to enable and hence fix the available vector instructions on each machine.
+
+
+\subsection{Static Rank Polymorphism}
+
+Seemingly independently of the Aaron's work, in the 2010s the academic topic of compiled APL was suddenly rejuvinated, but the topic of interest turned into static correctness guarantees via type systems.
+ % ???why, why did idris, dependent Haskell, granule happen? the theory is quite old.
+These papers focus on so-called static rank polymorphism, which is captured with dependent types. Paper that seemingly first introduced this was Slepak in a paper that described language called Remora, with follow-up papers from Gibbons using dependent Haskell, and Henriksen in Futhark. In the industry, Google announced their work as a language called Dex in (). These papers focus on the correctness guarantees facilitated by dependent types. These works establish the use of shapely types in a static format, as from a typing perspective, rank polymorphism is about functions acting on the shape of the data to prove the correctness of function compositions.
+
+
+
+\subsection{Superoptimizers}
+
+Performance optimizations on array languages that leverage type systems is rather nascent.
+In its most crude format, what the type systems can contribute to the execution of the languages is a form of static memory allocation.
+Given a function composition such as $f to g to h$, when the shape type after each function application can be determined statically, it allows computing the required amount of memory to execute the expression before starting it.
+The implications of this kind of programming has been researched separately from array languages, e.g. as ASAP.
+There are further useful features to static memory allocation when considering accelerators such as GPUs: these accelerators do not support dynamic memory allocation.
+Hence, being able to define the compute the required memory for the runtime of the whole expression statically makes it possible to keep the computation within the GPU memory longer.
+This is important to avoid memory communication between the CPU and GPU, which is nowadays the main bottleneck to performance.
+In this sense, there is a growing interest in different methods to scheduling computation to accelerators.
+For GPUs in specific, projects such as Nvidia Legate abstract various array operations encoded with Python's NumPy to a fleet of GPUs.
+These approaches address major bottlenecks in performance optimization of large compute cluster, such as noted in (https://cse.hkust.edu.hk/~weiwa/papers/fgd-atc23.pdf) in which the objective of the scheduler is to minimize so-called GPU fragmentation, and maximize utilization.
+Such schedulers are often implemented on three different levels: 1) framework-level, 2) device runtime-level, and on 3) hardware-assisted.
+The challenge that was noted in a (PhD dissertation) is that generally speaking, the algorithms which try to fit computation on various accelerators are only as good as the heurestics that can be inferred about the operations of the computation.
+Here, the question is, as mentioned in the PhD dissertation, is whether the programming language could provide "guidance" to exhaustive searches to optimize the scheduling problem.
+Such exhaustive searches, when implemented in a compiler to increase performance, are called superoptimizations.
+What the research direction in this literature review is thus trying to answer is whether the use of types in a constrained domain such as array programming could provide such guidance in the form of static types to superoptimizers.
+This line of research is aligned with the "future directions of optimizing compilers" as noted by an author John Regehr, who is specialized in compiler superoptimizations in the LLVM compiler infrastructure:
+
+> https://arxiv.org/pdf/1809.02161.pdf
+> Thesis 1. Major components of future compilers will be generated partially automatically, with the help of SMT solvers, directly addressing compiler speed (automatically discovered optimizations will be structured uniformly and amenable to fast rewrite strategies), compiler correctness (automated theorem provers are generally less fallible than humans), and code quality (solvers can be used to conduct a thorough search of the optimization space).
+
+This is echoed in the Phd Thesis, and aligns well with our thesis.
+Our thesis extends this that such compiler optimizations will be most likely to be applied in a constrained and well-typed programming languages, which reduce the search space done by optimizing compiler.
+That is, because finding min-max goals with model checkers is NP-complete, we instead try to constraint the search space with types, and then use available hardware information to further restrict the domain of possible answers to the scheduling problem.
+Array programming languages make a good fit for such constrained language, because they only have one data-type, the rank polymorphic array, over which we can implement scheduling schemes per-operation basis.
+In practice, this kind of SMT scheduling is done with solvers that implement MaxSMT strategies, such as savilerow, vZ, and PRISM.
+MaxSMT problems are typically much harder to solve than standard SMT problems because they involve not just finding a satisfiable solution but optimizing over the space of all such solutions. The complexity of the problem depends on the underlying theories involved and the structure of the constraints.
+With array programming languages, there exists a Turing-incomplete fragment of the languages, which make the search space finite.
+This way, the SMT solvers can focus on finding the optimal solution instead of checking whether such solutions even exist.
+
+\subsection{Quantitative Type Theory}
+
+However, a relevant part to note is that the dependent types are lossy information wise when the memory allocations are static and when memory is re-used: when the amount of memory is retracted, e.g., as a sum reduction, what happens is that the whole array still exists in the GPU memory.
+In other words, to optimize for memory use, the amount of allocated memory should also be re-used.
+For example, a sum reduction over an array should not allocate a new variable where the result is, but instead cause the first element of the input array to hold the end result.
+To model these kinds of interactions, the type system has to be even more powerful than dependent types.
+Luckily, quantified type system is already implemented in Idris 2 and Granule.
+Here, Quantitative Type Theory (QTT) is an extension or variation of traditional type theory that incorporates the notion of quantity or resources into the types themselves. This concept is inspired by linear logic and resource-sensitive computation, where you can track how many times a variable is used.
+In classical type theory, a variable can typically be used any number of times, including not at all or infinitely many times. This property is referred to as "weakening" and "contraction" in the context of type rules. For example, if you have a proof or a function that relies on a particular assumption or argument, you can use that assumption as many times as you need, or even discard it without using it.
+However, in QTT, each variable is assigned a quantity that dictates how many times it can be used. This quantity is reflected in the type system and is checked by the type checker.
+The idea is to exploit Resource Tracking: The types in QTT keep track of how many times a variable can be used. This is useful in scenarios where resources are not duplicable or discardable, such as file handles, monetary transactions, or quantum bits.
+In our scenario, the resource tracking happens on the memory registers.
+And with Erasure and Duplication: QTT can express which variables can be safely erased (not used) or duplicated, adding flexibility in how programs can be written and optimized.
+Semantics: The semantics of QTT are typically given by a categorical model, often using symmetric monoidal categories, where the notion of resource or quantity is naturally captured.
+Understanding and working with QTT generally requires a strong background in type theory, logic, and potentially category theory, as well as an understanding of the computational models that require resource sensitivity.
+In our thesis, we focus on using existing quantitatively typed programming languages such as Idris and Granule, while targeting the optimizations given by the type system to adhere to SPIR-V semantics.
+
+Overall, SPIR-V represents a step forward in the standardization of GPU programming, offering a common ground between high-level languages and the diverse world of hardware. It allows for more portable and potentially more efficient execution of graphics and compute programs across different platforms and devices.
+Notably, SPIR-V and Vulkan has been a backend target for the Furhark language (?).
+As noted about the challenges of appliying quantitative typed languages, we need to understand the underlying backend target code that we target.
+However, our previous works (Python code) used SPIR-V as the backend target for a fragment of APL to compile APL programs into SPIR-V.
+Our pre-existing work on a Vulkan loader program (link?) works as an interface between the SMT solver code and the execution layer of our language.
+
+
+\subsection{Heterogeneous Scheduling}
+
+An important desctinction of applying scheduling this way is that it allows the scheduling to also be resolved before the execution happens.
+This is in contrast to previous research where the execution happens on runtime.
+
+NumPy is a popular Python library used for performing array- based numerical computations. The canonical implementation of NumPy used by most programmers runs on a single CPU core and only a few operations are parallelized across cores. This restriction to single-node CPU-only execution limits both the size of data that can be processed and the speed with which problems can be solved.
+
+Despite these limitatons, the programming interface provided by NumPy is often the basis of many of other distributed computing libraries. Somewhat of a limiting factor with NumPy is its lack of strict type system. This becomes apparent when doing distributed computing over arrays: the static information flow between phases of computation has to be done on another level. In practice, this means that NumPy cannot often be directly overloaded, but instead each library has to implement a correspondence to the NumPy interfaces to make the distributed computing intrinsics work.
+
+Dask is a flexible library for parallel computing in Python. Dask.distributed is a lightweight library for distributed computing in Python. It extends both the concurrent.futures and dask APIs to moderate sized clusters. Dask.distributed is a centrally managed, distributed, dynamic task scheduler. The central dask scheduler process coordinates the actions of several dask worker processes spread across multiple machines and the concurrent requests of several clients.
+
+Legate, a programming system that transparently accelerates and distributes NumPy programs to machines of any scale and capability typically by changing a single module import statement. Legate achieves this by translating the NumPy application interface into the Legion programming model and leveraging the performance and scalability of the Legion runtime.
+
+Legion is a data-driven task-based runtime system [2] designed to support scalable parallel execution of programs while retaining their apparent sequential semantics. All long-lived data is organized in logical regions, a tabular abstraction with rows named by multi- dimensional coordinate indices and fields of arbitrary types along the columns (see Figure 3). Logical regions organize data indepen- dently from the physical layout of that data in memory, and Legion supports a rich set of operations for dynamically and hierarchically partitioning logical regions [27, 28]. The Legion data model is thus ideally suited for programming models such as NumPy which must manipulate collections of multi-dimensional arrays and support creation of arbitrary views onto those arrays at runtime.
+
+Legate leverages support for dynamic control replication in the Legion runtime. As a result of efficient translation to Legion, effective mapping strate- gies, and control replication, our Legate implementation enables developers to weak-scale problems out to hundreds of GPUs with- out code rewrites.
+
+JAX
+
+We describe JAX, a domain-specific tracing JIT compiler for gen- erating high-performance accelerator code from pure Python and Numpy machine learning programs. JAX uses the XLA compiler infrastructure to generate optimized code for the program subrou- tines that are most favorable for acceleration, and these optimized subroutines can be called and orchestrated by arbitrary Python. Because the system is fully compatible with Autograd, it allows forward- and reverse-mode automatic differentiation of Python functions to arbitrary order.
+
+What’s new is that JAX uses XLA to compile and run your NumPy programs on GPUs and TPUs. Compilation happens under the hood by default, with library calls getting just-in-time compiled and executed. But JAX also lets you just-in-time compile your own Python functions into XLA-optimized kernels using a one-function API, jit. Compilation and automatic differentiation can be composed arbitrarily, so you can express sophisticated algorithms and get maximal performance without leaving Python. You can even program multiple GPUs or TPU cores at once using pmap, and differentiate through the whole thing.
+
+Cloud Haskell
+
+We present Cloud Haskell, a domain-specific language for devel- oping programs for a distributed computing environment. Imple- mented as a shallow embedding in Haskell, it provides a message- passing communication model, inspired by Erlang, without intro- ducing incompatibility with Haskell’s established shared-memory concurrency. A key contribution is a method for serializing func- tion closures for transmission across the network. Cloud Haskell has been implemented; we present example code and some prelim- inary performance measurements.
+
+Cloud Haskell is a domain-specific language for cloud computing, implemented as a shallow embedding in Haskell. It presents the programmer with a computational model strongly based on the message-passing model of Erlang, but with additional advantages that stem from Haskell’s purity, types, and monads.
+
+co-dfns
+
+Co-dfns development historically focused on the core compiler, and not parsing, code generation, or the runtime. The associated Ph.D. thesis and famous 17 lines figure refer to this section, which transforms the abstract syntax tree (AST) of a program to a lower-level form, and resolves lexical scoping by linking variables to their definitions.
+
+The core Co-dfns compiler is based on manipulating the syntax tree, which is mostly stored as parent and sibling vectors—that is, lists of indices of other nodes in the tree.
+
+\subsubsection{Lenses}
+
+The prevalent question might be that how generalizable is this?
+Our thesis proposes that the computation is a form of a lens on various levels.
+In computer science, particularly in the field of functional programming, a lens represents a composable abstraction used to isolate and manipulate a specific part of a data structure. Lenses are most commonly found in languages like Haskell but can be and have been implemented in other languages as well.
+
+The concept of a lens is borrowed from optics, as a lens focuses on a particular portion of a data structure. In the context of programming, it allows you to "zoom in" on a field within a complex nested data structure, perform get or set operations, and "zoom out" with the changes applied.
+Lenses are particularly powerful because they are composable. You can take a lens that focuses on one part of a structure and another lens that focuses on a subpart of that part, and compose them into a lens that focuses directly on the subpart.
+This kind of abstraction makes it easier to work with immutable data structures, as it provides a concise and expressive way to deal with updates without mutating state. Lenses are part of the broader family of optics in functional programming, which includes prisms, traversals, and others, each specialized for different kinds of data manipulation.
+
+The lens is an important abstraction for both working with quantitative types, and to abstract the heterogenous infrastructure on which our code runs.
+
+An interesting combinator implemented by BQN is a so-called “Under” a.k.a “Dual”. This operation is represented in the language as
+⊚
+⊚. This “donut” and its history in APL was covered in a recent Dyalog blog post titled Structural vs. Mathematical “Under”. As that title suggests, Under exists in the forms of structural and mathematical. In BQN, both are implemented behind the same donut squiggol.
+
+
+
+% Array programming languages could be said to have been deterred from the mainstream zeitgeist of programming languages because the languages remained proprietary. At the time of writing, the proprietary still applies to the main implementations such as Dyalog APL, and APL derivatives such as k and q.
+
+\subsection{Dependent types}
+
+Considering related work, type systems for parallelism could be considered to be closely related with the concept of \emph{shapely types} \cite{jay1994shapely, shkaravska2007polynomial}. Traits of the concept have been recently captured in works related to APL. In \cite{hsu2019phd} a GPU code generating compiler is integrated with the proprietary Dyalog APL implementation. The implementation makes use of the parallel OpenCL backend. In \cite{Henriksen:2016:AGT:2975991.2975997} a subset of AZZPL is typed and compiled into a language called Futhark, which runs on parallel hardware like GPUs via OpenCL, CUDA, and Vulkan backends.
+
+\emph{Static} rank polymorphism can be considered an approach to capture the notion of shapely types. Recently, the subject has been studied in Northeastern University \cite{slepak2014array, slepak2019semantics, shivers2019introduction}, University of Oxford \cite{gibbons2017aplicative}, and University of Copenhagen \cite{henriksen:phdthesis}. These approaches involve dependent types: at Northeastern, they have their language called Remora, at Copenhagen sized-types (a fragment of dependent types) are utilized on their language Futhark, and at Oxford, dependent Haskell was used. Recent industry work can be found from Google as Dex \cite{paszke2021getting}, which proliferates typed indices.
+
+Regarding this work, it quickly became evident that the rational decision to capture static rank polymorphism should follow the general direction pioneered by the related work. As such, we settled with dependent types. And rather conveniently for us, almost as if by plan, the continuation institution after the previous thesis work became the University of St Andrews. This coincides with the place where the dependently typed language \emph{Idris} is developed. As such, it was both logical and convenient to choose Idris as the language for this thesis work. Further, Idris bears some novelty to the previous works: Idris can also be used as a theorem prover like Agda and Coq. This allows theorem prover capabilities to be used, well, to prove properties such as \emph{completeness} and \emph{soundness} pragmatically, i.e., without us coming up with the type system on our own.
+
+
+
+
+
+
+\newpage
+\printbibliography
+
+
+\end{document}
+
