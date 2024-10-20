@@ -33,13 +33,12 @@ const exportSVG = (container: any, width: any, height: any, transform: any, setP
   iframe.style.top = "0";
   iframe.style.left = "50px";
 
-  iframe.addEventListener("load", async () => {
-    const iframeDocument = iframe.contentDocument;
-    if (!iframeDocument) throw new Error("Could not get iframe document");
+  iframe.addEventListener("load", (e) => {
+    const iframeDocument = e.target.contentDocument;
     const iframeStyle = iframeDocument.createElement("style");
     iframeStyle.innerHTML = `
         ${mainStyle}
-        ${reactFlowStyle} 
+        ${reactFlowStyle}
     `;
     iframeDocument.body.append(iframeStyle);
     const clone = container.cloneNode(true) as HTMLElement;
@@ -59,66 +58,62 @@ const exportSVG = (container: any, width: any, height: any, transform: any, setP
     iframe.remove()
   });
 
-  document.body.append(iframe);
+  return iframe
 }
-
 
 export const initialNodes: Node[] = [
   {
-    id: 'F',
-    type: 'input',
-    position: { x: 25, y: 0 },
-    data: { label: 'F' },
-    style: {
-      width: "fit-content",
-    },
-  },
-  {
     id: 'G',
-    position: { x: 75, y: 75 },
-    data: { label: 'G' },
-    style: {
-      width: "fit-content",
-    },
+    type: 'input',
+    position: { x: 11, y: 0 },
+    data: { label: '/' },
   },
   {
-    id: 'a',
-    type: 'output',
-    position: { x: 25, y: 150 },
-    data: { label: 'a' },
+    id: 'F',
+    position: { x: 10, y: 3 },
+    data: { label: '>' },
+  },
+  {
+    id: 'F2',
+    position: { x: 10, y: 9 },
+    data: { label: '2' },
+    type: "output",
+  },
+  {
+    id: 'G2',
+    position: { x: 11, y: 6 },
+    data: { label: 'x' },
+  },
+].map((node) => {
+  const x = (x) => x * 25;
+  return Object.assign(node, {
+    position: {
+      x: x(node.position.x),
+      y: x(node.position.y),
+    },
     style: {
       width: "fit-content",
       height: "fit-content",
     },
-  },
-];
+  });
+});
 
 export const initialEdges: Edge[] = [
-  {
-    id: 'F->G',
-    source: 'F',
-    target: 'G',
+  ['G', 'F'],
+  ['G', 'G2'],
+  ['F', 'G2'],
+  ['F', 'F2'],
+  ["G2", "F2"],
+].map(([source, target]) => {
+  return {
+    id: `${source}->${target}`,
+    source,
+    target,
     style: {
       strokeWidth: 2,
     },
-  },
-  {
-    id: 'G->a',
-    source: 'G',
-    target: 'a',
-    style: {
-      strokeWidth: 2,
-    },
-  },
-  {
-    id: 'F->a',
-    source: 'F',
-    target: 'a',
-    style: {
-      strokeWidth: 2,
-    },
-  },
-];
+  }
+});
 
 export default function App() {
   const [nodes] = useNodesState(initialNodes);
@@ -126,13 +121,12 @@ export default function App() {
   const [pane, setPane] = useState();
 
   const panelWait = (instance: any) => {
-    const nodes = instance.getNodes();
     const viewport = instance.getViewport()
-    const bounds = getNodesBounds(nodes)
+    const bounds = getNodesBounds(instance.getNodes())
     const transform = getViewportForBounds(bounds, bounds.width, bounds.height, viewport.zoom, viewport.zoom, 0);
-    const CONTAINER_QUERY = ".react-flow__viewport";
-    const container = document.querySelector(CONTAINER_QUERY);
-    exportSVG(container, bounds.width, bounds.height, transform, setPane)
+    const container = document.querySelector(".react-flow__viewport");
+    const iframe = exportSVG(container, bounds.width, bounds.height, transform, setPane)
+    document.body.append(iframe);
   }
 
   return (
