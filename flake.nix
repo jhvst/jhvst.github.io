@@ -217,6 +217,29 @@
             src = ./blogPosts/${name};
           };
 
+          packages."bidirectionality-bqn-uiua" = mkBlogPost rec {
+            name = "bidirectionality-bqn-uiua";
+            title = "APL: A Profunctor Language";
+            description = "Implementing a higher-order filter in Uiua and BQN";
+            pubDate = "31 Jul 2024 10:00:00 GMT";
+            distInstall = ''
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
+
+              cp ${pkgs.mbqn}/share/bqn/libbqn.js $out/libbqn.js
+              cp ${config.packages.tree-sitter-bqn-wasm}/bin/tree-sitter-bqn.wasm $out/tree-sitter-bqn.wasm
+              cp ${config.packages.tree-sitter-bqn-wasm}/queries/highlights.scm $out/highlights-bqn.scm
+
+              cp ${config.packages.tree-sitter-uiua-wasm}/bin/tree-sitter-uiua.wasm $out/tree-sitter-uiua.wasm
+              cp ${pkgs.tree-sitter-grammars.tree-sitter-uiua}/queries/highlights.scm $out/highlights-uiua.scm
+            '';
+            distInclude = ''
+              <script src="libbqn.js"></script>
+              <script src="tree-sitter.js"></script>
+            '';
+            src = ./blogPosts/${name};
+          };
+
           packages.default = with config.packages; pkgs.stdenv.mkDerivation {
 
             name = "Juuso Haavisto";
