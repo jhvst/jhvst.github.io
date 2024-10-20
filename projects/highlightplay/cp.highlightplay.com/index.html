@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Gamoloco Reddit Submitter</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.string/3.2.2/underscore.string.min.js"></script>
+<script src="https://www.google.com/jsapi"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/epoch/0.8.4/js/epoch.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.3/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.3/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="css/epoch.min.css">
+<style>
+
+	body {
+		width: 960px;
+		margin: auto;
+	}
+
+</style>
+</head>
+<body>
+	<div id="lineChart" style="width: 800px; height: 200px"></div>
+</body>
+<script type="text/babel">
+</script>
+<script type="text/javascript">
+
+	google.load('visualization', '1', {packages: ['corechart', 'line']});
+
+    $(function() {
+    var conn = new WebSocket("ws://localhost/ws");
+
+	window.data = new google.visualization.DataTable();
+	window.data.addColumn('date', 'X');
+	window.data.addColumn('number', 'Twitch Viewers');
+	window.data.addColumn('number', 'Messages sent in tick');
+	window.data.addColumn('number', 'Average messages sent in tick');
+	window.data.addColumn('number', 'Tick messages divided by avg messages');
+	window.data.addColumn('number', 'Threshold');
+
+	window.options = {
+		title: 'Stream',
+		tooltip: {
+			isHtml: true,
+			trigger: 'selection'
+		},
+		legend: { position: 'none' },
+	};	
+
+	window.el = document.createElement("div");
+	document.body.appendChild(window.el);
+	window.chart = new google.visualization.LineChart(window.el);	
+
+    conn.onopen = function() {
+    	$("body").prepend("WebSocket connection established.<br>");
+    }
+
+    conn.onclose = function(e) {
+    	$("body").prepend("WebSocket connection error: " + e.reason + "<br>");
+    }
+
+	conn.onmessage = function(event) {
+
+		if (event.data == "heartbeat") {
+			return;
+		}
+
+		if (s.startsWith(event.data, "metadata")) {
+			var metadata = s.ltrim(event.data, "metadata:");
+
+			Papa.parse(metadata, {
+				complete: function(results) {
+
+					var d = results.data[0];
+
+					d[0] = moment(d[0], "MMM DD HH:mm:ss").toDate();
+					d[1] = +d[1];
+					d[2] = +d[2];
+					d[3] = +d[3];
+					d[4] = +d[4];
+					d[5] = +d[5];
+
+					window.data.addRows([d]);
+					window.chart.draw(data, window.options);
+				
+				}
+			})
+
+			return;
+		}
+
+		console.log(event.data);		
+
+		if (s.startsWith(event.data, "clip")) {
+			var filename = s.ltrim(event.data, "clip:");
+
+			var video = document.createElement('video');
+			video.autoplay = true;
+			video.controls = true;
+			video.style.width = "720px";
+			video.style.height = "480px";
+			$("body").prepend(video)
+
+			var source = document.createElement('source');			
+			source.src = 'http://localhost:3000/Github/irc-logger/' + filename;
+			source.type = "video/mp4";
+			$(video).append(source);
+		}
+	}
+
+	});
+
+</script>
+</html>
