@@ -1,0 +1,154 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Automated Twitch Highlights</title>
+  <meta name="description" content="Get automatic, instant highlights to your YouTube channel as you stream on Twitch.">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.min.css">
+  <link href="css/main.css" rel="stylesheet">
+  <script src="https://checkout.stripe.com/checkout.js"></script>
+  <script src="https://apis.google.com/js/client.js"></script>
+</head>
+<body>
+  <div role="sign-up">
+  <div class="wrapper">
+    <div role="container">
+      <header>
+        <ul class="nav">
+          <li><a href="index.html">Highlight Play</a></li>
+          <li><a class="twitter" href="https://twitter.com/highlightplay"><i class="fa fa-twitter"></i></a></li>
+        </ul>
+      </header>
+      <div role="lead">
+      	<section role="twitch">
+        	<h3>Step 1: Authenticate with Twitch</h3>
+        	<p class="lead twitch" style="display:none;">Successfully authenticated with Twitch as: <span class="username"></span></p>
+    	</section>
+
+    	<section role="youtube" class="muted">
+			<h3>Step 2: Authenticate with YouTube</h3>
+			<button class="youtube-btn" onclick="auth();">Link your YouTube account</button>
+			<p class="lead youtube" style="display:none;">Successfully authenticated with YouTube</p>
+		</section>
+
+		<section role="stripe" class="muted">
+        	<h3>Step 3: Pay your subscription</h3>
+			<p>By clicking the button below you agree <a href="tos.html">Terms of Service</a></p>
+			<button id="buy">Authorize purchase</button>
+			<p class="lead stripe" style="display:none;">Purchase authorized. Your card will not be charged and your account will not be created before you press the Register button below.</p>
+		</section>
+
+		<section role="launch" class="muted">
+			<h3>Step 4</h3>
+			<button type="submit" id="register">Launch instance</button>
+		</section>
+      </div>
+    </div>
+  </div>
+  </div>
+  <script src="https://code.jquery.com/jquery.min.js"></script>
+  <script src="https://ttv-api.s3.amazonaws.com/twitch.min.js"></script>
+  <script src="https://www.parsecdn.com/js/parse-latest.js"></script>
+  <script>
+  Parse.initialize("dYDfLTjvGyi1rnFSn3IrXVhMx8rAAWdK7Pa1ymus", "D8c1EXiiHTNiaXdQwG9Qp6RVZIIa8IKczH62A6VY");
+
+  window.twitch = {};
+  window.youtube = {};
+  window.stripe = {};
+
+  $('#register').on('click', function(e) {
+  	data = {
+      	twitch: window.twitch,
+      	youtube: window.youtube,
+      	stripe: window.stripe
+  	};
+  	console.log(data);
+  	e.preventDefault();
+    $.ajax({
+      url: '/sign-up',
+      type: 'POST',
+      data: data,
+      success: function(data) {
+      	console.log(data);
+      },
+      error: function(xhr, status, err) {
+      	alert("Error in registration. Your purchase will be automatically returned.");
+      }
+    }); 
+  })
+
+function auth() {
+  var config = {
+    'client_id': '766078768640-e2026tujl878vc01gmajviogcf253b2f.apps.googleusercontent.com',
+    'scope': 'https://www.googleapis.com/auth/youtube',
+    'access-type': 'offline',
+    'prompt': 'consent'
+  };
+  gapi.auth.authorize(config, function() {
+    $(".youtube-btn").hide();
+    $(".youtube").show();
+    $('section[role="stripe"]').toggleClass('muted');
+    window.youtube = gapi.auth.getToken();
+    console.log(gapi.auth.getToken());
+  });
+};
+
+Twitch.init({clientId: 'q42it8k0v319uez5zmef5viyqy9zts5'}, function(error, status) {
+  if (error) alert(error);
+  if (status.authenticated) {
+    Twitch.api({method: 'channel'}, function(error, user) {
+    	if (error) {
+    		alert("Error in retrieving Twitch data. Please refresh the window and try again later.");
+    		return;
+    	};
+
+    	window.twitch = user;
+
+    	$(".username").text(user.display_name);
+    	$(".twitch").show();
+    	$('section[role="youtube"]').toggleClass("muted");
+
+		handler = StripeCheckout.configure({
+			key: 'pk_PJQRR1HJ55tY4opBiuSgLofkv45w7',
+		    locale: 'auto',
+		    email: user.email,
+		    panelLabel: "Subcribe for $19.95/month",
+		    allowRememberMe: false,
+		    token: function(token) {
+		    	console.log("paid")
+		    	console.log(token)
+		    	window.stripe = token;
+		    	$("#buy").hide();
+		    	$(".stripe").show();
+		    	$('section[role="launch"]').toggleClass("muted");
+		    }
+		});
+
+  		$(window).on('popstate', function() {
+    		handler.close();
+  		});
+
+  		$('#buy').on('click', function(e) {
+    		handler.open({
+      			name: 'Highlight Play',
+      			description: 'Monthly subscription',
+      			currency: "usd",
+      			amount: 1995
+    		});
+    		e.preventDefault();
+  		});
+    });           
+  }
+});
+  </script>   
+</body>
+</html>
