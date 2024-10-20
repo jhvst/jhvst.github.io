@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<script src="https://www.google.com/jsapi"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
+
+<div id="chat_charts">
+	<p>Clicking on a timestamp will take you to the right moment in Twitch VOD.</p>
+	<p>The site uses German chat data instead of English because ESL toggled between free and subscription only chat mode, which made finding peaks harder.</p>
+	<section>
+		<div id="day2.txt"></div>
+		<div id="day3.txt"></div>
+	</section>
+</div>
+
+<p>If you like the data, make sure to give me Internet points:</p>
+
+<a href="https://twitter.com/share" class="twitter-share-button" data-via="9uuso">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+<a href="https://twitter.com/9uuso" class="twitter-follow-button" data-show-count="false">Follow me on Twitter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+<script>
+
+google.load('visualization', '1', {packages: ['corechart', 'line']});
+google.setOnLoadCallback(initgraphs);
+
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) { 
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+  };
+}
+
+Number.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10); // don't forget the second param
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    var time    = hours+'h:'+minutes+'m:'+seconds+'s';
+    return time;
+}
+
+function ytlink(date, stamp, messages, seconds, link) {
+	return `
+	<div style="padding:5px 15px 5px 15px;">
+		<p>{0}</p>
+		<p>Messages sent <strong>{2}</strong></p>
+		<p><a href="{4}{3}">{1}</a></p>
+	</div>`.format(date, seconds.toHHMMSS(), messages, seconds, link)
+}
+
+function initgraphs() {
+	draw("day2.txt", "Aug 22 09:00:00", "Playoffs", "http://www.twitch.tv/esl_csgo/v/12181274?t=", -1620)
+	draw("day3.txt", "Aug 23 09:00:00", "Finals", "http://www.twitch.tv/esl_csgo/v/12353809?t=", -1800)
+}
+
+function draw(filename, date, title, link, offset) {
+
+	Papa.parse("https://esl-cologne.juusohaavisto.com/"+filename, {
+		download: true,
+		complete: function(results) {
+
+			var csv = results.data
+			var start = moment(date, "MMM DD HH:mm:ss");
+
+			csv.forEach(function(d) {
+
+				var now = moment(d[0], "MMM DD HH:mm:ss");
+				var diff = moment(now, "DD/MM/YYYY HH:mm:ss").diff(moment(start, "DD/MM/YYYY HH:mm:ss"));
+				var stamp = moment.utc(diff).format("HH[h]mm[m]ss[s]");
+				var seconds = diff/1000;
+
+				d[0] = moment(d[0], "MMM DD HH:mm:ss").toDate();
+				d[1] = +d[1];
+				d[2] = ytlink(moment(d[0]).format("MMMM Do, h:mm:ss a"), seconds+offset, d[1], seconds+offset, link);
+			});
+
+			var data = new google.visualization.DataTable();
+			data.addColumn('date', 'X');
+			data.addColumn('number', 'Messages');
+			data.addColumn({type: 'string', role: 'tooltip', p: {html:true}});
+			data.addRows(csv)
+
+			var options = {
+				title: 'CSGO: ESL Cologne 2015, {0} German Twitch chat messages'.format(title),
+				vAxis: {
+					title: 'Messages per minute'
+				},
+				tooltip: {
+					isHtml: true,
+					trigger: 'both'
+				},
+				legend: { position: 'none' },
+			};
+
+			var e = document.createElement("div");
+			document.getElementById(filename).appendChild(e);
+
+			var chart = new google.visualization.AreaChart(e);
+			chart.draw(data, options);
+			
+		}
+	})
+}
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-52171146-5', 'auto');
+ga('send', 'pageview');
+
+</script>
