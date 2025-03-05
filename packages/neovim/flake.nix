@@ -75,7 +75,6 @@
               nodePackages.js-beautify
               pandoc
               papis
-              sioyek
               sqlite
               typst
               xdg-utils
