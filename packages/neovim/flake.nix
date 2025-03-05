@@ -13,10 +13,7 @@
 
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
 
-      systems = [
-        "aarch64-linux"
-        "x86_64-linux"
-      ];
+      systems = inputs.nixpkgs.lib.systems.flakeExposed;
 
       perSystem = { pkgs, config, system, ... }: {
 
@@ -37,7 +34,7 @@
               inputs.juuso.outputs.nixosModules.neovim
             ];
             extraConfigVim = ''
-              "let g:sqlite_clib_path = '${pkgs.sqlite.out}/lib/libsqlite3.so'"
+              let g:sqlite_clib_path = '${pkgs.sqlite.out}/lib/libsqlite3.so'
 
               let g:limelight_bop = '^'
               let g:limelight_eop = '$'
