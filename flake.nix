@@ -240,6 +240,14 @@
             src = ./blogPosts/${name};
           };
 
+          packages."fido2-luks" = mkBlogPost rec {
+            name = "fido2-luks";
+            title = "Multi-token FIDO2 LUKS";
+            description = "What happens to your data if your computer gets lost or stolen?";
+            pubDate = "8 Jun 2025 23:09:00 GMT";
+            src = ./blogPosts/${name};
+          };
+
           packages.default = with config.packages; pkgs.stdenv.mkDerivation {
 
             name = "Juuso Haavisto";
@@ -273,6 +281,9 @@
 
               mkdir -p $out/blogPosts/${higher-order-filter-bqn-uiua.name}
               cp -r ${higher-order-filter-bqn-uiua.out}/* $out/blogPosts/${higher-order-filter-bqn-uiua.name}
+
+              mkdir -p $out/blogPosts/${fido2-luks.name}
+              cp -r ${fido2-luks.out}/* $out/blogPosts/${fido2-luks.name}
 
               mkdir -p $out/projects/highlightplay/theinternational5
               cp -r projects/highlightplay/theinternational5/* $out/projects/highlightplay/theinternational5

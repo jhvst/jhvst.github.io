@@ -7,6 +7,12 @@
   <link>https://juuso.dev</link>
   <description>Escape from Finnish farmland, Silicon Valley style</description>
   <item>
+    <title>Multi-token FIDO2 LUKS</title>
+    <link>https://juuso.dev/blogPosts/fido2-luks/multi-token-fido2-luks.html</link>
+    <description>What happens to your data if your computer gets lost or stolen?</description>
+    <pubDate>8 Jun 2025 23:09:00 GMT</pubDate>
+  </item>
+  <item>
     <title>Combinatory Tetris</title>
     <link>https://juuso.dev/blogPosts/higher-order-filter-bqn-uiua/combinatory-tetris.html</link>
     <description>Implementing a higher-order filter in Uiua and BQN</description>
