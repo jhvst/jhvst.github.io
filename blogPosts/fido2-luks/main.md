@@ -3,14 +3,24 @@
 _What happens to your data if your computer gets lost or stolen?_
 
 It is a trick question -- you do not need to worry *unless* you run Linux.
-This guide shows how to make a LUKS partition that supports multiple FIDO2 keys.
-I use (and the company I run insists) the use of [Yubico](https://www.yubico.com/) YubiKeys with PIN codes for SSH access, but the devices are general enough to also encrypt disks.
+This guide shows how to make a Linux Unified Key Setup (LUKS) partition that supports multiple Fast IDentity Online 2 (FIDO2) keys.
+I (and by extension my company) insist the use of [Yubico](https://www.yubico.com/) YubiKeys with PIN codes for SSH access, but the devices are general enough to also encrypt disks.
+
+With the so-called security key (sk; meaning coprocessor) resident key (rk; meaning stored on-coprocessor) SSH feature, the access to private keys is bridged to a secure coprocessor located on the YubiKey.
+This way, the private SSH key is never exposed on the computer, ensuring it cannot be used for unauthorized access to network resources.
+With LUKS integration, this additional security is extended to encrypted disk volumes -- the decryption key is not stored on the device nor is there a chance that the key is forgetten.
+However, there is still a chance that the coprocessor is lost or goes kaboom, so having at least two keys is advised.
 
 ## The disk setup
 
-Linux comes with various ways to arrange disks.
-[Arch Linux documentation on dm-crypt](https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system#Overview) lists options relevant to Linux Unified Key Setup (LUKS).
-The ones I would recommend is to install LUKS onto a disk partition or combine it with Logical Volume Manager (LVM).
+Linux comes with various ways to arrange disks through the device-mapper (dm) framework.
+The dm subsystem extends filesystem capabilities with features such as RAID (dm-raid), cryptography (dm-raid), and logical volume management (LVM; such as tiered caching), even if the underlying filesystem does not natively support it.
+This acronym soup is modular by design, meaning that it is the freedom of the user to decide how to layer the features.
+For example, dm-raid and LVM can be used to make a logical device of two physical disks such that reads and writes are load-balanced between the two (dm-raid) while LVM is used to apply different policies on per-volume basis.
+This way, fast-by-design filesystems such as `xfs` can be seamlessly augmented with multi-device RAID capabilities that normally exists only on more complicated filesystems such as `btrfs`.
+
+[Arch Linux documentation on dm-crypt](https://wiki.archlinux.org/title/Dm-crypt/Encrypting_an_entire_system#Overview) lists options relevant to LUKS.
+I would recommend to install LUKS onto a disk partition or combine it with LVM.
 As such, the options would be:
 
 1. LUKS on a partition
@@ -19,7 +29,7 @@ As such, the options would be:
 
 The first option is the simplest.
 LVM setups only make sense if you need the flexibility that LVM provides.
-But for personal devices, it is rather unlikely you benefit from LVM that much.
+LVM is best for servers with multiple disks, whereas most personal devices seldom have more than one.
 And if you are like me, who already has unencrypted partitions on the same disk, the partitioning makes even more sense.
 One may ask, *what such unencrypted partition might be?*
 For most people it is the bootloader, which often must reside in a dumbed-down EFI-readable partition.
@@ -99,7 +109,7 @@ First option picks the device for you, the second makes sure a PIN is always req
 PIN is useful if a crook steals *both* your computer and the YubiKey, because a simple tap on the YubiKey will not be enough to decrypt the partition.
 
 The command above will prompt the password you gave earlier, so I hope you still remember it.
-To "open" the crypted partition with FIDO:
+To "open" the crypted partition with FIDO2 token:
 
 ```bash
 sudo systemd-cryptsetup attach luks /dev/sda3
@@ -134,7 +144,7 @@ sudo systemd-cryptenroll --unlock-fido2-device=auto --password /dev/sda3
 ```
 
 This will prompt a new password.
-You can now enroll a new FIDO device e.g. by re-using the command above which wipes some slot while adding a new one.
+You can now enroll a new FIDO2 token e.g. by re-using the command above which wipes some slot while adding a new one.
 To find the slot index of the plain password re-inspect the output of the `luksDump` command.
 
 Your tinfoil hat is now more airtight.
