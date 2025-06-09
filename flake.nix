@@ -7,12 +7,9 @@
     nix2container.inputs.nixpkgs.follows = "nixpkgs";
     nix2container.url = "github:nlewo/nix2container";
     nixpkgs.url = "github:nixos/nixpkgs/24.05";
-    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
-    treefmt-nix.url = "github:numtide/treefmt-nix";
 
     # blogposts
     j1.url = "github:jhvst/jhvst.github.io?dir=blogPosts/j1";
-    barbell.url = "github:jhvst/jhvst.github.io?dir=blogPosts/barbell";
     vksum.url = "github:jhvst/jhvst.github.io?dir=blogPosts/vulkan-sum-reduction";
     ipxe-rpi4.url = "github:jhvst/jhvst.github.io?dir=blogPosts/ipxe-rpi4";
     ramsteam.url = "github:jhvst/jhvst.github.io?dir=blogPosts/RAMsteam";
@@ -35,7 +32,6 @@
       imports = [
         inputs.flake-parts.flakeModules.easyOverlay
         inputs.devenv.flakeModule
-        inputs.treefmt-nix.flakeModule
       ];
 
       perSystem = { pkgs, lib, config, system, inputs', ... }:
@@ -79,9 +75,9 @@
                 "checkPhase"
               ];
               buildPhase = ''
-                mkdir -p $out/css
-                mkdir -p $out/img
+                mkdir $out
                 mkdir html
+                cp -r $src/* $out/
                 cp -r ${web-components.out}/html/* ./html
                 cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
                 woff2_compress IBMPlexMono-Regular.otf
@@ -100,6 +96,7 @@
                 barbell main.html > article.bar
                 barbell html/template_article.html > $out/$(slugify ${title}).html
                 js-beautify -f $out/$(slugify ${title}).html -r
+                rm $out/main.md
 
                 ${distInstall}
               '';
@@ -194,6 +191,26 @@
             src = ./blogPosts/${name};
           };
 
+          packages.barbell = mkBlogPost rec {
+            description = "Barbell is like the template system Handlebars, but with BQN's Under doing the heavy lifting.";
+            name = "barbell";
+            pubDate = "28 Jun 2023 21:19:00 GMT";
+            title = "Barbell: Template System in BQN";
+            src = ./blogPosts/${name};
+            distInstall = ''
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
+
+              cp ${pkgs.mbqn}/share/bqn/libbqn.js $out/libbqn.js
+              cp ${config.packages.tree-sitter-bqn-wasm}/bin/tree-sitter-bqn.wasm $out/tree-sitter-bqn.wasm
+              cp ${config.packages.tree-sitter-bqn-wasm}/queries/highlights.scm $out/highlights-bqn.scm
+            '';
+            distInclude = ''
+              <script src="libbqn.js"></script>
+              <script src="tree-sitter.js"></script>
+            '';
+          };
+
           packages."higher-order-filter-bqn-uiua" = mkBlogPost rec {
             name = "higher-order-filter-bqn-uiua";
             title = "Combinatory Tetris";
@@ -255,9 +272,6 @@
 
             phases = [ "unpackPhase" "buildPhase" ];
             buildPhase = ''
-              mkdir -p $out/blogPosts/barbell
-              cp -r ${inputs.barbell.outputs.packages.${system}.barbell}/* $out/blogPosts/barbell
-
               mkdir -p $out/blogPosts/j1
               cp -r ${inputs.j1.outputs.packages.${system}.j1}/* $out/blogPosts/j1
 
@@ -275,6 +289,9 @@
 
               mkdir -p $out/blogPosts/nix-as-a-static-site-generator
               cp -r ${inputs.nix-static.outputs.packages.${system}.default}/* $out/blogPosts/nix-as-a-static-site-generator
+
+              mkdir -p $out/blogPosts/${barbell.name}
+              cp -r ${barbell.out}/* $out/blogPosts/${barbell.name}
 
               mkdir -p $out/blogPosts/${apple-music-linux-pipewire.name}
               cp -r ${apple-music-linux-pipewire.out}/* $out/blogPosts/${apple-music-linux-pipewire.name}
@@ -323,19 +340,6 @@
             };
 
           };
-
-          treefmt.config = {
-            projectRootFile = "flake.nix";
-            flakeFormatter = true;
-            flakeCheck = true;
-            programs = {
-              nixpkgs-fmt.enable = true;
-              deadnix.enable = true;
-              statix.enable = true;
-            };
-            settings.global.excludes = [ "*/flake.nix" ];
-          };
-
         };
     };
 }
