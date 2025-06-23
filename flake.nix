@@ -13,11 +13,6 @@
     ramsteam.url = "github:jhvst/jhvst.github.io?dir=blogPosts/RAMsteam";
     modular-neovim.url = "github:jhvst/jhvst.github.io?dir=blogPosts/modular-neovim";
     nix-static.url = "github:jhvst/jhvst.github.io?dir=blogPosts/nix-as-a-static-site-generator";
-
-    # papers
-    bsc-thesis.url = "github:jhvst/jhvst.github.io?dir=papers/bsc-thesis";
-    standrews.url = "github:jhvst/jhvst.github.io?dir=papers/msc-thesis-standrews";
-
   };
 
   outputs = { self, ... }@inputs:
@@ -261,8 +256,35 @@
             src = ./blogPosts/${name};
           };
 
-          packages.default = with config.packages; pkgs.stdenv.mkDerivation {
 
+          packages.msc-thesis-standrews = pkgs.callPackage ./packages/mkPaperLaTeX {
+            name = "msc-thesis-standrews";
+            src = ./papers/msc-thesis-standrews;
+            pandoc = pkgs.pandoc;
+          };
+
+          packages.bsc-thesis = pkgs.callPackage ./packages/mkPaperLaTeX {
+            name = "bsc-thesis";
+            src = ./papers/bsc-thesis;
+            pandoc = pkgs.pandoc;
+          };
+
+          packages.mkPapersLaTeX = with config; pkgs.stdenv.mkDerivation {
+            name = "mkPapersLaTeX";
+            src = ./.;
+            buildPhase = lib.strings.concatLines (lib.lists.forEach [
+              packages.bsc-thesis
+              packages.msc-thesis-standrews
+            ]
+              (post:
+                ''
+                  mkdir -p $out/papers/${post.name}
+                  cp -r ${post.out}/* $out/papers/${post.name}
+                ''
+              ));
+          };
+
+          packages.default = with config.packages; pkgs.stdenv.mkDerivation {
             name = "Juuso Haavisto";
             src = ./.;
 
@@ -297,15 +319,10 @@
 
               mkdir -p $out/blogPosts/${fido2-luks.name}
               cp -r ${fido2-luks.out}/* $out/blogPosts/${fido2-luks.name}
+              ${mkPapersLaTeX.buildPhase}
 
               mkdir -p $out/projects/highlightplay/theinternational5
               cp -r projects/highlightplay/theinternational5/* $out/projects/highlightplay/theinternational5
-
-              mkdir -p $out/papers/bsc-thesis
-              cp -r ${inputs.bsc-thesis.outputs.packages.${system}.bsc-thesis}/* $out/papers/bsc-thesis
-
-              mkdir -p $out/papers/msc-thesis-standrews
-              cp -r ${inputs.standrews.outputs.packages.${system}.default}/* $out/papers/msc-thesis-standrews
 
               cp -r ignition $out
               cp -r SPAs $out
