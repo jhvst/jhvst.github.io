@@ -1,11 +1,9 @@
 {
 
   inputs = {
-    devenv.url = "github:cachix/devenv";
+    barbell-pkg.url = "github:jhvst/barbell";
+    devshell.url = "github:numtide/devshell";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    mk-shell-bin.url = "github:rrbutani/nix-mk-shell-bin";
-    nix2container.inputs.nixpkgs.follows = "nixpkgs";
-    nix2container.url = "github:nlewo/nix2container";
     nixpkgs.url = "github:nixos/nixpkgs/24.05";
 
     # blogposts
@@ -20,8 +18,6 @@
     bsc-thesis.url = "github:jhvst/jhvst.github.io?dir=papers/bsc-thesis";
     standrews.url = "github:jhvst/jhvst.github.io?dir=papers/msc-thesis-standrews";
 
-    # components
-    barbell-pkg.url = "github:jhvst/barbell";
   };
 
   outputs = { self, ... }@inputs:
@@ -30,8 +26,8 @@
 
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
       imports = [
+        inputs.devshell.flakeModule
         inputs.flake-parts.flakeModules.easyOverlay
-        inputs.devenv.flakeModule
       ];
 
       perSystem = { pkgs, lib, config, system, inputs', ... }:
@@ -326,18 +322,18 @@
 
           };
 
-          devenv.shells.default = {
+          devshells.default = {
 
             packages = with pkgs; [
               butane
               ripgrep
             ];
 
-            scripts = {
-              img-compress = {
-                exec = "${lib.getExe pkgs.pngquant} img/*.png img/*/*.png --ext .png --force --strip --verbose";
-              };
-            };
+            commands = [{
+              name = "png-compress";
+              help = "compress pngs recursively";
+              command = "${lib.getExe pkgs.pngquant} img/*.png img/*/*.png --ext .png --force --strip --verbose";
+            }];
 
           };
         };
