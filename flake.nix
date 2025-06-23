@@ -27,77 +27,16 @@
 
       perSystem = { pkgs, lib, config, system, inputs', ... }:
         let
-          mkBlogPost =
-            { name
-            , title
-            , description
-            , pubDate
-            , distInclude ? ""
-            , distInstall ? ""
-            , src
-            ,
-            }:
-            let
-              "web-components" = pkgs.stdenv.mkDerivation {
-                name = "web-components";
-                src = ./.;
-                phases = [ "unpackPhase" "buildPhase" ];
-                buildPhase = ''
-                  mkdir -p $out/css
-                  mkdir -p $out/html
-                  cp css/* $out/css
-                  cp html/* $out/html
-                '';
-              };
-            in
-            pkgs.stdenv.mkDerivation rec {
-              inherit name description pubDate src distInstall distInclude;
-              buildInputs = with pkgs; [
-                inputs'.barbell-pkg.packages.barbell
-                nodePackages.js-beautify
-                pandoc
-                python311Packages.python-slugify
-                validator-nu
-                woff2
-              ];
-              phases = [
-                "unpackPhase"
-                "buildPhase"
-                "checkPhase"
-              ];
-              buildPhase = ''
-                mkdir $out
-                mkdir html
-                cp -r $src/* $out/
-                cp -r ${web-components.out}/html/* ./html
-                cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
-                woff2_compress IBMPlexMono-Regular.otf
-                cp IBMPlexMono-Regular.woff2 $out/
-                pandoc $src/main.md --no-highlight -o main.html
-
-                echo "${distInclude}" > head.bar
-                echo "${title}" > title.bar
-                echo "${description}" > description.bar
-                echo "${pubDate}" > pubDate.bar
-                echo "${name}" > name.bar
-                slugify ${title} > slug.bar
-                date -d "${pubDate}" -Iminutes > datetime.bar
-                cat $src/main.md | wc -w > wordCount.bar
-
-                barbell main.html > article.bar
-                barbell html/template_article.html > $out/$(slugify ${title}).html
-                js-beautify -f $out/$(slugify ${title}).html -r
-                rm $out/main.md
-
-                ${distInstall}
-              '';
-
-              doCheck = true;
-              checkPhase = ''
-                vnu $out/$(slugify ${title}).html
-              '';
-
-            };
+          mkBlogPost = { name, title, description, pubDate, distInclude ? "", distInstall ? "", src }: pkgs.callPackage ./packages/mkBlogPost {
+            inherit name title description pubDate distInclude distInstall src;
+            barbell = inputs'.barbell-pkg.packages.barbell;
+            js-beautify = pkgs.nodePackages.js-beautify;
+            pandoc = pkgs.pandoc;
+            python-slugify = pkgs.python313Packages.python-slugify;
+            validator-nu = pkgs.validator-nu;
+            web-components = config.packages.web-components;
+            woff2 = pkgs.woff2;
+          };
         in
         {
 
@@ -113,6 +52,18 @@
             inherit (config.packages)
               tree-sitter
               ;
+          };
+
+          packages.web-components = pkgs.stdenv.mkDerivation {
+            name = "web-components";
+            src = ./.;
+            phases = [ "unpackPhase" "buildPhase" ];
+            buildPhase = ''
+              mkdir -p $out/css
+              mkdir -p $out/html
+              cp css/* $out/css
+              cp html/* $out/html
+            '';
           };
 
           packages."tree-sitter" = (inputs'.nixpkgs.legacyPackages.tree-sitter.override {
@@ -256,6 +207,41 @@
             src = ./blogPosts/${name};
           };
 
+          packages.blogPostsnonFlake = with config.packages; pkgs.stdenv.mkDerivation {
+            name = "blogPostsnonFlake";
+            src = ./.;
+            buildPhase = lib.strings.concatLines (lib.lists.forEach [
+              barbell
+              apple-music-linux-pipewire
+              higher-order-filter-bqn-uiua
+              fido2-luks
+            ]
+              (post:
+                ''
+                  mkdir -p $out/blogPosts/${post.name}
+                  cp -r ${post.out}/* $out/blogPosts/${post.name}
+                ''
+              ));
+          };
+
+          packages.blogPostsFlake = with inputs'; pkgs.stdenv.mkDerivation {
+            name = "blogPostsFlake";
+            src = ./.;
+            buildPhase = lib.strings.concatLines (lib.lists.forEach [
+              j1.packages.default
+              vksum.packages.default
+              ipxe-rpi4.packages.default
+              ramsteam.packages.default
+              modular-neovim.packages.default
+              nix-static.packages.default
+            ]
+              (post:
+                ''
+                  mkdir -p $out/blogPosts/${post.name}
+                  cp -r ${post.out}/* $out/blogPosts/${post.name}
+                ''
+              ));
+          };
 
           packages.msc-thesis-standrews = pkgs.callPackage ./packages/mkPaperLaTeX {
             name = "msc-thesis-standrews";
@@ -287,38 +273,10 @@
           packages.default = with config.packages; pkgs.stdenv.mkDerivation {
             name = "Juuso Haavisto";
             src = ./.;
-
             phases = [ "unpackPhase" "buildPhase" ];
             buildPhase = ''
-              mkdir -p $out/blogPosts/j1
-              cp -r ${inputs.j1.outputs.packages.${system}.j1}/* $out/blogPosts/j1
-
-              mkdir -p $out/blogPosts/vulkan-sum-reduction
-              cp -r ${inputs.vksum.outputs.packages.${system}.default}/* $out/blogPosts/vulkan-sum-reduction
-
-              mkdir -p $out/blogPosts/ipxe-rpi4
-              cp -r ${inputs.ipxe-rpi4.outputs.packages.${system}.default}/* $out/blogPosts/ipxe-rpi4
-
-              mkdir -p $out/blogPosts/RAMsteam
-              cp -r ${inputs.ramsteam.outputs.packages.${system}.default}/* $out/blogPosts/RAMsteam
-
-              mkdir -p $out/blogPosts/modular-neovim
-              cp -r ${inputs.modular-neovim.outputs.packages.${system}.default}/* $out/blogPosts/modular-neovim
-
-              mkdir -p $out/blogPosts/nix-as-a-static-site-generator
-              cp -r ${inputs.nix-static.outputs.packages.${system}.default}/* $out/blogPosts/nix-as-a-static-site-generator
-
-              mkdir -p $out/blogPosts/${barbell.name}
-              cp -r ${barbell.out}/* $out/blogPosts/${barbell.name}
-
-              mkdir -p $out/blogPosts/${apple-music-linux-pipewire.name}
-              cp -r ${apple-music-linux-pipewire.out}/* $out/blogPosts/${apple-music-linux-pipewire.name}
-
-              mkdir -p $out/blogPosts/${higher-order-filter-bqn-uiua.name}
-              cp -r ${higher-order-filter-bqn-uiua.out}/* $out/blogPosts/${higher-order-filter-bqn-uiua.name}
-
-              mkdir -p $out/blogPosts/${fido2-luks.name}
-              cp -r ${fido2-luks.out}/* $out/blogPosts/${fido2-luks.name}
+              ${blogPostsFlake.buildPhase}
+              ${blogPostsnonFlake.buildPhase}
               ${mkPapersLaTeX.buildPhase}
 
               mkdir -p $out/projects/highlightplay/theinternational5

@@ -24,7 +24,7 @@
           description = "We describe how we can do sum reduction using SPIR-V subgroups up to vector length of 4096. With SPIR-V, we are able to run this program on GPUs of different manufacturers using the Vulkan GPU API. As Vulkan is supported by Nvidia, AMD, and, e.g., Apple ARM among others, this allows us to build cross-compatible array operations similar to CUDA.";
           pubDate = "23 Mar 2022 16:30:00 GMT";
 
-          name = "vksum";
+          name = "vulkan-sum-reduction";
           src = ./.;
           buildInputs = with pkgs; [
             inputs.barbell.packages.${system}.barbell
