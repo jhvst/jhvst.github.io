@@ -76,30 +76,55 @@
             '';
           });
 
-          packages."tree-sitter-uiua-wasm" = pkgs.stdenv.mkDerivation {
-            pname = "tree-sitter-uiua-wasm";
-            version = "0.22.6";
-            src = pkgs.fetchFromGitHub {
-              owner = "shnarazk";
-              repo = "tree-sitter-uiua";
-              rev = "942e8365d10b9b62be9f2a8b0503459d3d8f3af3";
-              hash = "sha256-yWlUnFbM0WsV7VhQQcTfogLarsV1yBhTBuea2LZukN8=";
-            };
-
-            phases = [
-              "unpackPhase"
-              "buildPhase"
-            ];
+          packages."tree-sitter-web" = pkgs.stdenv.mkDerivation {
+            name = "tree-sitter-web";
+            phases = [ "unpackPhase" "buildPhase" ];
+            src = ./.;
             buildPhase = ''
-              mkdir -p .emscriptencache
-              export EM_CACHE=$(pwd)/.emscriptencache
-              mkdir -p $out/bin
-              ${config.packages.tree-sitter}/bin/tree-sitter build --wasm
-              cp tree-sitter-uiua.wasm $out/bin/
+              mkdir -p $out
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
             '';
           };
 
-          packages."tree-sitter-bqn-wasm" = pkgs.stdenv.mkDerivation rec {
+          packages."tree-sitter-playground" = pkgs.stdenv.mkDerivation {
+            name = "tree-sitter-playground";
+            phases = [ "unpackPhase" "buildPhase" ];
+            src = ./SPAs/apls;
+            buildInputs = [ inputs'.barbell-pkg.packages.barbell pkgs.woff2 ];
+            buildPhase = ''
+              mkdir $out
+
+              ${config.packages.tree-sitter-web.buildPhase}
+
+              cp ${config.packages.tree-sitter-bqn-wasm}/bin/tree-sitter-bqn.wasm $out/tree-sitter-bqn.wasm
+              cp ${config.packages.tree-sitter-bqn-wasm}/queries/highlights.scm $out/highlights.scm
+              cp ${config.packages.tree-sitter-uiua-wasm}/queries/highlights.scm $out/highlights-uiua.scm
+              cp ${config.packages.tree-sitter-uiua-wasm}/bin/tree-sitter-uiua.wasm $out/tree-sitter-uiua.wasm
+
+              cp ${pkgs.mbqn}/share/bqn/libbqn.js $out
+
+              cp ${config.packages.tree-sitter-bqn-web}/bqn.js bqn.bar
+              cp ${config.packages.tree-sitter-uiua-web}/uiua.js uiua.bar
+              cat bqn.bar uiua.bar > grammars.bar
+
+              cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
+              woff2_compress IBMPlexMono-Regular.otf
+              cp IBMPlexMono-Regular.woff2 $out/
+
+              barbell main.js > f.js
+
+              cp f.js $out/main.js
+              cp index.html $out
+            '';
+          };
+
+          packages."tree-sitter-uiua-wasm" = pkgs.callPackage ./packages/mkTreesitterWasm {
+            pname = "tree-sitter-uiua-wasm";
+            inherit (pkgs.tree-sitter-grammars.tree-sitter-uiua) version src;
+          };
+
+          packages."tree-sitter-bqn-wasm" = pkgs.callPackage ./packages/mkTreesitterWasm rec {
             pname = "tree-sitter-bqn-wasm";
             version = "0.3.2";
             src = pkgs.fetchFromGitHub {
@@ -108,20 +133,27 @@
               rev = "v${version}";
               hash = "sha256-/FsA5GeFhWYFl1L9pF+sQfDSyihTnweEdz2k8mtLqnY=";
             };
+          };
 
-            phases = [
-              "unpackPhase"
-              "buildPhase"
-            ];
-            buildPhase = ''
-              mkdir -p .emscriptencache
-              export EM_CACHE=$(pwd)/.emscriptencache
-              mkdir -p $out/bin
-              ${config.packages.tree-sitter}/bin/tree-sitter build --wasm
-              cp tree-sitter-bqn.wasm $out/bin/
+          packages.tree-sitter-bqn-web = pkgs.stdenv.mkDerivation {
+            name = "tree-sitter-bqn-web";
+            src = ./packages/tree-sitter-web;
+            phases = [ "installPhase" ];
+            installPhase = ''
+              mkdir $out
+              cp $src/bqn.js $out
+              cp $src/bqn.css $out
+            '';
+          };
 
-              mkdir -p $out/queries
-              cp -r queries/* $out/queries
+          packages.tree-sitter-uiua-web = pkgs.stdenv.mkDerivation {
+            name = "tree-sitter-uiua-web";
+            src = ./packages/tree-sitter-web;
+            phases = [ "installPhase" ];
+            installPhase = ''
+              mkdir $out
+              cp $src/uiua.js $out
+              cp $src/uiua.css $out
             '';
           };
 
@@ -284,6 +316,7 @@
 
               cp -r ignition $out
               cp -r SPAs $out
+              cp ${config.packages.tree-sitter-playground}/* $out/SPAs/apls
 
               cp -r css $out
               cp -r img $out

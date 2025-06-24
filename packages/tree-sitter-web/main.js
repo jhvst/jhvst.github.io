@@ -1,4 +1,3 @@
-//@ts-check
 document.addEventListener("DOMContentLoaded", async () => {
 
   const fmt = (code, block) => {
@@ -33,9 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }).join("");
   }
 
-  document.getElementById("font").checked = true;
   await window.TreeSitter.init()
-  document.getElementById("Parser").checked = true;
 
   |grammars|
 
