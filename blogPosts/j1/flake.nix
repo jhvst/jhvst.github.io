@@ -3,27 +3,16 @@
   inputs = {
     barbell.url = "github:jhvst/barbell?dir=packages/barbell";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    nixpkgs.url = "github:nixos/nixpkgs/23.05";
+    nixpkgs.url = "github:nixos/nixpkgs/24.05";
   };
 
-  outputs =
-    inputs@{ self
-    , nixpkgs
-    , flake-parts
-    , ...
-    }:
+  outputs = { ... }@inputs:
 
-    flake-parts.lib.mkFlake { inherit inputs; } {
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
 
-      systems = [
-        "aarch64-darwin"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "x86_64-linux"
-      ];
-      imports = [ ];
+      systems = inputs.nixpkgs.lib.systems.flakeExposed;
 
-      perSystem = { pkgs, lib, config, system, inputs', ... }: rec {
+      perSystem = { pkgs, inputs', ... }: rec {
 
         packages.j1 = pkgs.stdenv.mkDerivation {
           name = "j1";
@@ -48,7 +37,7 @@
             cp attachments/* $out/attachments
           '';
 
-          doCheck = false;
+          doCheck = true;
           checkPhase = ''
             vnu $out/j1.html
           '';
