@@ -4,15 +4,12 @@
     barbell-pkg.url = "github:jhvst/barbell";
     devshell.url = "github:numtide/devshell";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:nixos/nixpkgs/24.05";
+    nuenv.url = "github:DeterminateSystems/nuenv";
 
-    # blogposts
+    # flake archived blog posts
     j1.url = "github:jhvst/jhvst.github.io?dir=blogPosts/j1";
-    vksum.url = "github:jhvst/jhvst.github.io?dir=blogPosts/vulkan-sum-reduction";
-    ipxe-rpi4.url = "github:jhvst/jhvst.github.io?dir=blogPosts/ipxe-rpi4";
-    ramsteam.url = "github:jhvst/jhvst.github.io?dir=blogPosts/RAMsteam";
-    modular-neovim.url = "github:jhvst/jhvst.github.io?dir=blogPosts/modular-neovim";
-    nix-static.url = "github:jhvst/jhvst.github.io?dir=blogPosts/nix-as-a-static-site-generator";
   };
 
   outputs = { self, ... }@inputs:
@@ -27,14 +24,14 @@
 
       perSystem = { pkgs, lib, config, system, inputs', ... }:
         let
-          mkBlogPost = { name, title, description, pubDate, distInclude ? "", distInstall ? "", src }: pkgs.callPackage ./packages/mkBlogPost {
-            inherit name title description pubDate distInclude distInstall src;
+          mkBlogPost = { name, title, description, pubDate, grammars ? [ ], distInclude ? "", distInstall ? "", src }: pkgs.callPackage ./packages/mkBlogPost {
+            inherit name title description pubDate grammars distInclude distInstall src;
             barbell = inputs'.barbell-pkg.packages.barbell;
             js-beautify = pkgs.nodePackages.js-beautify;
             pandoc = pkgs.pandoc;
             python-slugify = pkgs.python313Packages.python-slugify;
             validator-nu = pkgs.validator-nu;
-            web-components = config.packages.web-components;
+            pageTemplate = ./packages/mkBlogPost/template_article.html;
             woff2 = pkgs.woff2;
           };
         in
@@ -43,6 +40,7 @@
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
             overlays = [
+              inputs.nuenv.overlays.nuenv
               self.overlays.default
             ];
             config = { };
@@ -51,41 +49,22 @@
           overlayAttrs = {
             inherit (config.packages)
               tree-sitter
+              tree-sitter-cli
+              hq
+              ogq
               ;
-          };
-
-          packages.web-components = pkgs.stdenv.mkDerivation {
-            name = "web-components";
-            src = ./.;
-            phases = [ "unpackPhase" "buildPhase" ];
-            buildPhase = ''
-              mkdir -p $out/css
-              mkdir -p $out/html
-              cp css/* $out/css
-              cp html/* $out/html
-            '';
           };
 
           packages."tree-sitter" = (inputs'.nixpkgs.legacyPackages.tree-sitter.override {
             webUISupport = true;
-          }).overrideAttrs (_: {
-            preInstall = ''
+          }).overrideAttrs (old: {
+            nativeBuildInputs = [ pkgs.breakpointHook ] ++ old.nativeBuildInputs;
+            postInstall = ''
               mkdir -p $out/lib
               cp lib/binding_web/tree-sitter.js $out/lib
               cp lib/binding_web/tree-sitter.wasm $out/lib
             '';
           });
-
-          packages."tree-sitter-web" = pkgs.stdenv.mkDerivation {
-            name = "tree-sitter-web";
-            phases = [ "unpackPhase" "buildPhase" ];
-            src = ./.;
-            buildPhase = ''
-              mkdir -p $out
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
-            '';
-          };
 
           packages."tree-sitter-playground" = pkgs.stdenv.mkDerivation {
             name = "tree-sitter-playground";
@@ -95,66 +74,53 @@
             buildPhase = ''
               mkdir $out
 
-              ${config.packages.tree-sitter-web.buildPhase}
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
+              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
 
-              cp ${config.packages.tree-sitter-bqn-wasm}/bin/tree-sitter-bqn.wasm $out/tree-sitter-bqn.wasm
-              cp ${config.packages.tree-sitter-bqn-wasm}/queries/highlights.scm $out/highlights.scm
-              cp ${config.packages.tree-sitter-uiua-wasm}/queries/highlights.scm $out/highlights-uiua.scm
-              cp ${config.packages.tree-sitter-uiua-wasm}/bin/tree-sitter-uiua.wasm $out/tree-sitter-uiua.wasm
+              cp ${config.packages.tree-sitter-bqn-wasm}/bin/* $out/
+              cp ${config.packages.tree-sitter-uiua-wasm}/bin/* $out/
+
+              cat ${config.packages.tree-sitter-bqn-wasm}/language.js >> grammars.bar
+              cat ${config.packages.tree-sitter-uiua-wasm}/language.js >> grammars.bar
 
               cp ${pkgs.mbqn}/share/bqn/libbqn.js $out
-
-              cp ${config.packages.tree-sitter-bqn-web}/bqn.js bqn.bar
-              cp ${config.packages.tree-sitter-uiua-web}/uiua.js uiua.bar
-              cat bqn.bar uiua.bar > grammars.bar
 
               cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
               woff2_compress IBMPlexMono-Regular.otf
               cp IBMPlexMono-Regular.woff2 $out/
 
-              barbell main.js > f.js
-
-              cp f.js $out/main.js
+              barbell main.js > $out/main.js
               cp index.html $out
             '';
           };
 
           packages."tree-sitter-uiua-wasm" = pkgs.callPackage ./packages/mkTreesitterWasm {
             pname = "tree-sitter-uiua-wasm";
+            barbell = inputs'.barbell-pkg.packages.barbell;
             inherit (pkgs.tree-sitter-grammars.tree-sitter-uiua) version src;
           };
 
-          packages."tree-sitter-bqn-wasm" = pkgs.callPackage ./packages/mkTreesitterWasm rec {
+          packages."tree-sitter-bqn-wasm" = pkgs.callPackage ./packages/mkTreesitterWasm {
             pname = "tree-sitter-bqn-wasm";
-            version = "0.3.2";
-            src = pkgs.fetchFromGitHub {
-              owner = "shnarazk";
-              repo = "tree-sitter-bqn";
-              rev = "v${version}";
-              hash = "sha256-/FsA5GeFhWYFl1L9pF+sQfDSyihTnweEdz2k8mtLqnY=";
-            };
+            barbell = inputs'.barbell-pkg.packages.barbell;
+            inherit (inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-bqn) version src;
           };
 
-          packages.tree-sitter-bqn-web = pkgs.stdenv.mkDerivation {
-            name = "tree-sitter-bqn-web";
-            src = ./packages/tree-sitter-web;
-            phases = [ "installPhase" ];
-            installPhase = ''
-              mkdir $out
-              cp $src/bqn.js $out
-              cp $src/bqn.css $out
-            '';
+          packages."tree-sitter-cli" = pkgs.callPackage ./packages/tree-sitter-cli {
+            tree-sitter = inputs'.nixpkgs-unstable.legacyPackages.tree-sitter;
+            grammars = [
+              inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-html
+            ];
           };
 
-          packages.tree-sitter-uiua-web = pkgs.stdenv.mkDerivation {
-            name = "tree-sitter-uiua-web";
-            src = ./packages/tree-sitter-web;
-            phases = [ "installPhase" ];
-            installPhase = ''
-              mkdir $out
-              cp $src/uiua.js $out
-              cp $src/uiua.css $out
-            '';
+          packages."hq" = pkgs.callPackage ./packages/hq {
+            tree-sitter-cli = config.packages.tree-sitter-cli;
+            writeShellApplication = pkgs.nuenv.writeShellApplication;
+          };
+
+          packages."ogq" = pkgs.callPackage ./packages/ogq {
+            hq = config.packages.hq;
+            jq = inputs'.nixpkgs-unstable.legacyPackages.jq;
           };
 
           packages."apple-music-linux-pipewire" = mkBlogPost rec {
@@ -171,17 +137,14 @@
             pubDate = "28 Jun 2023 21:19:00 GMT";
             title = "Barbell: Template System in BQN";
             src = ./blogPosts/${name};
+            grammars = [
+              inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
+            ];
             distInstall = ''
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
-
               cp ${pkgs.mbqn}/share/bqn/libbqn.js $out/libbqn.js
-              cp ${config.packages.tree-sitter-bqn-wasm}/bin/tree-sitter-bqn.wasm $out/tree-sitter-bqn.wasm
-              cp ${config.packages.tree-sitter-bqn-wasm}/queries/highlights.scm $out/highlights-bqn.scm
             '';
             distInclude = ''
               <script src="libbqn.js"></script>
-              <script src="tree-sitter.js"></script>
             '';
           };
 
@@ -190,20 +153,16 @@
             title = "Combinatory Tetris";
             description = "Implementing a higher-order filter in Uiua and BQN";
             pubDate = "31 Jul 2024 10:00:00 GMT";
+            grammars = [
+              inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
+              pkgs.tree-sitter-grammars.tree-sitter-haskell
+              pkgs.tree-sitter-grammars.tree-sitter-uiua
+            ];
             distInstall = ''
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
-
               cp ${pkgs.mbqn}/share/bqn/libbqn.js $out/libbqn.js
-              cp ${config.packages.tree-sitter-bqn-wasm}/bin/tree-sitter-bqn.wasm $out/tree-sitter-bqn.wasm
-              cp ${config.packages.tree-sitter-bqn-wasm}/queries/highlights.scm $out/highlights-bqn.scm
-
-              cp ${config.packages.tree-sitter-uiua-wasm}/bin/tree-sitter-uiua.wasm $out/tree-sitter-uiua.wasm
-              cp ${pkgs.tree-sitter-grammars.tree-sitter-uiua}/queries/highlights.scm $out/highlights-uiua.scm
             '';
             distInclude = ''
               <script src="libbqn.js"></script>
-              <script src="tree-sitter.js"></script>
             '';
             src = ./blogPosts/${name};
           };
@@ -213,20 +172,15 @@
             title = "APL: A Profunctor Language";
             description = "Implementing a higher-order filter in Uiua and BQN";
             pubDate = "31 Jul 2024 10:00:00 GMT";
+            grammars = [
+              inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
+              pkgs.tree-sitter-grammars.tree-sitter-uiua
+            ];
             distInstall = ''
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
-
               cp ${pkgs.mbqn}/share/bqn/libbqn.js $out/libbqn.js
-              cp ${config.packages.tree-sitter-bqn-wasm}/bin/tree-sitter-bqn.wasm $out/tree-sitter-bqn.wasm
-              cp ${config.packages.tree-sitter-bqn-wasm}/queries/highlights.scm $out/highlights-bqn.scm
-
-              cp ${config.packages.tree-sitter-uiua-wasm}/bin/tree-sitter-uiua.wasm $out/tree-sitter-uiua.wasm
-              cp ${pkgs.tree-sitter-grammars.tree-sitter-uiua}/queries/highlights.scm $out/highlights-uiua.scm
             '';
             distInclude = ''
               <script src="libbqn.js"></script>
-              <script src="tree-sitter.js"></script>
             '';
             src = ./blogPosts/${name};
           };
@@ -239,50 +193,112 @@
             src = ./blogPosts/${name};
           };
 
-          packages.blogPostsnonFlake = with config.packages; pkgs.stdenv.mkDerivation {
-            name = "blogPostsnonFlake";
-            src = ./.;
-            buildPhase = lib.strings.concatLines (lib.lists.forEach [
-              barbell
-              apple-music-linux-pipewire
-              higher-order-filter-bqn-uiua
-              fido2-luks
-            ]
-              (post:
-                ''
-                  mkdir -p $out/blogPosts/${post.name}
-                  cp -r ${post.out}/* $out/blogPosts/${post.name}
-                ''
-              ));
+          packages."ipxe-rpi4" = mkBlogPost rec {
+            name = "ipxe-rpi4";
+            title = "iPXE, NixOS, EDK2 UEFI BIOS, and Raspberry Pi 4";
+            description = "This is an excerpt from a reddit comment of mine in response to running NixOS with additional kernel modules on NixOS.";
+            pubDate = "12 Nov 2022 11:57:50 GMT";
+            src = ./blogPosts/${name};
+            grammars = [
+              pkgs.tree-sitter-grammars.tree-sitter-nix
+            ];
           };
 
-          packages.blogPostsFlake = with inputs'; pkgs.stdenv.mkDerivation {
-            name = "blogPostsFlake";
-            src = ./.;
-            buildPhase = lib.strings.concatLines (lib.lists.forEach [
-              j1.packages.default
-              vksum.packages.default
-              ipxe-rpi4.packages.default
-              ramsteam.packages.default
-              modular-neovim.packages.default
-              nix-static.packages.default
-            ]
-              (post:
-                ''
-                  mkdir -p $out/blogPosts/${post.name}
-                  cp -r ${post.out}/* $out/blogPosts/${post.name}
-                ''
-              ));
+          packages."RAMsteam" = mkBlogPost rec {
+            name = "RAMsteam";
+            title = "RAMsteam";
+            description = "Explanation more or less how Linux boots.";
+            pubDate = "29 Nov 2022 02:19:00 GMT";
+            src = ./blogPosts/${name};
           };
+
+          packages."nix-as-a-static-site-generator" = mkBlogPost rec {
+            name = "nix-as-a-static-site-generator";
+            title = "Nix as a Static Site Generator";
+            description = "A pathway incremental builds and reproducability";
+            pubDate = "10 Sep 2023 17:31:00 GMT";
+            src = ./blogPosts/${name};
+            grammars = [
+              pkgs.tree-sitter-grammars.tree-sitter-nix
+            ];
+          };
+
+          packages."modular-neovim" = mkBlogPost rec {
+            name = "modular-neovim";
+            title = "Modular Neovim with Nix";
+            description = "Expanding your Neovim configuration on per-project basis using Nix and devenv.";
+            pubDate = "03 Sep 2023 20:19:00 GMT";
+            src = ./blogPosts/${name};
+            grammars = [
+              pkgs.tree-sitter-grammars.tree-sitter-nix
+            ];
+          };
+
+          packages."vulkan-sum-reduction" = mkBlogPost rec {
+            name = "vulkan-sum-reduction";
+            title = "Vulkan sum reduction";
+            description = "We describe how we can do sum reduction using SPIR-V subgroups up to vector length of 4096. With SPIR-V, we are able to run this program on GPUs of different manufacturers using the Vulkan GPU API. As Vulkan is supported by Nvidia, AMD, and, e.g., Apple ARM among others, this allows us to build cross-compatible array operations similar to CUDA.";
+            pubDate = "23 Mar 2022 16:30:00 GMT";
+            src = ./blogPosts/${name};
+            distInclude = ''
+              <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css' integrity='sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI' crossorigin='anonymous'>
+
+              <script defer src='https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js' integrity='sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t' crossorigin='anonymous'></script>
+
+              <script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                      var mathElements = document.getElementsByClassName('math');
+                      var macros = [];
+                      for (var i = 0; i < mathElements.length; i++) {
+                          var texText = mathElements[i].firstChild;
+                          if (mathElements[i].tagName == 'SPAN') {
+                              katex.render(texText.data, mathElements[i], {
+                                  displayMode: mathElements[i].classList.contains('display'),
+                                  throwOnError: false,
+                                  macros: macros,
+                                  fleqn: false
+                              });
+                          }
+                      }
+                  });
+              </script>
+            '';
+          };
+
+          packages.blogPosts = with config.packages;
+            pkgs.stdenv.mkDerivation {
+              name = "blogPostsnonFlake";
+              src = ./.;
+              buildPhase = lib.strings.concatLines (lib.lists.forEach [
+                apple-music-linux-pipewire
+                barbell
+                fido2-luks
+                higher-order-filter-bqn-uiua
+                RAMsteam
+                ipxe-rpi4
+                modular-neovim
+                vulkan-sum-reduction
+                nix-as-a-static-site-generator
+                inputs'.j1.packages.default
+              ]
+                (post:
+                  ''
+                    mkdir -p $out/blogPosts/${post.name}
+                    cp -r ${post.out}/* $out/blogPosts/${post.name}
+                  ''
+                ));
+            };
 
           packages.msc-thesis-standrews = pkgs.callPackage ./packages/mkPaperLaTeX {
             name = "msc-thesis-standrews";
+            title = "MSc thesis: Static Semantics of Rank Polymorphism";
             src = ./papers/msc-thesis-standrews;
             pandoc = pkgs.pandoc;
           };
 
           packages.bsc-thesis = pkgs.callPackage ./packages/mkPaperLaTeX {
             name = "bsc-thesis";
+            title = "BSc thesis: Latency-optimized edge computing in 5G cellular networks";
             src = ./papers/bsc-thesis;
             pandoc = pkgs.pandoc;
           };
@@ -302,40 +318,133 @@
               ));
           };
 
-          packages.default = with config.packages; pkgs.stdenv.mkDerivation {
-            name = "Juuso Haavisto";
+          packages.blog = with config.packages; pkgs.stdenv.mkDerivation {
+            name = "Blog of Juuso Haavisto";
             src = ./.;
-            phases = [ "unpackPhase" "buildPhase" ];
             buildPhase = ''
-              ${blogPostsFlake.buildPhase}
-              ${blogPostsnonFlake.buildPhase}
+              ${blogPosts.buildPhase}
               ${mkPapersLaTeX.buildPhase}
 
               mkdir -p $out/projects/highlightplay/theinternational5
               cp -r projects/highlightplay/theinternational5/* $out/projects/highlightplay/theinternational5
 
-              cp -r ignition $out
-              cp -r SPAs $out
-              cp ${config.packages.tree-sitter-playground}/* $out/SPAs/apls
-
               cp -r css $out
               cp -r img $out
               cp -r videos $out
 
+              cp *.html $out
+              rm $out/cv.html
+              rm $out/index.html
+            '';
+          };
+
+          packages.site = with config.packages; pkgs.stdenv.mkDerivation {
+            name = "Site of Juuso Haavisto";
+            src = ./.;
+            buildPhase = ''
+              ${blog.buildPhase}
+              cp cv.html $out
+              cp index.html $out
+
+              cp -r ignition $out
+              cp -r SPAs $out
+              cp ${config.packages.tree-sitter-playground}/* $out/SPAs/apls
+
               cp favicon.svg $out
               cp robots.txt $out
-              cp rss.xml $out
-              cp *.html $out
+              cp ${rss2}/rss.xml $out
             '';
 
           };
 
+          packages.default = with config.packages;
+            let
+              sitemap = config.packages.sitemap.overrideAttrs (_: prev: {
+                src = config.packages.site.outPath;
+              });
+            in
+            pkgs.stdenv.mkDerivation {
+              name = "Juuso Haavisto";
+              src = ./.;
+              buildPhase = ''
+                ${site.buildPhase}
+                awk '{print "https://juuso.dev/" $0}' ${sitemap}/sitemap.txt > sitemap.txt
+              '';
+              installPhase = ''
+                install -D sitemap.txt $out/sitemap.txt
+              '';
+            };
+
+          packages.sitemap = pkgs.stdenv.mkDerivation {
+            name = "sitemap";
+            src = config.packages.blog.outPath;
+            buildInputs = [ pkgs.fd pkgs.jq ];
+            buildPhase = ''
+              fd -t f -e html > sitemap.txt
+              cat sitemap.txt | jq -R -s -c 'split("\n") | map(select(length > 0))' > sitemap.json
+            '';
+            installPhase = ''
+              install -D sitemap.txt $out/sitemap.txt
+              install -D sitemap.json $out/sitemap.json
+            '';
+          };
+
+          packages.rss = pkgs.callPackage ./packages/mkOpengraph/all.nix {
+            src = config.packages.blog.outPath;
+            jq = inputs'.nixpkgs-unstable.legacyPackages.jq;
+            fileset = builtins.fromJSON (builtins.readFile "${config.packages.sitemap}/sitemap.json");
+            ogq = config.packages.ogq;
+            siteURL = "https://juuso.dev";
+          };
+
+          packages.rss2 =
+            let
+              entriesJSON = builtins.fromJSON (builtins.readFile "${config.packages.rss}/graphs.json");
+            in
+            pkgs.stdenv.mkDerivation rec {
+              name = "rss2";
+              src = config.packages.rss.outPath;
+              entriesXML = lib.lists.forEach entriesJSON (entry: ''
+                <item>
+                  <title>${entry."og:title"}</title>
+                  <link>${entry."og:url"}</link>
+                  <pubDate>${entry."pubDate"}</pubDate>
+                </item>
+              '');
+              channel = ''
+                <?xml version="1.0" encoding="UTF-8" ?>
+                <?xml-stylesheet href="css/pretty-feed-v3.xsl" type="text/xsl"?>
+                <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+                <channel>
+                  <title>Juuso Haavisto</title>
+                  <link>https://juuso.dev</link>
+                  <atom:link href="https://juuso.dev/rss.xml" rel="self" type="application/rss+xml" />
+                  <description>Escape from Finnish farmland</description>
+                  ${ lib.strings.concatLines entriesXML }
+                </channel>
+                </rss>
+              '';
+              buildInputs = [ pkgs.xq-xml ];
+              feed = pkgs.writeText "feed.xml" channel;
+              buildPhase = ''
+                xq ${feed} > rss.xml
+              '';
+              installPhase = ''
+                install -D rss.xml $out/rss.xml
+              '';
+            };
+
           devshells.default = {
 
-            packages = with pkgs; [
-              butane
-              ripgrep
-            ];
+            packages = with pkgs;
+              [
+                butane
+                papis
+                tomb
+                tree-sitter-cli
+                hq
+                ogq
+              ];
 
             commands = [{
               name = "png-compress";
@@ -345,5 +454,11 @@
 
           };
         };
+
+      flake =
+        let
+          inherit (self) outputs;
+        in
+        { };
     };
 }

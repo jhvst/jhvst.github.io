@@ -7,9 +7,9 @@
   <meta name="author" content="Juuso Haavisto">
 
   <title>|title|</title>
-  <meta property="og:title" content="|title|">
-  <meta name="description" content="|description|">
-  <meta property="og:description" content="|description|">
+  <meta property="og:title" content="|title|" />
+  <meta property="og:description" content="|description|" />
+  <meta property="article:published_time" content="|datetime|" />
 
   <link rel="icon" href="/favicon.svg">
   <link rel="alternate" type="application/rss+xml" title="Juuso Haavisto" href="/rss.xml">
@@ -18,28 +18,6 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
-
-
-      const BQN = async (treesitter) => {
-        const ctx = new treesitter().setLanguage(await treesitter.Language.load("tree-sitter-bqn.wasm"));
-        const query = ctx.language.query(await (await fetch("highlights-bqn.scm")).text())
-        document.querySelectorAll('.bqn').forEach((el) => {
-          var result = bqn(el.textContent);
-          if (typeof result === "function") {
-            result = `${result.m}-${result.name} function`;
-          }
-          const reBQN = `${el.textContent}\n# Result: ${result}`
-          el.innerHTML = fmt(reBQN, query.matches(ctx.parse(reBQN).rootNode).flatMap(m => m.captures))
-        });
-      }
-
-      const Uiua = async (treesitter) => {
-        const ctx = new treesitter().setLanguage(await treesitter.Language.load("tree-sitter-uiua.wasm"));
-        const query = ctx.language.query(await (await fetch("highlights-uiua.scm")).text())
-        document.querySelectorAll('.uiua').forEach((el) => {
-          el.innerHTML = fmt(el.textContent, query.matches(ctx.parse(el.textContent).rootNode).flatMap(q => q.captures))
-        });
-      }
 
       const fmt = (code, block) => {
         return Object.values(Object.groupBy(
@@ -74,8 +52,9 @@
       }
 
       await window.TreeSitter.init()
-      await BQN(window.TreeSitter);
-      await Uiua(window.TreeSitter);
+
+      |grammars|
+
     });
   </script>
 
@@ -122,6 +101,22 @@
 
     .bqn [class^="punctuation"] {
       color: #862f9e;
+    }
+
+    .haskell .variable {
+      color: #a94598;
+    }
+
+    .haskell .type {
+      color: #c48218;
+    }
+
+    .haskell .function.variable, .haskell .type.variable {
+      color: #48bac2;
+    }
+
+    .haskell .number {
+      color: #c43e18;
     }
 
     output {

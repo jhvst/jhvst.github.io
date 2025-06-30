@@ -4,7 +4,7 @@ This is an excerpt from a reddit comment of mine in response to running NixOS wi
 
 I use config in which the instrumental part is this:
 
-```html
+```nix
 boot.kernelPackages = pkgs.linuxPackages_rpi4;
 boot.loader.raspberryPi = {
     enable = true;

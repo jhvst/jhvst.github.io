@@ -20,14 +20,14 @@ So, what's new with Uiua?
 
 To begin the elaboration, let us consider a piece of Haskell code taken from _[Why Concatenative Programming Matters](https://evincarofautumn.blogspot.com/2012/02/why-concatenative-programming-matters.html)_:
 
-```Haskell
+```haskell
 countWhere :: (a -> Bool) -> [a] -> Int
 countWhere predicate list = length (filter predicate list)
 ```
 
 The definition can be called as follows, which will return 3:
 
-```Haskell
+```haskell
 countWhere (>2) [1, 2, 3, 4, 5]
 ```
 
@@ -138,7 +138,7 @@ You can [try it](https://www.uiua.org/pad?src=0_12_0-dev_1__Q291bnRXaGVyZSEg4oaQ
 
 Compare this with the Haskell code:
 
-```Haskell
+```haskell
 countWhere :: (a -> Bool) -> [a] -> Int
 countWhere predicate list = length (filter predicate list)
 countWhere (>2) [1, 2, 3, 4, 5]
@@ -187,7 +187,7 @@ Meanwhile, the `CountWhere` is defined in a so-called block style (a.k.a _[dfn](
 In block style code, arguments have keywords such as `𝕎` (left argument as a verb) and `𝕩` (right argument as a noun) which can be placed in arbitrary locations of the expression.
 With this in mind, here is the Haskell code again:
 
-```Haskell
+```haskell
 countWhere :: (a -> Bool) -> [a] -> Int
 countWhere predicate list = length (filter predicate list)
 countWhere (>2) [1, 2, 3, 4, 5]

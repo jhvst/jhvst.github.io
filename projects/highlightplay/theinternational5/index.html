@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<meta property="article:published_time" content="2016-08-05Z19:05:36" />
+<meta property="og:title" content="The International 5 in Numbers" />
 <body>
 <link rel="stylesheet" href="./main.css">
 <script src="https://www.google.com/jsapi"></script>
@@ -175,7 +177,7 @@ google.setOnLoadCallback(initgraphs);
 if (!String.prototype.format) {
   String.prototype.format = function() {
     var args = arguments;
-    return this.replace(/{(\d+)}/g, function(match, number) { 
+    return this.replace(/{(\d+)}/g, function(match, number) {
       return typeof args[number] != 'undefined'
         ? args[number]
         : match
@@ -209,10 +211,10 @@ function initgraphs() {
 }
 
 function drawPie() {
-	
+
 	var data = google.visualization.arrayToDataTable([
 		['Emoticons', 'Count during TI5'],
-		['Kappa', 434708],		
+		['Kappa', 434708],
 		['DansGame', 39831],
 		['BabyRage', 48922],
 		['PuppeyFace', 26414],
