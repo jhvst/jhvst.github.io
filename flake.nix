@@ -362,15 +362,21 @@
               sitemap = config.packages.sitemap.overrideAttrs (_: prev: {
                 src = config.packages.site.outPath;
               });
+              patches = pkgs.writeTextFile {
+                name = "redirections.patch";
+                text = builtins.readFile ./redirections.patch;
+              };
             in
             pkgs.stdenv.mkDerivation {
               name = "Juuso Haavisto";
               src = ./.;
+              buildInputs = [ pkgs.git ];
               buildPhase = ''
                 ${site.buildPhase}
                 awk '{print "https://juuso.dev/" $0}' ${sitemap}/sitemap.txt > sitemap.txt
               '';
               installPhase = ''
+                git apply --unsafe-paths --directory $out ${patches}
                 install -D sitemap.txt $out/sitemap.txt
               '';
             };

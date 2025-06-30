@@ -1,0 +1,10 @@
+diff --git c/blogPosts/barbell/barbell.html i/blogPosts/barbell/barbell.html
+new file mode 100644
+index 0000000..c81f511
+--- /dev/null
++++ i/blogPosts/barbell/barbell.html
+@@ -0,0 +1,3 @@
++<head>
++  <meta http-equiv="Refresh" content="0; URL=./barbell-template-system-in-bqn.html" />
++</head>
+\ No newline at end of file
