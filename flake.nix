@@ -370,10 +370,12 @@
             pkgs.stdenv.mkDerivation {
               name = "Juuso Haavisto";
               src = ./.;
-              buildInputs = [ pkgs.git ];
+              buildInputs = [ pkgs.git inputs'.barbell-pkg.packages.barbell ];
               buildPhase = ''
                 ${site.buildPhase}
                 awk '{print "https://juuso.dev/" $0}' ${sitemap}/sitemap.txt > sitemap.txt
+                cp ${config.packages.sitemapHTML}/sitemap.html sitemap.bar
+                barbell index.html > $out/index.html
               '';
               installPhase = ''
                 git apply --unsafe-paths --directory $out ${patches}
@@ -424,6 +426,29 @@
               '';
               installPhase = ''
                 install -D sitemap.xml $out/sitemap.xml;
+              '';
+            };
+
+          packages.sitemapHTML =
+            let
+              entriesJSON = builtins.fromJSON (builtins.readFile "${config.packages.rss}/graphs.json");
+            in
+            pkgs.stdenv.mkDerivation rec {
+              name = "sitemap-html";
+              src = ./.;
+              urls = lib.lists.forEach entriesJSON (entry: ''
+                <li>
+                  <a href="./${lib.strings.removePrefix "https://juuso.dev/" entry."og:url"}">${entry."og:title"}</a>
+                </li>
+              '');
+              urlset = ''
+                <ol>
+                  ${ lib.strings.concatLines urls }
+                </ol>
+              '';
+              feed = pkgs.writeText "links.html" urlset;
+              installPhase = ''
+                install -D ${feed} $out/sitemap.html;
               '';
             };
 
@@ -482,6 +507,7 @@
                 tree-sitter-cli
                 hq
                 ogq
+                inputs'.barbell-pkg.packages.barbell
               ];
 
             commands = [{
