@@ -365,7 +365,6 @@
             buildPhase = ''
               ${blog.buildPhase}
               cp cv.html $out
-              cp index.html $out
 
               cp -r ignition $out
               cp -r SPAs $out
