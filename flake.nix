@@ -145,6 +145,27 @@
             '';
             distInclude = ''
               <script src="libbqn.js"></script>
+              <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css' integrity='sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI' crossorigin='anonymous'>
+
+              <script defer src='https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js' integrity='sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t' crossorigin='anonymous'></script>
+
+              <script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                      var mathElements = document.getElementsByClassName('math');
+                      var macros = [];
+                      for (var i = 0; i < mathElements.length; i++) {
+                          var texText = mathElements[i].firstChild;
+                          if (mathElements[i].tagName == 'SPAN') {
+                              katex.render(texText.data, mathElements[i], {
+                                  displayMode: mathElements[i].classList.contains('display'),
+                                  throwOnError: false,
+                                  macros: macros,
+                                  fleqn: false
+                              });
+                          }
+                      }
+                  });
+              </script>
             '';
           };
 
