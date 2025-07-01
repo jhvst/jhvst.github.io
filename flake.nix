@@ -378,6 +378,7 @@
               installPhase = ''
                 git apply --unsafe-paths --directory $out ${patches}
                 install -D sitemap.txt $out/sitemap.txt
+                install -D ${config.packages.sitemapXML}/sitemap.xml $out/sitemap.xml
               '';
             };
 
@@ -394,6 +395,37 @@
               install -D sitemap.json $out/sitemap.json
             '';
           };
+
+          packages.sitemapXML =
+            let
+              sitemap = config.packages.sitemap.overrideAttrs (_: prev: {
+                src = config.packages.site.outPath;
+              });
+              entriesJSON = builtins.fromJSON (builtins.readFile "${sitemap}/sitemap.json");
+            in
+            pkgs.stdenv.mkDerivation rec {
+              name = "sitemap-xml";
+              src = ./.;
+              urls = lib.lists.forEach entriesJSON (entry: ''
+                <url>
+                  <loc>https://juuso.dev/${entry}</loc>
+                </url>
+              '');
+              urlset = ''
+                <?xml version="1.0" encoding="UTF-8"?>
+                <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+                  ${ lib.strings.concatLines urls }
+                </urlset>
+              '';
+              buildInputs = [ pkgs.xq-xml ];
+              feed = pkgs.writeText "feed.xml" urlset;
+              buildPhase = ''
+                xq ${feed} > sitemap.xml
+              '';
+              installPhase = ''
+                install -D sitemap.xml $out/sitemap.xml;
+              '';
+            };
 
           packages.rss = pkgs.callPackage ./packages/mkOpengraph/all.nix {
             src = config.packages.blog.outPath;
