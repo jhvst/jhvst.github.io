@@ -4,8 +4,8 @@
     barbell-pkg.url = "github:jhvst/barbell";
     devshell.url = "github:numtide/devshell";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-2405.url = "github:nixos/nixpkgs/nixos-24.05";
     nuenv.url = "github:DeterminateSystems/nuenv";
 
     # flake archived blog posts
@@ -55,7 +55,7 @@
               ;
           };
 
-          packages."tree-sitter" = (inputs'.nixpkgs.legacyPackages.tree-sitter.override {
+          packages."tree-sitter" = (inputs'.nixpkgs-2405.legacyPackages.tree-sitter.override {
             webUISupport = true;
           }).overrideAttrs (old: {
             nativeBuildInputs = [ pkgs.breakpointHook ] ++ old.nativeBuildInputs;
@@ -103,13 +103,13 @@
           packages."tree-sitter-bqn-wasm" = pkgs.callPackage ./packages/mkTreesitterWasm {
             pname = "tree-sitter-bqn-wasm";
             barbell = inputs'.barbell-pkg.packages.barbell;
-            inherit (inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-bqn) version src;
+            inherit (inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-bqn) version src;
           };
 
           packages."tree-sitter-cli" = pkgs.callPackage ./packages/tree-sitter-cli {
-            tree-sitter = inputs'.nixpkgs-unstable.legacyPackages.tree-sitter;
+            tree-sitter = inputs'.nixpkgs.legacyPackages.tree-sitter;
             grammars = [
-              inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-html
+              inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-html
             ];
           };
 
@@ -120,7 +120,7 @@
 
           packages."ogq" = pkgs.callPackage ./packages/ogq {
             hq = config.packages.hq;
-            jq = inputs'.nixpkgs-unstable.legacyPackages.jq;
+            jq = inputs'.nixpkgs.legacyPackages.jq;
           };
 
           packages."apple-music-linux-pipewire" = mkBlogPost rec {
@@ -138,7 +138,7 @@
             title = "Barbell: Template System in BQN";
             src = ./blogPosts/${name};
             grammars = [
-              inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
+              inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
             ];
             distInstall = ''
               cp ${pkgs.mbqn}/share/bqn/libbqn.js $out/libbqn.js
@@ -175,7 +175,7 @@
             description = "Implementing a higher-order filter in Uiua and BQN";
             pubDate = "31 Jul 2024 10:00:00 GMT";
             grammars = [
-              inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
+              inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
               pkgs.tree-sitter-grammars.tree-sitter-haskell
               pkgs.tree-sitter-grammars.tree-sitter-uiua
             ];
@@ -194,7 +194,7 @@
             description = "Implementing a higher-order filter in Uiua and BQN";
             pubDate = "31 Jul 2024 10:00:00 GMT";
             grammars = [
-              inputs'.nixpkgs-unstable.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
+              inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
               pkgs.tree-sitter-grammars.tree-sitter-uiua
             ];
             distInstall = ''
@@ -474,7 +474,7 @@
 
           packages.rss = pkgs.callPackage ./packages/mkOpengraph/all.nix {
             src = config.packages.blog.outPath;
-            jq = inputs'.nixpkgs-unstable.legacyPackages.jq;
+            jq = inputs'.nixpkgs.legacyPackages.jq;
             fileset = builtins.fromJSON (builtins.readFile "${config.packages.sitemap}/sitemap.json");
             ogq = config.packages.ogq;
             siteURL = "https://juuso.dev";
