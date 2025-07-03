@@ -33,6 +33,8 @@
             validator-nu = pkgs.validator-nu;
             pageTemplate = ./packages/mkBlogPost/template_article.html;
             woff2 = pkgs.woff2;
+            servo = pkgs.servo;
+            mesa = pkgs.mesa;
           };
         in
         {

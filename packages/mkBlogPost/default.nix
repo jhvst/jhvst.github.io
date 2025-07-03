@@ -1,24 +1,26 @@
-{ stdenv
-, name
+{ barbell
+, callPackage
 , description
-, pubDate
-, src
-, distInstall
 , distInclude
-, barbell
+, distInstall
+, grammars
+, ibm-plex
 , js-beautify
+, lib
+, mesa
+, name
+, pageTemplate
 , pandoc
+, pubDate
 , python-slugify
+, servo
+, src
+, stdenv
+, title
+, tree-sitter
 , validator-nu
 , woff2
-, title
-, pageTemplate
-, ibm-plex
 , writeTextFile
-, tree-sitter
-, grammars
-, lib
-, callPackage
 }:
 let
   template = writeTextFile {
@@ -41,6 +43,26 @@ let
       pname = grammar.pname + "-wasm";
     }
   );
+  mkImage = stdenv.mkDerivation {
+    name = title + "-opengraph_image";
+    src = ./.;
+    buildInputs = [ barbell servo ];
+
+    # see: https://discourse.nixos.org/t/test-packages-with-opengl-dependency/40099/8
+    # fixes: `Failed to create WR surfman: ConnectionFailed (thread main, at ports/servoshell/desktop/headless_window.rs:42)`
+    LIBGL_DRIVERS_PATH = "${mesa}/lib:${mesa}/lib/dri";
+    __EGL_VENDOR_LIBRARY_FILENAMES = "${mesa}/share/glvnd/egl_vendor.d/50_mesa.json";
+
+    buildPhase = ''
+      echo "${title}" > title.bar
+      echo "${description}" > description.bar
+      barbell template_og_image.html > opengraph_image.html
+      servo -z opengraph_image.html --window-size 1200x630 -o opengraph_image.png
+    '';
+    installPhase = ''
+      install -D opengraph_image.png $out/opengraph_image.png
+    '';
+  };
 in
 stdenv.mkDerivation rec {
   inherit name description pubDate src distInstall distInclude;
@@ -71,6 +93,7 @@ stdenv.mkDerivation rec {
     echo "${description}" > description.bar
     echo "${pubDate}" > pubDate.bar
     echo "${name}" > name.bar
+    echo "https://juuso.dev/blogPosts/${name}/opengraph_image.png" > image.bar
     slugify ${title} > slug.bar
     date -d "${pubDate}" -Iminutes > datetime.bar
     cat $src/main.md | wc -w > wordCount.bar
@@ -88,6 +111,7 @@ stdenv.mkDerivation rec {
     js-beautify -f $out/$(slugify ${title}).html -r
     rm $out/main.md
 
+    cp ${mkImage}/opengraph_image.png $out
     ${treesitterInstall}
     ${distInstall}
   '';
