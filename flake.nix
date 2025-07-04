@@ -240,28 +240,26 @@
             '';
           };
 
-          packages.blogPosts = with config.packages;
-            pkgs.stdenv.mkDerivation {
-              name = "blogPostsnonFlake";
-              src = ./.;
-              buildPhase = lib.strings.concatLines (lib.lists.forEach [
-                barbell
-                fido2-luks
-                higher-order-filter-bqn-uiua
-                RAMsteam
-                ipxe-rpi4
-                modular-neovim
-                vulkan-sum-reduction
-                nix-as-a-static-site-generator
-                inputs'.j1.packages.default
-              ]
-                (post:
-                  ''
-                    mkdir -p $out/blogPosts/${post.name}
-                    cp -r ${post.out}/* $out/blogPosts/${post.name}
-                  ''
-                ));
-            };
+          packages.blogPosts = with config.packages; pkgs.stdenv.mkDerivation {
+            name = "blogPosts";
+            src = ./.;
+            buildPhase = lib.strings.concatLines (lib.lists.forEach [
+              RAMsteam
+              barbell
+              fido2-luks
+              higher-order-filter-bqn-uiua
+              inputs'.j1.packages.default
+              ipxe-rpi4
+              modular-neovim
+              nix-as-a-static-site-generator
+              vulkan-sum-reduction
+            ]
+              (post: ''
+                mkdir -p $out/blogPosts/${post.name}
+                cp -r ${post.out}/* $out/blogPosts/${post.name}
+              '')
+            );
+          };
 
           packages.msc-thesis-standrews = pkgs.callPackage ./packages/mkPaperLaTeX {
             name = "msc-thesis-standrews";
@@ -284,12 +282,11 @@
               packages.bsc-thesis
               packages.msc-thesis-standrews
             ]
-              (post:
-                ''
-                  mkdir -p $out/papers/${post.name}
-                  cp -r ${post.out}/* $out/papers/${post.name}
-                ''
-              ));
+              (post: ''
+                mkdir -p $out/papers/${post.name}
+                cp -r ${post.out}/* $out/papers/${post.name}
+              '')
+            );
           };
 
           packages.blog = with config.packages; pkgs.stdenv.mkDerivation {
@@ -376,6 +373,9 @@
               urlset = ''
                 <?xml version="1.0" encoding="UTF-8"?>
                 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+                  <url>
+                    <loc>https://juuso.dev</loc>
+                  </url>
                   ${ lib.strings.concatLines urls }
                 </urlset>
               '';
