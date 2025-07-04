@@ -313,7 +313,6 @@
 
               cp -r css $out
               cp -r img $out
-              cp -r videos $out
 
               cp *.html $out
               rm $out/cv.html
