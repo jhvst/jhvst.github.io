@@ -368,7 +368,6 @@
               ${blog.buildPhase}
               cp cv.html $out
 
-              cp -r ignition $out
               cp -r SPAs $out
               cp ${config.packages.tree-sitter-playground}/* $out/SPAs/apls
 
@@ -521,16 +520,14 @@
 
           devshells.default = {
 
-            packages = with pkgs;
-              [
-                butane
-                papis
-                tomb
-                tree-sitter-cli
-                hq
-                ogq
-                inputs'.barbell-pkg.packages.barbell
-              ];
+            packages = with pkgs; [
+              hq
+              inputs'.barbell-pkg.packages.barbell
+              ogq
+              papis
+              tomb
+              tree-sitter-cli
+            ];
 
             commands = [{
               name = "png-compress";
