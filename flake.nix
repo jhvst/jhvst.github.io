@@ -316,22 +316,16 @@
             src = ./.;
             buildPhase = ''
               ${blog.buildPhase}
-              cp cv.html $out
-
+              cp ${rss2}/rss.xml $out
               cp -r SPAs $out
-
+              cp cv.html $out
               cp favicon.svg $out
               cp robots.txt $out
-              cp ${rss2}/rss.xml $out
             '';
-
           };
 
           packages.default = with config.packages;
             let
-              sitemap = config.packages.sitemap.overrideAttrs (_: prev: {
-                src = config.packages.site.outPath;
-              });
               patches = pkgs.writeTextFile {
                 name = "redirections.patch";
                 text = builtins.readFile ./redirections.patch;
@@ -343,13 +337,11 @@
               buildInputs = [ pkgs.git inputs'.barbell-pkg.packages.barbell ];
               buildPhase = ''
                 ${site.buildPhase}
-                awk '{print "https://juuso.dev/" $0}' ${sitemap}/sitemap.txt > sitemap.txt
                 cp ${config.packages.sitemapHTML}/sitemap.html sitemap.bar
                 barbell index.html > $out/index.html
               '';
               installPhase = ''
                 git apply --unsafe-paths --directory $out ${patches}
-                install -D sitemap.txt $out/sitemap.txt
                 install -D ${config.packages.sitemapXML}/sitemap.xml $out/sitemap.xml
               '';
             };
@@ -359,11 +351,9 @@
             src = config.packages.blog.outPath;
             buildInputs = [ pkgs.fd pkgs.jq ];
             buildPhase = ''
-              fd -t f -e html > sitemap.txt
-              cat sitemap.txt | jq -R -s -c 'split("\n") | map(select(length > 0))' > sitemap.json
+              fd -t f -e html | jq -R -s -c 'split("\n") | map(select(length > 0))' > sitemap.json
             '';
             installPhase = ''
-              install -D sitemap.txt $out/sitemap.txt
               install -D sitemap.json $out/sitemap.json
             '';
           };
