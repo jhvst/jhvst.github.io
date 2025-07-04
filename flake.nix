@@ -68,46 +68,6 @@
             '';
           });
 
-          packages."tree-sitter-playground" = pkgs.stdenv.mkDerivation {
-            name = "tree-sitter-playground";
-            phases = [ "unpackPhase" "buildPhase" ];
-            src = ./SPAs/apls;
-            buildInputs = [ inputs'.barbell-pkg.packages.barbell pkgs.woff2 ];
-            buildPhase = ''
-              mkdir $out
-
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.js $out/tree-sitter.js
-              cp ${config.packages.tree-sitter}/lib/tree-sitter.wasm $out/tree-sitter.wasm
-
-              cp ${config.packages.tree-sitter-bqn-wasm}/bin/* $out/
-              cp ${config.packages.tree-sitter-uiua-wasm}/bin/* $out/
-
-              cat ${config.packages.tree-sitter-bqn-wasm}/language.js >> grammars.bar
-              cat ${config.packages.tree-sitter-uiua-wasm}/language.js >> grammars.bar
-
-              cp ${pkgs.mbqn}/share/bqn/libbqn.js $out
-
-              cp ${pkgs.ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
-              woff2_compress IBMPlexMono-Regular.otf
-              cp IBMPlexMono-Regular.woff2 $out/
-
-              barbell main.js > $out/main.js
-              cp index.html $out
-            '';
-          };
-
-          packages."tree-sitter-uiua-wasm" = pkgs.callPackage ./packages/mkTreesitterWasm {
-            pname = "tree-sitter-uiua-wasm";
-            barbell = inputs'.barbell-pkg.packages.barbell;
-            inherit (pkgs.tree-sitter-grammars.tree-sitter-uiua) version src;
-          };
-
-          packages."tree-sitter-bqn-wasm" = pkgs.callPackage ./packages/mkTreesitterWasm {
-            pname = "tree-sitter-bqn-wasm";
-            barbell = inputs'.barbell-pkg.packages.barbell;
-            inherit (inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-bqn) version src;
-          };
-
           packages."tree-sitter-cli" = pkgs.callPackage ./packages/tree-sitter-cli {
             tree-sitter = inputs'.nixpkgs.legacyPackages.tree-sitter;
             grammars = [
@@ -369,7 +329,6 @@
               cp cv.html $out
 
               cp -r SPAs $out
-              cp ${config.packages.tree-sitter-playground}/* $out/SPAs/apls
 
               cp favicon.svg $out
               cp robots.txt $out
