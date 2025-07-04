@@ -268,6 +268,14 @@
             pandoc = pkgs.pandoc;
           };
 
+          packages.msc-thesis-lorraine = pkgs.callPackage ./packages/mkPaperLaTeX {
+            name = "msc-thesis-lorraine";
+            title = "MSc thesis: Leveraging APL and SPIR-V languages to write network functions to be deployed on Vulkan compatible GPUs
+";
+            src = ./papers/msc-thesis-lorraine;
+            pandoc = pkgs.pandoc;
+          };
+
           packages.bsc-thesis = pkgs.callPackage ./packages/mkPaperLaTeX {
             name = "bsc-thesis";
             title = "BSc thesis: Latency-optimized edge computing in 5G cellular networks";
@@ -280,6 +288,7 @@
             src = ./.;
             buildPhase = lib.strings.concatLines (lib.lists.forEach [
               packages.bsc-thesis
+              packages.msc-thesis-lorraine
               packages.msc-thesis-standrews
             ]
               (post: ''

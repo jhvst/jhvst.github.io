@@ -5,7 +5,6 @@
 \setmonofont[Scale=0.90]{APL385.ttf}
 
 \usepackage{graphicx}
-\graphicspath{{assets/}}
 \usepackage{glossaries}
 \usepackage{listings}
 \usepackage{threeparttable}
@@ -68,19 +67,19 @@
     \vspace{7cm}
     \begin{center}
         \huge{Leveraging APL and SPIR-V languages to write network functions to be deployed on Vulkan compatible GPUs}
-    \end{center}    
-    
+    \end{center}
+
     \begin{figure*}[ht]
         \centering
         \begin{minipage}[b]{0.25\textwidth}
-            \includegraphics[width=\textwidth]{ul.png}
+            \includegraphics[width=\textwidth]{./assets/ul.png}
         \end{minipage}
         \quad \quad %%
         \begin{minipage}[b]{0.25\textwidth}
-            \includegraphics[width=\textwidth]{inria.png}
+            \includegraphics[width=\textwidth]{./assets/inria.png}
         \end{minipage}
     \end{figure*}
-    
+
     \begin{textblock}{200}(10,12)%
     \obeylines
     \setlength{\parskip}{0cm}
@@ -92,7 +91,7 @@
         Research Team: RESIST
         \today
     \end{textblock}%
-    
+
 \end{titlepage}
 
 \tableofcontents
@@ -105,7 +104,7 @@ Present-day computers apply parallelism for high throughput and low latency calc
 
 In this study, we tackle the problem by compromising on programming language generality in favor of conciseness. As a novelty, we do this by limiting the language's data structures to rank polymorphic arrays. We apply our approach to the domain of Network Function Virtualization (NFV). We use GPUs as the target hardware. This complements NFV research in replacing purpose-built hardware with commodity hardware. Further, we present an empirical case study of a random forest implementation used to classify network traffic. We write the application for GPUs with SPIR-V Intermediate Representation (IR) while using APL as a modeling language.
 
-To our knowledge, this approach is novel in three ways. First, SPIR-V has not yet been demonstrated to be used in machine learning applications. Second, we translate a non-imperative language APL to SPIR-V GPU IR. Using a non-imperative source language for GPUs is rare in general. Third, we show how SPIR-V programs can be used in Kubernetes microservice orchestration system. This integrates our proposed parallel computation pipeline to industry NFV deployment standards. 
+To our knowledge, this approach is novel in three ways. First, SPIR-V has not yet been demonstrated to be used in machine learning applications. Second, we translate a non-imperative language APL to SPIR-V GPU IR. Using a non-imperative source language for GPUs is rare in general. Third, we show how SPIR-V programs can be used in Kubernetes microservice orchestration system. This integrates our proposed parallel computation pipeline to industry NFV deployment standards.
 
 We benchmark the SPIR-V code against C with a random forest of size 150x6000x300. We find 8-core CPU runtime to average 380ms and RTX 2080 GPU to average 480ms. Hence, space is left for further improvements in future work, which we detail for both the GPU pipeline and APL to GPU compilation.
 
@@ -115,13 +114,13 @@ We benchmark the SPIR-V code against C with a random forest of size 150x6000x300
 
 \section{Introduction}
 
-In the software industry, progress in computation capability has historically followed Moore's law. While it is an open debate whether Moore's law still holds, it's without a doubt that classical computer architectures have evolved to multi-core. To elaborate, commodity computers in the 20th century were single-core systems. This paradigm saw a big change at the start of the 21st century. During the first decade, the physical core count started to increase rapidly. First came the dual-core processors: in 2001, IBM \textit{POWER4} became the first commercially available multi-core microprocessor. Similarly, AMD released their first dual-core system in 2005 under brand name \textit{Athlon 64 X2}, and Intel released \textit{Core Duo} processor series in 2006. Core count has then kept on steadily increasing on each microprocessor release: in 2020, the flagship consumer multi-core processor from AMD, called \textit{Ryzen Threadripper 3990X}, has 64 physical cores and 128 logical threads. Moreover, in the \gls{GPU} landscape, the difference is even larger. E.g., in 2005 a Nvidia flagship GPU model \textit{GeForce 6800 GT} had 16 cores for pixel shaders. In 2020, a \textit{GeForce RTX 2080 Ti} sports 4352 shader processors. 
+In the software industry, progress in computation capability has historically followed Moore's law. While it is an open debate whether Moore's law still holds, it's without a doubt that classical computer architectures have evolved to multi-core. To elaborate, commodity computers in the 20th century were single-core systems. This paradigm saw a big change at the start of the 21st century. During the first decade, the physical core count started to increase rapidly. First came the dual-core processors: in 2001, IBM \textit{POWER4} became the first commercially available multi-core microprocessor. Similarly, AMD released their first dual-core system in 2005 under brand name \textit{Athlon 64 X2}, and Intel released \textit{Core Duo} processor series in 2006. Core count has then kept on steadily increasing on each microprocessor release: in 2020, the flagship consumer multi-core processor from AMD, called \textit{Ryzen Threadripper 3990X}, has 64 physical cores and 128 logical threads. Moreover, in the \gls{GPU} landscape, the difference is even larger. E.g., in 2005 a Nvidia flagship GPU model \textit{GeForce 6800 GT} had 16 cores for pixel shaders. In 2020, a \textit{GeForce RTX 2080 Ti} sports 4352 shader processors.
 
 Yet, despite the hardware changing, most programmers still think of software from the viewpoint of a single thread. Performance-wise this is suboptimal, as it means that the way software benefits from multi-core systems are dependant on the smartness of the compiler. Further, as parallelism is abstracted from the programmer, it is easy to construct data-and control-structures which result in execution logic that cannot be safely parallelized, or parallelized without much performance gain compared to single-core processing.
 
 As such, an open research question remains: how parallel software could be better programmed? Coincidentally, this is the topic of this study. In particular, we focus on \glspl{GPU}. \glspl{GPU} have recently found use as a general-purpose computation accelerator for programs with high parallelisms, such as machine learning. Here, the data structures of these programs tend to be based on arrays: languages which encode software for \glspl{GPU}, e.g., Futhark \cite{Henriksen:2017:FPF:3062341.3062354}, is based on the purely functional array programming paradigm. But, we take the array programming paradigm a step further, inspired by \gls{APL} \cite{hui2020apl}, which only permits array data structures. To achieve such semantic in practice, we translate our program into \gls{SPIR-V}. \gls{SPIR-V} is the current technological spearhead of \gls{GPU} \gls{SSA} \glspl{IR}. Our thesis is that by combining the language and the execution environment to only match the usual computation domain tackled with \glspl{GPU}, we could better reason about such programs. As such, this directly addresses the problem of efficient use of current computation hardware. Should it be possible to implicitly parallelize all computations while enforcing parallel program construction, we could ensure that software runs as fast as physically possible. To our knowledge, this is the first attempt at creating a compute \gls{DSL} on top of \gls{SPIR-V}.
 
-The study is organized as follows: first in §\ref{ch:bg}, we present a literature review. The review considers cloud computing models, and programming language approaches to achieve parallelism. After this, we move onto the empirical part in §\ref{ch:contribution}. First, in §\ref{ch:p2a}, we select a machine learning application written in Python and look at how it uses a C-language sub interpreter to produce parallel code for \glspl{CPU}. The selected machine learning application considers \gls{NFV}, i.e., use-case in which machine learning models are used for network processing. The machine learning application in question comes from a previous paper \cite{brissaud2019transparent} of the research group under which this study was conducted. Next, we manually translate its Python-and-C implementation into \gls{APL}. The APL code we then manually translate into \gls{SPIR-V}. Some technical details of the SPIR-V translation are presented in §\ref{ch:prgspirv}. Next, in §\ref{ch:sysarch} we present the \gls{GPU} system architecture. In §\ref{ch:k8s}, we start with the high-level view of how a Vulkan-based \gls{GPU} bootloader. We describe how the loader can be integrated as a microservice in today's de-facto industrial cloud computing framework called Kubernetes. The loader program in itself, which leverages a systems programming language Rust and a low-level Vulkan \gls{API} to control the \gls{GPU}, is described in §\ref{ch:loader}. After this, in §\ref{ch:results} we benchmark the \gls{SPIR-V} against the Python-C implementation. This marks a performance comparison between a CPU and GPU processing for the machine learning application. Yet, we concede to the fact that the comparison is not evenly-leveled: the CPU is given a headstart due to a small sample size. We consider this an acceptable limitation in our research. This is because it contributes to a tangential research question about whether latency-sensitive computing, here, \gls{NFV}, can be accelerated with \glspl{GPU}. Following the results, in §\ref{ch:dicussion}, we contribute our findings on how our loader program and APL to SPIR-V compilation could be improved.  Finally, the study is concluded in §\ref{ch:conclusion}. 
+The study is organized as follows: first in §\ref{ch:bg}, we present a literature review. The review considers cloud computing models, and programming language approaches to achieve parallelism. After this, we move onto the empirical part in §\ref{ch:contribution}. First, in §\ref{ch:p2a}, we select a machine learning application written in Python and look at how it uses a C-language sub interpreter to produce parallel code for \glspl{CPU}. The selected machine learning application considers \gls{NFV}, i.e., use-case in which machine learning models are used for network processing. The machine learning application in question comes from a previous paper \cite{brissaud2019transparent} of the research group under which this study was conducted. Next, we manually translate its Python-and-C implementation into \gls{APL}. The APL code we then manually translate into \gls{SPIR-V}. Some technical details of the SPIR-V translation are presented in §\ref{ch:prgspirv}. Next, in §\ref{ch:sysarch} we present the \gls{GPU} system architecture. In §\ref{ch:k8s}, we start with the high-level view of how a Vulkan-based \gls{GPU} bootloader. We describe how the loader can be integrated as a microservice in today's de-facto industrial cloud computing framework called Kubernetes. The loader program in itself, which leverages a systems programming language Rust and a low-level Vulkan \gls{API} to control the \gls{GPU}, is described in §\ref{ch:loader}. After this, in §\ref{ch:results} we benchmark the \gls{SPIR-V} against the Python-C implementation. This marks a performance comparison between a CPU and GPU processing for the machine learning application. Yet, we concede to the fact that the comparison is not evenly-leveled: the CPU is given a headstart due to a small sample size. We consider this an acceptable limitation in our research. This is because it contributes to a tangential research question about whether latency-sensitive computing, here, \gls{NFV}, can be accelerated with \glspl{GPU}. Following the results, in §\ref{ch:dicussion}, we contribute our findings on how our loader program and APL to SPIR-V compilation could be improved.  Finally, the study is concluded in §\ref{ch:conclusion}.
 
 \section{Previous research}
 \label{ch:bg}
@@ -139,12 +138,12 @@ In general, it could be considered that when a microservice runtime is not restr
 \begin{table*}
 \begin{center}
 \caption{Microservice runtimes}
-\begin{tabular}{ c|c|c|c } 
+\begin{tabular}{ c|c|c|c }
  Technology & Overhead & Application Capabilities & Orchestrator \\
  \hline
- VM & Full OS + Full OS & Full OS & e.g., Xen \\ 
- Containers & Full OS + Partial OS & Full OS & Kubernetes \cite{burns2016borg} \\ 
- Unikernels & Partial OS  & Full OS & e.g., iPXE  \\ 
+ VM & Full OS + Full OS & Full OS & e.g., Xen \\
+ Containers & Full OS + Partial OS & Full OS & Kubernetes \cite{burns2016borg} \\
+ Unikernels & Partial OS  & Full OS & e.g., iPXE  \\
  Serverless & Full OS + WASM Runtime  & A function & e.g., Lucet \\
 \end{tabular}
 \end{center}
@@ -154,7 +153,7 @@ In general, it could be considered that when a microservice runtime is not restr
 \begin{table*}
 \begin{center}
 \caption{NFV acceleration methods}
-\begin{tabular}{ c|c|c|c|c } 
+\begin{tabular}{ c|c|c|c|c }
  Technology & DSL & Overhead & Application Capabilities & Orchestrator \\
  \hline
  GPUs & e.g., SPIR-V & Full OS + Graphics API + GPU & A chain of functions & e.g., Legate \cite{bauer2019legate} \\
@@ -192,7 +191,7 @@ More recently, the open \gls{GPU} standards working group called Khronos, which 
 
 \begin{figure*}
   \centering
-  \includegraphics[width=\columnwidth*2]{tric}
+  \includegraphics[width=\columnwidth*2]{./assets/tric.pdf}
   \caption{How programming languages and approaches for machine learning are made faster: by removing generality and by compromising on utmost performance. (Model inspired by \cite{brown2011heterogeneous})}
   \label{fig:tri0}
 \end{figure*}
@@ -209,7 +208,7 @@ Once a library like NumPy is used, what essentially happens is that a sub interp
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{mlir.png}
+  \includegraphics[width=\columnwidth]{./assets/mlir.png}
   \caption{Compilation pipeline of different languages with multiple mid-level IRs for language specific optimization with common backend for multiple hardware targets. Source: \cite{lattner2020mlir}}
   \label{fig:mlir}
 \end{figure}
@@ -239,7 +238,7 @@ Some programs which would traditionally require explicit loops, such as the vect
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{legint.png}
+  \includegraphics[width=\columnwidth]{./assets/legint.png}
   \caption{Sample code showing GPGPU paradigm seamlessly integrated into Python's NumPy. (Source: \cite{bauer2019legate})}
   \label{fig:legint}
 \end{figure}
@@ -293,7 +292,7 @@ Another approach to achieve performance for parallel computing is to make the la
 
 \begin{figure*}
   \centering
-  \includegraphics[width=\columnwidth*2]{overview.pdf}
+  \includegraphics[width=\columnwidth*2]{./assets/overview.pdf}
   \caption{High-level overview of the research done in this study, and how they relate to previous work}
   \label{fig:ov}
 \end{figure*}
@@ -308,7 +307,7 @@ As mentioned, our approach to writing the GPU implementation is unusual: we rewr
 
 Yet, as GPUs are not typical computers, implementing all the operations for a full compiler is not without its eccentricities. As such, in §\ref{ch:prgspirv}, we describe some of the underlying peculiarities that affect GPUs.
 
-Next, in §\ref{ch:k8s}, we notice that SPIR-V is a useful IR for another reason: the produced binary files are few kilobytes and can hence be inlined within text files. We use this finding to propose a way to orchestrate GPU \glspl{NF} on Kubernetes using Vulkan in the following subsections. 
+Next, in §\ref{ch:k8s}, we notice that SPIR-V is a useful IR for another reason: the produced binary files are few kilobytes and can hence be inlined within text files. We use this finding to propose a way to orchestrate GPU \glspl{NF} on Kubernetes using Vulkan in the following subsections.
 
 \subsection{Python to APL translation}
 \label{ch:p2a}
@@ -349,19 +348,19 @@ Where \verb|clf| is our model and \verb|feat_| are the samples. This call forwar
 \begin{lstlisting}[language=Python]
 def predict(self, X):
     proba = self.predict_proba(X)
-    
+
     if self.n_outputs_ == 1:
         return self.classes_.take(np.argmax(proba, axis=1), axis=0)
-    
+
     else:
         n_samples = proba[0].shape[0]
         class_type = self.classes_[0].dtype
         predictions = np.empty((n_samples, self.n_outputs_),
                                dtype=class_type)
-    
+
         for k in range(self.n_outputs_):
             predictions[:, k] = self.classes_[k].take(np.argmax(proba[k], axis=1), axis=0)
-    
+
         return predictions
 \end{lstlisting}
 
@@ -372,10 +371,10 @@ def predict_proba(self, X):
     check_is_fitted(self)
     # Check data
     X = self._validate_X_predict(X)
-    
+
     # Assign chunk of trees to jobs
     n_jobs, _, _ = _partition_estimators(self.n_estimators, self.n_jobs)
-    
+
     # avoid storing the output of every estimator by summing them here
     all_proba = [np.zeros((X.shape[0], j), dtype=np.float64)
                  for j in np.atleast_1d(self.n_classes_)]
@@ -385,10 +384,10 @@ def predict_proba(self, X):
         delayed(_accumulate_prediction)(e.predict_proba, X, all_proba,
                                         lock)
         for e in self.estimators_)
-    
+
     for proba in all_proba:
         proba /= len(self.estimators_)
-    
+
     if len(all_proba) == 1:
         return all_proba[0]
     else:
@@ -425,25 +424,25 @@ def predict_proba(self, X, check_input=True):
     check_is_fitted(self)
     X = self._validate_X_predict(X, check_input)
     proba = self.tree_.predict(X)
-    
+
     if self.n_outputs_ == 1:
         proba = proba[:, :self.n_classes_]
         normalizer = proba.sum(axis=1)[:, np.newaxis]
         normalizer[normalizer == 0.0] = 1.0
         proba /= normalizer
-    
+
         return proba
-    
+
     else:
         all_proba = []
-    
+
         for k in range(self.n_outputs_):
             proba_k = proba[:, k, :self.n_classes_[k]]
             normalizer = proba_k.sum(axis=1)[:, np.newaxis]
             normalizer[normalizer == 0.0] = 1.0
             proba_k /= normalizer
             all_proba.append(proba_k)
-    
+
         return all_proba
 \end{lstlisting}
 
@@ -663,7 +662,7 @@ Next, we move up in the call stack back to the Python functions. The APL equival
 
 What we have here is a sum reduction \verb|+/⍵| applied to a normalization \verb|⍵(÷⍤1 0){⍵+0÷⍵}|, after which for each matrix column a descending indices sort is applied \verb|⍒¨↓|, and the indices of each column are returned \verb|1⌷[2]↑|.
 
-In general, it could be said that in Python, much effort goes into dealing with asynchronous and parallel code, which requires multiple methods, source files, and libraries. In APL, these performance improvement methodologies are implicit, and the math function of the RF prediction is arguably more succinctly described. In essence, the APL code produced at this time can be written in seven lines of code, as shown in the Appendix. 
+In general, it could be said that in Python, much effort goes into dealing with asynchronous and parallel code, which requires multiple methods, source files, and libraries. In APL, these performance improvement methodologies are implicit, and the math function of the RF prediction is arguably more succinctly described. In essence, the APL code produced at this time can be written in seven lines of code, as shown in the Appendix.
 
 As for the SPIR-V code, the final product is found in the Appendix. In the SPIR-V code, we used the APL implementation rather than the Python implementation as the reference. The translation itself is rudimentary, with the idea being that in future work, these hand-coded translations would be generated as the program output whenever a given operation is used. Since APL only has a limited amount of operations, an APL-SPIRV compiler amounts "only" to the implementation of the supported mathematical operations. As such, given a complete APL operand support, generating executables equals to correctly interpreting APL calls to produce the main function, which calls the manually coded SPIR-V. Regarding novelty, its not exactly a proper compiler, but the GPU targeting produces enough quirks and pitfalls to keep things interesting (see: \ref{ch:prgspirv}).
 
@@ -704,7 +703,7 @@ The bottom line is that computation on the GPUs is tricky for memory reasons: bo
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{system}
+  \includegraphics[width=\columnwidth]{./assets/system.pdf}
   \caption{An envisioned software stack of a GPU node.}
   \label{fig:system}
 \end{figure}
@@ -718,7 +717,7 @@ As mentioned, Kubernetes \cite{burns2016borg} is an orchestrator system for cont
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{k8s2.pdf}
+  \includegraphics[width=\columnwidth]{./assets/k8s2.pdf}
   \caption{Kubernetes integration. Here, four instances form the Kubernetes abstraction. Green instances are container-schedulable, the red one is not.}
   \label{fig:k8s}
 \end{figure}
@@ -741,7 +740,7 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 9376
-\end{lstlisting} 
+\end{lstlisting}
 \end{minipage}
 \begin{minipage}[t]{0.45\columnwidth}
 \begin{lstlisting}
@@ -767,7 +766,7 @@ subsets:
       - ip: 192.0.2.42
     ports:
       - port: 9376
-\end{lstlisting} 
+\end{lstlisting}
 \end{minipage}
 \caption{Kubernetes Service declarations. On the left, one with selectors, which would spawn container image MyApp. On the right, a Service without a selector, which would not spawn any containers. Our proposal uses the right-hand side version to spawn GPU NFs as microservices.}
 \label{fig:svc}
@@ -788,7 +787,7 @@ In Fig. \ref{fig:vulkan} we demonstrate the program flow of the loader. We start
 
 \begin{figure*}
   \centering
-  \includegraphics[width=\columnwidth*2]{vulkan3.pdf}
+  \includegraphics[width=\columnwidth*2]{./assets/vulkan3.pdf}
   \caption{Vulkan loader in a nutshell.}
   \label{fig:vulkan}
 \end{figure*}
@@ -798,14 +797,14 @@ In Fig. \ref{fig:vulkan} we demonstrate the program flow of the loader. We start
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{bench.pdf}
+  \includegraphics[width=\columnwidth]{./assets/bench.pdf}
   \caption{Runtime comparison of random forest model of 150x6000x300 trees between Cython and SPIR-V.}
   \label{fig:bench}
 \end{figure}
 
 The benchmarks were run on an Intel i7 processor and Nvidia GTX 2080 GPU. As introduced previously, the application was a \gls{RF} prediction over 150x6000x300 dimensional trees (i.e., quite small). As shown in Fig. \ref{fig:bench}, the Cython code on OpenMP was faster than the GPU code: the average runtime of the Cython code was 380ms (8 cores, 6000 threads) while the SPIR-V took on average 480ms (1024 cores) to execute. Further, the performance variance on the GPU was higher than on the Cython code.
 
-However, even though the GPU code was slower, we estimate that there exists future work in making the GPU approach faster. In specific, due to the time limits of our research, each data buffer is copied separately to the GPU. While the dataset is not big (our dataset weights in at 70MB in total), the memory copies happen sequentially. Yet, it is possible to use Vulkan's fine-grained performance primitives to structure the data in such a way that a single memory copy would suffice. Similarly, garbage collection of the Vulkan resources could be done asynchronously, whereas currently, the operations block each tree iteration. Furthermore, the data structure of the binary decision tree could be reformatted into a path matrix \cite{hsu2016key}. Such a parallel data structure would allow the GPU to use its y-dimension cores when traversing the tree. 
+However, even though the GPU code was slower, we estimate that there exists future work in making the GPU approach faster. In specific, due to the time limits of our research, each data buffer is copied separately to the GPU. While the dataset is not big (our dataset weights in at 70MB in total), the memory copies happen sequentially. Yet, it is possible to use Vulkan's fine-grained performance primitives to structure the data in such a way that a single memory copy would suffice. Similarly, garbage collection of the Vulkan resources could be done asynchronously, whereas currently, the operations block each tree iteration. Furthermore, the data structure of the binary decision tree could be reformatted into a path matrix \cite{hsu2016key}. Such a parallel data structure would allow the GPU to use its y-dimension cores when traversing the tree.
 
 Altogether, we think these results are promising. GPUs are oftentimes thought to only be practical approach after a certain threshold is met, but here we show it can be almost comparable to CPU performance even for small datasets.
 
@@ -862,7 +861,7 @@ This study was conducted in the context of NFV, which seeks to replace purpose-b
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{aplsrc.png}
+  \includegraphics[width=\columnwidth]{./assets/aplsrc.png}
   \caption{APL refactor of the Python source code.}
   \label{fig:aplsrc}
 \end{figure}
