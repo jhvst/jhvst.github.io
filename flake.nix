@@ -85,14 +85,6 @@
             jq = inputs'.nixpkgs.legacyPackages.jq;
           };
 
-          packages."apple-music-linux-pipewire" = mkBlogPost rec {
-            name = "apple-music-linux-pipewire";
-            title = "Apple Music on Linux using Pipewire";
-            description = "Streaming DRM music to Linux from an iPhone";
-            pubDate = "28 Jan 2024 16:10:00 GMT";
-            src = ./blogPosts/${name};
-          };
-
           packages.barbell = mkBlogPost rec {
             description = "Barbell is like the template system Handlebars, but with BQN's Under doing the heavy lifting.";
             name = "barbell";
@@ -253,7 +245,6 @@
               name = "blogPostsnonFlake";
               src = ./.;
               buildPhase = lib.strings.concatLines (lib.lists.forEach [
-                apple-music-linux-pipewire
                 barbell
                 fido2-luks
                 higher-order-filter-bqn-uiua
