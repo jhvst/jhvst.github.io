@@ -174,9 +174,6 @@
             description = "This is an excerpt from a reddit comment of mine in response to running NixOS with additional kernel modules on NixOS.";
             pubDate = "12 Nov 2022 11:57:50 GMT";
             src = ./blogPosts/${name};
-            grammars = [
-              pkgs.tree-sitter-grammars.tree-sitter-nix
-            ];
           };
 
           packages."RAMsteam" = mkBlogPost rec {
@@ -193,9 +190,6 @@
             description = "A pathway incremental builds and reproducability";
             pubDate = "10 Sep 2023 17:31:00 GMT";
             src = ./blogPosts/${name};
-            grammars = [
-              pkgs.tree-sitter-grammars.tree-sitter-nix
-            ];
           };
 
           packages."modular-neovim" = mkBlogPost rec {
@@ -204,9 +198,6 @@
             description = "Expanding your Neovim configuration on per-project basis using Nix and devenv.";
             pubDate = "03 Sep 2023 20:19:00 GMT";
             src = ./blogPosts/${name};
-            grammars = [
-              pkgs.tree-sitter-grammars.tree-sitter-nix
-            ];
           };
 
           packages."vulkan-sum-reduction" = mkBlogPost rec {
