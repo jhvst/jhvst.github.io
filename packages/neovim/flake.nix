@@ -74,6 +74,7 @@
               papis
               sqlite
               typst
+              typstyle
               xdg-utils
               yq-go
             ];
@@ -88,18 +89,23 @@
             ] ++ [
               pkgs.vimExtraPlugins.sqlite-lua
             ];
-            plugins.lsp.servers = {
-              html.enable = true;
-              ts-ls.enable = true;
+            plugins = {
+              lsp.servers = {
+                html.enable = true;
+                tinymist = {
+                  enable = true;
+                  settings.formatterMode = "typstyle";
+                };
+                ts_ls.enable = true;
+              };
+              treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+                typst
+              ];
+              cmp.settings.sources = [
+                { name = "latex_symbols"; }
+                { name = "papis"; }
+              ];
             };
-            plugins.cmp.settings = {
-              sources =
-                [
-                  { name = "latex_symbols"; }
-                  { name = "papis"; }
-                ];
-            };
-            plugins.typst-vim.enable = true;
           };
         };
 
