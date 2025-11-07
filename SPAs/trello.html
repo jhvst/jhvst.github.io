@@ -8,10 +8,17 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡︎</text></svg>">
     <style>
 
+    html {
+      background-size: cover;
+    }
+
     body {
         display: grid;
         gap: 2em;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        height: 100vh;
+        margin: 0;
+        background: linear-gradient(rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.8));
     }
 
     header {
@@ -19,18 +26,26 @@
         justify-content: space-between;
     }
 
+    header fieldset {
+      background-color: rgb(236 240 241 / 50%);
+      backdrop-filter: blur(10px);
+      border-radius: 7px;
+    }
+
     main {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
-    }
+        grid-template-columns: repeat(5, 1fr);
+   }
 
     main fieldset {
         border: 0;
+        align-self: end;
     }
 
     textarea {
         height: 50vh;
         width: 90%;
+        background-color: rgb(236 240 241 / 50%);
     }
 
     form#geo input[type="number"] {
@@ -45,20 +60,34 @@
 
         <form onsubmit="geolocate(event); return false" id="geo">
             <fieldset>
-                <legend>Geolocation</legend>
-                <small>Latitude <input name="latitude" type="number" step="0.01" readonly required /></small>
-                <small>Longitude <input name="longitude" type="number" step="0.01" readonly required /></small>
-                <input type="submit" value="↺" />
+                <legend>Geolocation <input type="submit" value="↺" /></legend>
+                <input hidden name="latitude" type="number" step="0.01" readonly required />
+                <input hidden name="longitude" type="number" step="0.01" readonly required />
+                <span id="sunrise">??:??</span>
+                <span id="sunset">??:??</span>
+                <output id="time">??:??:?? ??</output>
             </fieldset>
         </form>
 
-        <form action="https://duckduckgo.com">
-            <fieldset>
-                <legend>duckduckgo 🦆 🔎</legend>
-                <input autofocus name="q" type="search" />
-                </br>
-                <small>For address bar, press Ctrl+L</small>
-            </fieldset>
+        <form onsubmit="NTS(event); volumeSet(event.target); return false">
+          <fieldset disabled>
+            <legend>NTS
+              <input onclick="event.target.form.querySelector('fieldset').disabled = false;" type="submit" value="↺">
+            </legend>
+            <input checked onchange="muteSibling(event); setTitle(event.target.form); setCover(event.target.form);" required type="radio" name="nts" value="nts-1" />
+            <audio crossorigin="anonymous" id="nts-1" muted autoplay>
+              <source src="https://stream-relay-geo.ntslive.net/stream" />
+            </audio>
+            <input onchange="muteSibling(event); setTitle(event.target.form); setCover(event.target.form);" required type="radio" name="nts" value="nts-2" />
+            <audio crossorigin="anonymous" id="nts-2" muted autoplay>
+              <source src="https://stream-relay-geo.ntslive.net/stream2" />
+            </audio>
+            <input oninput="volumeSet(event.target.form)" type="range" name="volume" min="0" max="1" step="0.05" />
+            <input disabled type="button" onclick="muteSibling(event);" value="play" />
+            <div>
+              <output></output>
+            </div>
+          </fieldset>
         </form>
 
     </header>
@@ -66,39 +95,22 @@
     <main>
 
         <fieldset>
-            <legend>Sunday</legend>
-            <small>Sunrise: <span id="sunrise">??:??</span></small>
-            <small>Sunset: <span id="sunset">??:??</span></small>
             <textarea></textarea>
         </fieldset>
 
         <fieldset>
-            <legend>Monday</legend>
             <textarea></textarea>
         </fieldset>
 
         <fieldset>
-            <legend>Tuesday</legend>
             <textarea></textarea>
         </fieldset>
 
         <fieldset>
-            <legend>Wednesday</legend>
             <textarea></textarea>
         </fieldset>
 
         <fieldset>
-            <legend>Thursday</legend>
-            <textarea></textarea>
-        </fieldset>
-
-        <fieldset>
-            <legend>Friday</legend>
-            <textarea></textarea>
-        </fieldset>
-
-        <fieldset>
-            <legend>Saturday</legend>
             <textarea></textarea>
         </fieldset>
 
@@ -108,8 +120,49 @@
 
 <script>
 
-    const geolocate = async e => {
-        navigator.geolocation.getCurrentPosition((pos) => {
+    document.addEventListener("DOMContentLoaded", event => {
+      setInterval(() => document.getElementById("time").textContent = new Date().toLocaleTimeString(), 1000)
+    });
+
+    const volumeSet = f => f.querySelectorAll("audio").forEach(a => a.volume = document.querySelector("input[type='range']").value)
+    const setCover = e => document.documentElement.style.backgroundImage = `url('${document.getElementById(new FormData(e).get("nts")).dataset.cover}')`
+    const setTitle = e => e.querySelector("output").textContent = e.querySelector(":checked").nextElementSibling.dataset.title
+
+    const muteSibling = e => {
+      const play = e.type == "click" ? true : false
+      if (new Set([...e.target.form.querySelectorAll("audio")].map(a => a.muted)).union(new Set([true])).size == 1 && !play) return;
+      const buttons = [...e.target.form.querySelectorAll("input[type='radio']")].map(r => r.checked)
+      e.target.form.querySelectorAll("audio").forEach((v, idx) => {
+        if (buttons[idx]) {
+          v.muted = !v.muted;
+        } else {
+          v.muted = true
+        }
+      })
+    }
+
+    const NTS = async e => {
+      try {
+        const req = await fetch("https://www.nts.live/api/v2/live", { cache: "no-store" } );
+        const json = await req.json();
+        const tracks = e.target.querySelectorAll("audio");
+        json.results
+          .map((station) => station.now)
+          .forEach((v, idx) => {
+            tracks[idx].dataset.title = v.broadcast_title;
+            tracks[idx].dataset.cover = v.embeds.details.media.background_large;
+          })
+      } catch (e) {
+        console.log(e)
+      } finally {
+        e.target.querySelector("input[type='button']").disabled = false;
+        setCover(e.target)
+        setTitle(e.target)
+      }
+    }
+
+    const geolocate = e => {
+        navigator.geolocation.getCurrentPosition(pos => {
             e.target.querySelector("input[name='latitude']").value = parseFloat(pos.coords.latitude).toFixed(2);
             e.target.querySelector("input[name='longitude']").value = parseFloat(pos.coords.longitude).toFixed(2);
             const [sunrise, sunset] = suntimes(pos.coords.latitude, pos.coords.longitude, undefined);
