@@ -20,6 +20,7 @@
 , tree-sitter
 , validator-nu
 , woff2
+, writableTmpDirAsHomeHook
 , writeTextFile
 }:
 let
@@ -34,7 +35,7 @@ let
     '' else '''';
   treesitterInclude =
     if builtins.length grammars > 0 then ''
-      <script src="tree-sitter.js"></script>
+      <script type="module" src="tree-sitter.js"></script>
     '' else '''';
   wasmGrammars = lib.lists.forEach grammars (grammar:
     callPackage ../mkTreesitterWasm {
@@ -47,6 +48,7 @@ let
     name = title + "-opengraph_image";
     src = ./.;
     buildInputs = [ barbell servo ];
+    nativeBuildInputs = [ writableTmpDirAsHomeHook ];
 
     # see: https://discourse.nixos.org/t/test-packages-with-opengl-dependency/40099/8
     # fixes: `Failed to create WR surfman: ConnectionFailed (thread main, at ports/servoshell/desktop/headless_window.rs:42)`
@@ -57,7 +59,7 @@ let
       echo "${title}" > title.bar
       echo "${description}" > description.bar
       barbell template_og_image.html > opengraph_image.html
-      servo -z opengraph_image.html --window-size 1200x630 -o opengraph_image.png
+      servo -zx opengraph_image.html --window-size 1200x630 -o opengraph_image.png
     '';
     installPhase = ''
       install -D opengraph_image.png $out/opengraph_image.png

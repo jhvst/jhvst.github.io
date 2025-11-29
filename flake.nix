@@ -4,8 +4,7 @@
     barbell-pkg.url = "github:jhvst/barbell";
     devshell.url = "github:numtide/devshell";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-2405.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nuenv.url = "github:DeterminateSystems/nuenv";
 
     # flake archived blog posts
@@ -36,6 +35,7 @@
             servo = pkgs.servo;
             mesa = pkgs.mesa;
           };
+          web-tree-sitter = ./vendor/tree-sitter-v0.25.10/web-tree-sitter.js;
         in
         {
 
@@ -57,14 +57,23 @@
               ;
           };
 
-          packages."tree-sitter" = (inputs'.nixpkgs-2405.legacyPackages.tree-sitter.override {
+          packages.tree-sitter-bqn = inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-bqn.overrideAttrs (old: {
+            src = pkgs.fetchFromGitHub {
+              owner = "jhvst";
+              repo = "tree-sitter-bqn";
+              rev = "jhvst/patch-1";
+              sha256 = "sha256-z5IdhcopL0Od/VyNp3Un+f+qYsZruZkekjeVKRPJ/Sg=";
+            };
+          });
+
+          packages."tree-sitter" = (inputs'.nixpkgs.legacyPackages.tree-sitter.override {
             webUISupport = true;
           }).overrideAttrs (old: {
             nativeBuildInputs = [ pkgs.breakpointHook ] ++ old.nativeBuildInputs;
             postInstall = ''
               mkdir -p $out/lib
-              cp lib/binding_web/tree-sitter.js $out/lib
-              cp lib/binding_web/tree-sitter.wasm $out/lib
+              cp ${web-tree-sitter} $out/lib/tree-sitter.js
+              cp lib/binding_web/lib/tree-sitter.wasm $out/lib
             '';
           });
 
@@ -92,7 +101,7 @@
             title = "Barbell: Template System in BQN";
             src = ./blogPosts/${name};
             grammars = [
-              inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
+              config.packages.tree-sitter-bqn
             ];
             distInstall = ''
               cp ${pkgs.mbqn}/share/bqn/libbqn.js $out/libbqn.js
@@ -129,7 +138,8 @@
             description = "Implementing a higher-order filter in Uiua and BQN";
             pubDate = "31 Jul 2024 10:00:00 GMT";
             grammars = [
-              inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
+              config.packages.tree-sitter-bqn
+
               pkgs.tree-sitter-grammars.tree-sitter-haskell
               pkgs.tree-sitter-grammars.tree-sitter-uiua
             ];
@@ -148,7 +158,7 @@
             description = "Implementing a higher-order filter in Uiua and BQN";
             pubDate = "31 Jul 2024 10:00:00 GMT";
             grammars = [
-              inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-bqn
+              config.packages.tree-sitter-bqn
               pkgs.tree-sitter-grammars.tree-sitter-uiua
             ];
             distInstall = ''
