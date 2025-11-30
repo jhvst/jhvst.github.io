@@ -4,7 +4,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     juuso.url = "github:jhvst/nix-config";
     nixneovimplugins.url = "github:NixNeovim/NixNeovimPlugins";
-    nixpkgs.inputs.nixpkgs.follows = "juuso";
+    nixpkgs.url = "github:NixOS/nixpkgs/25.05";
     nixvim.url = "github:nix-community/nixvim";
     papis.url = "github:jghauser/papis.nvim";
   };
@@ -65,13 +65,36 @@
 
               -- F8 invokes a SyncTeX forward search, or similar, where appropriate
               kmap({ 'n', 'v', 'i' },'<F8>', function() require("knap").forward_jump() end)
+
+              require("papis").setup({
+                db_path = "/run/media/juuso/papis/papis-nvim.sqlite3",
+                papis_python = {
+                  dir = "/run/media/juuso/papis",
+                  info_name = "info.yaml",
+                  notes_name = [[notes.org]],
+                },
+                enable_keymaps = true,
+                yq_bin = "${pkgs.yq-go}/bin/yq",
+                enable_modules = {
+                  ["search"] = true,          -- Enables/disables the search module
+                  ["completion"] = true,      -- Enables/disables the completion module
+                  ["at-cursor"] = true,  -- Enables/disables the at-cursor module
+                  ["formatter"] = true,       -- Enables/disables the formatter module
+                  ["colors"] = true,          -- Enables/disables default highlight groups (you
+                                              -- probably want this)
+                  ["base"] = true,            -- Enables/disables the base module (you definitely
+                                              -- want this)
+                  ["debug"] = true,          -- Enables/disables the debug module (useful to
+                                              -- troubleshoot and diagnose issues)
+                },
+              })
             '';
             extraPackages = with pkgs; [
+              inputs.nixpkgs.legacyPackages.x86_64-linux.papis
               kdePackages.falkon
               ncurses # papis has dependency on ncurses, but it is broken on macOS -- install with brew instead. see: https://github.com/jhvst/nix-config/commit/360220836e1f03b5b0668f2f33af1ecc247d8d15
               nodePackages.js-beautify
               pandoc
-              papis
               sqlite
               typst
               typstyle
