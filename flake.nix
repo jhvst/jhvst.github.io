@@ -66,6 +66,15 @@
             };
           });
 
+          packages.tree-sitter-typst = inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-typst.overrideAttrs (old: {
+            src = pkgs.fetchFromGitHub {
+              owner = "jhvst";
+              repo = "tree-sitter-typst";
+              rev = "jhvst/patch-1";
+              sha256 = "sha256-400tpTEPa5JuOD9DG1Ay5HmyKywav0mf2jgOs+wRWf8=";
+            };
+          });
+
           packages."tree-sitter" = (inputs'.nixpkgs.legacyPackages.tree-sitter.override {
             webUISupport = true;
           }).overrideAttrs (old: {
@@ -81,6 +90,7 @@
             tree-sitter = inputs'.nixpkgs.legacyPackages.tree-sitter;
             grammars = [
               inputs'.nixpkgs.legacyPackages.tree-sitter-grammars.tree-sitter-html
+              config.packages.tree-sitter-typst
             ];
           };
 
