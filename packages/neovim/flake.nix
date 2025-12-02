@@ -6,7 +6,6 @@
     nixneovimplugins.url = "github:NixNeovim/NixNeovimPlugins";
     nixpkgs.url = "github:NixOS/nixpkgs/25.11";
     nixvim.url = "github:nix-community/nixvim";
-    papis.url = "github:jghauser/papis.nvim";
   };
 
   outputs = inputs@{ ... }:
@@ -22,7 +21,6 @@
           overlays = [
             inputs.juuso.overlays.default
             inputs.nixneovimplugins.overlays.default
-            inputs.papis.overlays.default
           ];
           config = { };
         };
@@ -66,31 +64,9 @@
               -- F8 invokes a SyncTeX forward search, or similar, where appropriate
               kmap({ 'n', 'v', 'i' },'<F8>', function() require("knap").forward_jump() end)
 
-              require("papis").setup({
-                db_path = "/run/media/juuso/papis/papis-nvim.sqlite3",
-                papis_python = {
-                  dir = "/run/media/juuso/papis",
-                  info_name = "info.yaml",
-                  notes_name = [[notes.org]],
-                },
-                enable_keymaps = true,
-                yq_bin = "${pkgs.yq-go}/bin/yq",
-                enable_modules = {
-                  ["search"] = true,          -- Enables/disables the search module
-                  ["completion"] = true,      -- Enables/disables the completion module
-                  ["at-cursor"] = true,  -- Enables/disables the at-cursor module
-                  ["formatter"] = true,       -- Enables/disables the formatter module
-                  ["colors"] = true,          -- Enables/disables default highlight groups (you
-                                              -- probably want this)
-                  ["base"] = true,            -- Enables/disables the base module (you definitely
-                                              -- want this)
-                  ["debug"] = true,          -- Enables/disables the debug module (useful to
-                                              -- troubleshoot and diagnose issues)
-                },
-              })
             '';
             extraPackages = with pkgs; [
-              inputs.nixpkgs.legacyPackages.x86_64-linux.papis
+              papis
               kdePackages.falkon
               ncurses # papis has dependency on ncurses, but it is broken on macOS -- install with brew instead. see: https://github.com/jhvst/nix-config/commit/360220836e1f03b5b0668f2f33af1ecc247d8d15
               nodePackages.js-beautify
@@ -128,6 +104,28 @@
                 { name = "latex_symbols"; }
                 { name = "papis"; }
               ];
+              papis = {
+                enable = true;
+                settings = rec {
+                  search.enable = true;
+                  completion.enable = true;
+                  at-cursor.enable = true;
+                  formatter.enable = true;
+                  colors.enable = true;
+                  base.enable = true;
+                  db_path = "${papis_python.dir}/papis-nvim.sqlite3";
+                  debug.enable = true;
+                  enable_keymaps = true;
+                  yq_bin = "${pkgs.yq-go}/bin/yq";
+                  papis_python = {
+                    dir = "/run/media/juuso/papis";
+                    info_name = "info.yaml";
+                    notes_name = {
+                      __raw = "[[notes.org]]";
+                    };
+                  };
+                };
+              };
             };
           };
         };
