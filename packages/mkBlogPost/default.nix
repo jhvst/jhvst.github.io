@@ -96,6 +96,7 @@ stdenv.mkDerivation rec {
     echo "${pubDate}" > pubDate.bar
     echo "${name}" > name.bar
     echo "https://juuso.dev/blogPosts/${name}/opengraph_image.png" > image.bar
+    echo "https://juuso.dev/blogPosts/${name}/$(slugify ${title}).html" > canonical.bar
     slugify ${title} > slug.bar
     date -d "${pubDate}" -Iminutes > datetime.bar
     cat $src/main.md | wc -w > wordCount.bar
