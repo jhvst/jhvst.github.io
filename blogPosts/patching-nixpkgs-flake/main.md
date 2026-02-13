@@ -1,7 +1,5 @@
 # Patching nixpkgs in a flake
 
-Patching nixpkgs-patched is an advanced tactic to solve a very particular problem.
-
 Suppose there is a patch upstream that depends on a specific version of Python, e.g., `3.13.8`, but the patch trails the current tip such that the Python version on our `inputs.nixpkgs` is `3.13.9`.
 
 In this case, we have two options:
@@ -115,7 +113,7 @@ Once the changes are upstreamed, you will be met with an error message saying th
 
 For more, see:
 
-- https://ertt.ca/nix/patch-nixpkgs/
-- https://juuso.dev/blogPosts/modular-neovim/modular-neovim-with-nix.html
+- [https://ertt.ca/nix/patch-nixpkgs/](https://ertt.ca/nix/patch-nixpkgs/)
+- [https://juuso.dev/blogPosts/modular-neovim/modular-neovim-with-nix.html](https://juuso.dev/blogPosts/modular-neovim/modular-neovim-with-nix.html)
 
-Finally, it would be great if this would also apply to `nixosModules`, but that shall not be the case for some time: https://github.com/NixOS/nix/pull/13225
+Finally, it would be great if this would also apply to `nixosModules`, but that shall not be the case for some time: [https://github.com/NixOS/nix/pull/13225](https://github.com/NixOS/nix/pull/13225)
