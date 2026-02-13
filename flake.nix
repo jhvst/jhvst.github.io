@@ -104,6 +104,14 @@
             jq = inputs'.nixpkgs.legacyPackages.jq;
           };
 
+          packages."patching-nixpkgs-flake" = mkBlogPost rec {
+            name = "patching-nixpkgs-flake";
+            title = "Patching nixpkgs in a flake";
+            description = "An advanced flake tactic for a very particular problem.";
+            pubDate = "13 Feb 2026 18:48:52 GMT";
+            src = ./blogPosts/${name};
+          };
+
           packages.barbell = mkBlogPost rec {
             description = "Barbell is like the template system Handlebars, but with BQN's Under doing the heavy lifting.";
             name = "barbell";
