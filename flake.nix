@@ -271,6 +271,7 @@
               ipxe-rpi4
               modular-neovim
               nix-as-a-static-site-generator
+              patching-nixpkgs-flake
               vulkan-sum-reduction
             ]
               (post: ''
