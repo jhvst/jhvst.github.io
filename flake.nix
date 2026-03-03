@@ -8,7 +8,7 @@
     devshell.url = "github:numtide/devshell";
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-    nuenv.url = "github:DeterminateSystems/nuenv";
+    nuenv.url = "github:YPares/nushellWith";
 
     # flake archived blog posts
     j1.inputs.barbell.follows = "barbell-pkg";
@@ -48,7 +48,7 @@
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
             overlays = [
-              inputs.nuenv.overlays.nuenv
+              inputs.nuenv.overlays.default
               self.overlays.default
             ];
             config = { };
@@ -102,7 +102,7 @@
 
           packages."hq" = pkgs.callPackage ./packages/hq {
             tree-sitter-cli = config.packages.tree-sitter-cli;
-            writeShellApplication = pkgs.nuenv.writeShellApplication;
+            writeNuApplication = pkgs.callPackage ./packages/writeNuApplication { };
           };
 
           packages."ogq" = pkgs.callPackage ./packages/ogq {
