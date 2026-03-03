@@ -8,6 +8,7 @@
     devshell.url = "github:numtide/devshell";
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nuenv.inputs.nixpkgs.follows = "nixpkgs";
     nuenv.url = "github:YPares/nushellWith";
 
     # flake archived blog posts
