@@ -2,6 +2,7 @@
 
   inputs = {
     barbell-pkg.url = "github:jhvst/barbell";
+    devshell.inputs.nixpkgs.follows = "nixpkgs";
     devshell.url = "github:numtide/devshell";
     flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";

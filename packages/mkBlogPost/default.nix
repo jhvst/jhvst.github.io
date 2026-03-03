@@ -1,4 +1,5 @@
 { barbell
+, cacert
 , callPackage
 , description
 , distInclude
@@ -47,7 +48,7 @@ let
   mkImage = stdenv.mkDerivation {
     name = title + "-opengraph_image";
     src = ./.;
-    buildInputs = [ barbell servo ];
+    buildInputs = [ barbell servo cacert ];
     nativeBuildInputs = [ writableTmpDirAsHomeHook ];
 
     # see: https://discourse.nixos.org/t/test-packages-with-opengl-dependency/40099/8
