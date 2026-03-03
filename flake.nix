@@ -1,7 +1,9 @@
 {
 
   inputs = {
-    barbell-pkg.url = "github:jhvst/barbell";
+    barbell-pkg.inputs.flake-parts.follows = "flake-parts";
+    barbell-pkg.inputs.nixpkgs.follows = "nixpkgs";
+    barbell-pkg.url = "github:jhvst/barbell?dir=packages/barbell";
     devshell.inputs.nixpkgs.follows = "nixpkgs";
     devshell.url = "github:numtide/devshell";
     flake-parts.url = "github:hercules-ci/flake-parts";
@@ -9,6 +11,9 @@
     nuenv.url = "github:DeterminateSystems/nuenv";
 
     # flake archived blog posts
+    j1.inputs.barbell.follows = "barbell-pkg";
+    j1.inputs.flake-parts.follows = "flake-parts";
+    j1.inputs.nixpkgs.follows = "nixpkgs";
     j1.url = "github:jhvst/jhvst.github.io?dir=blogPosts/j1";
   };
 
@@ -496,6 +501,7 @@
               papis
               tomb
               tree-sitter-cli
+              servo
             ];
 
             commands = [{
