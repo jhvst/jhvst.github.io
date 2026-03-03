@@ -5,7 +5,7 @@
 , distInclude
 , distInstall
 , grammars
-, ibm-plex
+, iosevka
 , js-beautify
 , lib
 , mesa
@@ -86,9 +86,9 @@ stdenv.mkDerivation rec {
     mkdir $out
     mkdir html
     cp -r $src/* $out/
-    cp ${ibm-plex}/share/fonts/opentype/IBMPlexMono-Regular.otf .
-    woff2_compress IBMPlexMono-Regular.otf
-    cp IBMPlexMono-Regular.woff2 $out/
+    cp ${iosevka}/share/fonts/truetype/Iosevka-Regular.ttf .
+    woff2_compress Iosevka-Regular.ttf
+    cp Iosevka-Regular.woff2 $out/
     pandoc $src/main.md --no-highlight --katex -o main.html
 
     echo "${distInclude + treesitterInclude}" > head.bar
