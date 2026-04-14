@@ -1,22 +1,19 @@
 {
 
   inputs = {
-    flake-parts.url = "github:hercules-ci/flake-parts";
     juuso.url = "github:jhvst/nix-config";
     nixneovimplugins.url = "github:NixNeovim/NixNeovimPlugins";
-    nixpkgs.url = "github:NixOS/nixpkgs/25.11";
-    nixvim.url = "github:nix-community/nixvim";
   };
 
   outputs = inputs@{ ... }:
 
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+    inputs.juuso.inputs.flake-parts.lib.mkFlake { inherit inputs; } {
 
-      systems = inputs.nixpkgs.lib.systems.flakeExposed;
+      systems = inputs.juuso.inputs.nixpkgs.lib.systems.flakeExposed;
 
       perSystem = { pkgs, config, system, ... }: {
 
-        _module.args.pkgs = import inputs.nixpkgs {
+        _module.args.pkgs = import inputs.juuso.inputs.nixpkgs {
           inherit system;
           overlays = [
             inputs.juuso.overlays.default
@@ -25,7 +22,7 @@
           config = { };
         };
 
-        packages.neovim = inputs.nixvim.legacyPackages.${system}.makeNixvimWithModule {
+        packages.neovim = inputs.juuso.inputs.nixvim.legacyPackages.${system}.makeNixvimWithModule {
           inherit pkgs;
           module = {
             imports = [
@@ -69,7 +66,7 @@
               papis
               kdePackages.falkon
               ncurses # papis has dependency on ncurses, but it is broken on macOS -- install with brew instead. see: https://github.com/jhvst/nix-config/commit/360220836e1f03b5b0668f2f33af1ecc247d8d15
-              nodePackages.js-beautify
+              js-beautify
               pandoc
               sqlite
               typst
