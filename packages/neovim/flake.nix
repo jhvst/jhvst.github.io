@@ -33,16 +33,28 @@
 
               let g:limelight_bop = '^'
               let g:limelight_eop = '$'
-
-              let g:mkdp_browser = '${pkgs.kdePackages.falkon}/bin/falkon'
-              let g:mkdp_echo_preview_url = 1
-
             '';
             extraConfigLua = ''
               local gknapsettings = {
                 delay = 420,
                 mdoutputext = "pdf",
-                mdtopdf = "pandoc %docroot% -t typst -o %outputfile%",
+                mdtopdf = table.concat({
+                  "pandoc",
+                  "--filter pandoc-include",
+                  "--citeproc",
+                  "--bibliography=/var/lib/papis/lib.bib",
+                  "--pdf-engine=xelatex",
+                  "-M link-citations=true",
+                  "-M link-bibliography=true",
+                  "-V colorlinks=true",
+                  "-V citecolor=red",
+                  "-V linkcolor=red",
+                  "-V urlcolor=blue",
+                  "--number-sections",
+                  "--toc",
+                  "%docroot%",
+                  "-o %outputfile%",
+                }, " "),
               }
               vim.g.knap_settings = gknapsettings
 
@@ -61,14 +73,23 @@
               -- F8 invokes a SyncTeX forward search, or similar, where appropriate
               kmap({ 'n', 'v', 'i' },'<F8>', function() require("knap").forward_jump() end)
 
+              vim.api.nvim_create_autocmd("BufWritePost", {
+                pattern = { "*.md", "*.markdown", "*.tex" },
+                callback = function()
+                  if vim.b.knap_viewerpid then
+                    require("knap").process_once()
+                  end
+                end,
+              })
             '';
             extraPackages = with pkgs; [
-              papis
-              kdePackages.falkon
-              ncurses # papis has dependency on ncurses, but it is broken on macOS -- install with brew instead. see: https://github.com/jhvst/nix-config/commit/360220836e1f03b5b0668f2f33af1ecc247d8d15
               js-beautify
+              ncurses # papis has dependency on ncurses, but it is broken on macOS -- install with brew instead. see: https://github.com/jhvst/nix-config/commit/360220836e1f03b5b0668f2f33af1ecc247d8d15
               pandoc
+              pandoc-include
+              papis
               sqlite
+              texliveSmall
               typst
               typstyle
               xdg-utils
