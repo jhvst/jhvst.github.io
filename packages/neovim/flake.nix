@@ -1,8 +1,18 @@
 {
 
+  nixConfig = {
+    extra-substituters = [
+      "https://pandoc-crossref.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "pandoc-crossref.cachix.org-1:LI9ABFTkGpPCTkUTzoopVSSpb1a26RSTJNMsqVbDtPM="
+    ];
+  };
+
   inputs = {
     juuso.url = "github:jhvst/nix-config";
     nixneovimplugins.url = "github:NixNeovim/NixNeovimPlugins";
+    pandoc-crossref.url = "github:lierdakil/pandoc-crossref/v0.3.23a";
   };
 
   outputs = inputs@{ ... }:
@@ -41,6 +51,7 @@
                 mdtopdf = table.concat({
                   "pandoc",
                   "--filter pandoc-include",
+                  "--filter pandoc-crossref",
                   "--citeproc",
                   "--bibliography=/var/lib/papis/lib.bib",
                   "--pdf-engine=xelatex",
@@ -85,7 +96,7 @@
             extraPackages = with pkgs; [
               js-beautify
               ncurses # papis has dependency on ncurses, but it is broken on macOS -- install with brew instead. see: https://github.com/jhvst/nix-config/commit/360220836e1f03b5b0668f2f33af1ecc247d8d15
-              pandoc
+              inputs.pandoc-crossref.packages.${system}.pandoc-with-crossref
               pandoc-include
               papis
               sqlite
