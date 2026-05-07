@@ -151,7 +151,7 @@
                   enable_keymaps = true;
                   yq_bin = "${pkgs.yq-go}/bin/yq";
                   papis_python = {
-                    dir = "/run/media/juuso/papis";
+                    dir = "/var/lib/papis";
                     info_name = "info.yaml";
                     notes_name = {
                       __raw = "[[notes.org]]";
