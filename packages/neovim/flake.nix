@@ -54,7 +54,10 @@
                   "--filter pandoc-crossref",
                   "--citeproc",
                   "--bibliography=/var/lib/papis/lib.bib",
-                  "--pdf-engine=xelatex",
+                  "--pdf-engine=latexmk",
+                  "--pdf-engine-opt=-xelatex",
+                  "--pdf-engine-opt=-bibtex",
+                  "--top-level-division=chapter",
                   "-M link-citations=true",
                   "-M link-bibliography=true",
                   "-V colorlinks=true",
@@ -65,6 +68,7 @@
                   "--toc",
                   "%docroot%",
                   "-o %outputfile%",
+                  "-d defaults.yaml",
                 }, " "),
               }
               vim.g.knap_settings = gknapsettings
@@ -100,7 +104,7 @@
               pandoc-include
               papis
               sqlite
-              texliveSmall
+              texliveMedium # latexmk
               typst
               typstyle
               xdg-utils
